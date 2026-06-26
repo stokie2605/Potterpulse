@@ -1,5 +1,7 @@
 ﻿# Potter Pulse
 
+![PotterPulse Dashboard](docs/screenshots/dashboard_latest.png)
+
 Potter Pulse is a work-in-progress local Stoke City tracker app built around a small SQLite database and a lightweight Node renderer. It presents the squad and fixture run as a premium black-and-red sports app interface inspired by modern products such as Sky Sports, EA Sports, and bet365, while keeping the look recognisably Stoke-focused. This is not a finished production app yet; it is an actively evolving prototype with real data, a live local renderer, and a documented design direction.
 
 ## Project Status
@@ -263,4 +265,5 @@ Good next improvements:
 - Add a route for JSON fixture data.
 - Add filtering by competition, month, and home/away.
 - Add a proper screenshot in `docs/screenshots/dashboard_latest.png`.
+
 
