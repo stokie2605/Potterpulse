@@ -412,6 +412,14 @@ The W/D/L form tokens now use strict 24px square sizing, flex centering, and `li
 
 Verification confirmed a two-column desktop grid, height-balanced left and right columns, three travel guide cards inside the unified right panel, one-column mobile layout, 90px mobile bottom padding, and centered 24x24 form circles.
 
+### 19. Single squad pitch vs split tactical match map
+
+The Squad view now uses a vertical architecture: the tactical match map sits in the upper section and the Player Performance Ledger spans the full width directly beneath it. On desktop, the upper section splits into two symmetrical cards: `The Potters Starting XI` and `Opposition Scouting`. On mobile, those cards collapse into one column so the opposition map stacks below the home map before the ledger.
+
+The old oversized circular player nodes have been replaced with CSS-only geometric mini-kit markers. The home nodes use minimalist red-and-white striping, while the opposition scouting nodes use a solid light away-kit tone with no badges, logos, or commercial marks. Both pitch canvases share the formation controls, so switching from 4-3-3 to 5-3-2 updates the home and opposition maps together.
+
+Verification confirmed two desktop pitch cards, one-column mobile stacking, 11 home nodes, 11 opposition nodes, 22 mini-kit markers, striped home kits, solid opposition kits, mirrored opposition coordinates, and a full-width ledger beneath the tactical map.
+
 ## Screenshot Workflow
 
 Save the latest dashboard image here:
@@ -463,6 +471,8 @@ Template leak hardening confirms awaySupporterCards compiles into three guide ca
 Pitch hardening confirms 11 distinctive player nodes and no undefined ledger values
 Away Days master grid balances left briefing stack with unified right travel-guide card
 Form W/D/L tokens render as centered 24px circles with mobile-safe bottom padding
+Squad split-pitch map renders home and opposition cards with 22 mini-kit nodes
+Player Performance Ledger spans below the tactical map on desktop and mobile
 ```
 
 Responsive screenshots were generated during visual QA:

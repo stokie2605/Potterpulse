@@ -387,92 +387,201 @@
 
       
       .squad-pitch-layout {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        min-width: 0;
+      }
+      .tactical-map-grid {
         display: grid;
-        grid-template-columns: minmax(0, 1.4fr) minmax(230px, 0.6fr);
+        grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 12px;
         align-items: stretch;
+        min-width: 0;
+      }
+      .tactical-pitch-card {
+        min-width: 0;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 14px;
+        padding: 12px;
+        background: rgba(255, 255, 255, 0.03);
+      }
+      .pitch-card-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        margin-bottom: 10px;
+      }
+      .pitch-card-head h3 {
+        margin: 0;
+        color: #fff;
+        font-size: 0.88rem;
+        font-weight: 1000;
+        text-transform: uppercase;
+      }
+      .pitch-card-head span {
+        color: var(--muted);
+        font-size: 0.58rem;
+        font-weight: 900;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
       }
       .pitch {
         position: relative;
         display: grid;
         grid-template-columns: repeat(7, minmax(0, 1fr));
-        grid-template-rows: repeat(6, minmax(44px, 1fr));
-        gap: 8px;
+        grid-template-rows: repeat(6, minmax(34px, 1fr));
+        gap: 6px;
         width: 100%;
-        min-height: clamp(420px, 54vw, 560px);
+        min-height: clamp(300px, 34vw, 390px);
         overflow: hidden;
-        margin-top: 10px;
         border: 1px dashed rgba(255, 255, 255, 0.12);
-        border-radius: 20px;
-        padding: 16px;
+        border-radius: 16px;
+        padding: 12px;
         background:
-          linear-gradient(to right, rgba(255, 255, 255, 0.055) 1px, transparent 1px) 50% 0 / 1px 100% no-repeat,
-          radial-gradient(circle at 50% 50%, transparent 54px, rgba(255, 255, 255, 0.055) 55px, rgba(255, 255, 255, 0.055) 57px, transparent 58px),
-          linear-gradient(to top, rgba(255, 255, 255, 0.06) 2px, transparent 2px) bottom center / 170px 48px no-repeat,
-          linear-gradient(to right, rgba(255, 255, 255, 0.06) 2px, transparent 2px) bottom left 30% / 2px 48px no-repeat,
-          linear-gradient(to left, rgba(255, 255, 255, 0.06) 2px, transparent 2px) bottom right 30% / 2px 48px no-repeat,
-          linear-gradient(180deg, rgba(20, 96, 52, 0.72) 0%, rgba(8, 54, 34, 0.92) 100%);
+          linear-gradient(to right, rgba(255, 255, 255, 0.12) 2px, transparent 2px) 50% 0 / 2px 100% no-repeat,
+          radial-gradient(circle at 50% 50%, transparent 44px, rgba(255, 255, 255, 0.08) 45px, rgba(255, 255, 255, 0.08) 47px, transparent 48px),
+          linear-gradient(to top, rgba(255, 255, 255, 0.08) 2px, transparent 2px) bottom center / 150px 42px no-repeat,
+          linear-gradient(to bottom, rgba(255, 255, 255, 0.08) 2px, transparent 2px) top center / 150px 42px no-repeat,
+          repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.025) 0 1px, transparent 1px 42px),
+          linear-gradient(180deg, rgba(20, 96, 52, 0.78) 0%, rgba(8, 54, 34, 0.94) 100%);
+      }
+      .opposition-pitch {
+        background:
+          linear-gradient(to right, rgba(255, 255, 255, 0.12) 2px, transparent 2px) 50% 0 / 2px 100% no-repeat,
+          radial-gradient(circle at 50% 50%, transparent 44px, rgba(255, 255, 255, 0.08) 45px, rgba(255, 255, 255, 0.08) 47px, transparent 48px),
+          linear-gradient(to top, rgba(255, 255, 255, 0.08) 2px, transparent 2px) bottom center / 150px 42px no-repeat,
+          linear-gradient(to bottom, rgba(255, 255, 255, 0.08) 2px, transparent 2px) top center / 150px 42px no-repeat,
+          repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.025) 0 1px, transparent 1px 42px),
+          linear-gradient(180deg, rgba(18, 82, 55, 0.88), rgba(6, 45, 33, 0.96));
       }
       .pitch .player-strip-card {
         position: relative;
-        width: min(68px, 100%);
-        height: min(68px, 100%);
-        min-height: 58px;
+        width: 42px;
+        min-width: 0;
+        min-height: 0;
         place-self: center;
-        border: 2px solid rgba(255, 255, 255, 0.18);
-        border-radius: 999px;
-        padding: 5px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
+        border: 0;
+        border-radius: 0;
+        padding: 0;
+        display: grid;
+        justify-items: center;
+        gap: 2px;
         text-align: center;
         cursor: pointer;
-        background: radial-gradient(circle at 50% 30%, #252936, #101116 72%);
-        box-shadow: 0 10px 26px rgba(0, 0, 0, 0.58), inset 0 2px 4px rgba(255, 255, 255, 0.1);
-        transition: border-color 0.2s ease, transform 0.2s ease, opacity 0.2s ease;
+        background: transparent;
+        box-shadow: none;
+        color: #fff;
+        transition: transform 0.2s ease, filter 0.2s ease;
       }
-      .pitch .player-strip-card.is-tracked { border-color: var(--red); }
-      .pitch .player-strip-card:hover, .pitch .player-strip-card.active-player { border-color: var(--red-3); transform: scale(1.06); }
-      .pitch .player-strip-card[data-role-433="gk"], .pitch .player-strip-card[data-role-532="gk"] { grid-column: 4; grid-row: 6; }
-      .pitch[data-formation="433"] .player-strip-card[data-role-433="lb"] { grid-column: 1; grid-row: 5; }
-      .pitch[data-formation="433"] .player-strip-card[data-role-433="lcb"] { grid-column: 3; grid-row: 5; }
-      .pitch[data-formation="433"] .player-strip-card[data-role-433="rcb"] { grid-column: 5; grid-row: 5; }
-      .pitch[data-formation="433"] .player-strip-card[data-role-433="rb"] { grid-column: 7; grid-row: 5; }
-      .pitch[data-formation="433"] .player-strip-card[data-role-433="lcm"] { grid-column: 2; grid-row: 3; }
-      .pitch[data-formation="433"] .player-strip-card[data-role-433="dm"] { grid-column: 4; grid-row: 4; }
-      .pitch[data-formation="433"] .player-strip-card[data-role-433="rcm"] { grid-column: 6; grid-row: 3; }
-      .pitch[data-formation="433"] .player-strip-card[data-role-433="lw"] { grid-column: 1; grid-row: 1; }
-      .pitch[data-formation="433"] .player-strip-card[data-role-433="st"] { grid-column: 4; grid-row: 1; }
-      .pitch[data-formation="433"] .player-strip-card[data-role-433="rw"] { grid-column: 7; grid-row: 1; }
-      .pitch[data-formation="532"] .player-strip-card[data-role-532="lwb"] { grid-column: 1; grid-row: 4; }
-      .pitch[data-formation="532"] .player-strip-card[data-role-532="lcb"] { grid-column: 2; grid-row: 5; }
-      .pitch[data-formation="532"] .player-strip-card[data-role-532="cb"] { grid-column: 4; grid-row: 5; }
-      .pitch[data-formation="532"] .player-strip-card[data-role-532="rcb"] { grid-column: 6; grid-row: 5; }
-      .pitch[data-formation="532"] .player-strip-card[data-role-532="rwb"] { grid-column: 7; grid-row: 4; }
-      .pitch[data-formation="532"] .player-strip-card[data-role-532="lcm"] { grid-column: 2; grid-row: 3; }
-      .pitch[data-formation="532"] .player-strip-card[data-role-532="cm"] { grid-column: 4; grid-row: 3; }
-      .pitch[data-formation="532"] .player-strip-card[data-role-532="rcm"] { grid-column: 6; grid-row: 3; }
-      .pitch[data-formation="532"] .player-strip-card[data-role-532="stl"] { grid-column: 3; grid-row: 1; }
-      .pitch[data-formation="532"] .player-strip-card[data-role-532="str"] { grid-column: 5; grid-row: 1; }
-      .pitch .player-strip-card::after { display: none; }
+      .pitch .player-strip-card:hover,
+      .pitch .player-strip-card.active-player {
+        transform: translateY(-2px) scale(1.08);
+        filter: drop-shadow(0 0 10px rgba(255, 51, 68, 0.55));
+      }
+      .mini-kit {
+        position: relative;
+        display: block;
+        width: 30px;
+        height: 27px;
+      }
+      .kit-body {
+        position: absolute;
+        left: 7px;
+        top: 3px;
+        width: 16px;
+        height: 22px;
+        border: 1px solid rgba(0, 0, 0, 0.32);
+        border-radius: 4px 4px 3px 3px;
+        background: repeating-linear-gradient(90deg, #e20e19 0 4px, #f4f4f6 4px 8px);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45), 0 5px 12px rgba(0, 0, 0, 0.32);
+      }
+      .kit-sleeve {
+        position: absolute;
+        top: 6px;
+        width: 8px;
+        height: 12px;
+        border-radius: 3px;
+        background: #e20e19;
+      }
+      .kit-sleeve.left { left: 2px; transform: rotate(-24deg); }
+      .kit-sleeve.right { right: 2px; transform: rotate(24deg); background: #f4f4f6; }
+      .opposition-kit .kit-body,
+      .opposition-kit .kit-sleeve {
+        background: #f4f4f6;
+      }
+      .opposition-kit .kit-body { border-color: rgba(0, 0, 0, 0.38); }
+      .opposition-kit .kit-sleeve.right { background: #e8eaef; }
+      .pitch .position-pill {
+        min-width: 23px;
+        max-width: 34px;
+        padding: 2px 5px;
+        border-radius: 999px;
+        background: rgba(0, 0, 0, 0.35);
+        border-color: rgba(255, 255, 255, 0.22);
+        color: #fff;
+        font-size: 0.48rem;
+      }
       .pitch .player-strip-card h3 {
         position: relative;
         z-index: 1;
         width: 100%;
-        margin: 4px 0 0;
+        margin: 0;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
         color: #fff;
-        font-size: clamp(0.52rem, 1.1vw, 0.64rem);
-        font-weight: 1000;
-        line-height: 1.05;
+        font-size: clamp(0.45rem, 0.9vw, 0.58rem);
+        font-weight: 950;
+        line-height: 1;
         text-transform: uppercase;
       }
+      .home-pitch .player-strip-card[data-role-433="gk"], .home-pitch .player-strip-card[data-role-532="gk"] { grid-column: 4; grid-row: 6; }
+      .home-pitch[data-formation="433"] .player-strip-card[data-role-433="lb"] { grid-column: 1; grid-row: 5; }
+      .home-pitch[data-formation="433"] .player-strip-card[data-role-433="lcb"] { grid-column: 3; grid-row: 5; }
+      .home-pitch[data-formation="433"] .player-strip-card[data-role-433="rcb"] { grid-column: 5; grid-row: 5; }
+      .home-pitch[data-formation="433"] .player-strip-card[data-role-433="rb"] { grid-column: 7; grid-row: 5; }
+      .home-pitch[data-formation="433"] .player-strip-card[data-role-433="lcm"] { grid-column: 2; grid-row: 3; }
+      .home-pitch[data-formation="433"] .player-strip-card[data-role-433="dm"] { grid-column: 4; grid-row: 4; }
+      .home-pitch[data-formation="433"] .player-strip-card[data-role-433="rcm"] { grid-column: 6; grid-row: 3; }
+      .home-pitch[data-formation="433"] .player-strip-card[data-role-433="lw"] { grid-column: 1; grid-row: 1; }
+      .home-pitch[data-formation="433"] .player-strip-card[data-role-433="st"] { grid-column: 4; grid-row: 1; }
+      .home-pitch[data-formation="433"] .player-strip-card[data-role-433="rw"] { grid-column: 7; grid-row: 1; }
+      .home-pitch[data-formation="532"] .player-strip-card[data-role-532="lwb"] { grid-column: 1; grid-row: 4; }
+      .home-pitch[data-formation="532"] .player-strip-card[data-role-532="lcb"] { grid-column: 2; grid-row: 5; }
+      .home-pitch[data-formation="532"] .player-strip-card[data-role-532="cb"] { grid-column: 4; grid-row: 5; }
+      .home-pitch[data-formation="532"] .player-strip-card[data-role-532="rcb"] { grid-column: 6; grid-row: 5; }
+      .home-pitch[data-formation="532"] .player-strip-card[data-role-532="rwb"] { grid-column: 7; grid-row: 4; }
+      .home-pitch[data-formation="532"] .player-strip-card[data-role-532="lcm"] { grid-column: 2; grid-row: 3; }
+      .home-pitch[data-formation="532"] .player-strip-card[data-role-532="cm"] { grid-column: 4; grid-row: 3; }
+      .home-pitch[data-formation="532"] .player-strip-card[data-role-532="rcm"] { grid-column: 6; grid-row: 3; }
+      .home-pitch[data-formation="532"] .player-strip-card[data-role-532="stl"] { grid-column: 3; grid-row: 1; }
+      .home-pitch[data-formation="532"] .player-strip-card[data-role-532="str"] { grid-column: 5; grid-row: 1; }
+      .opposition-pitch .player-strip-card[data-role-433="gk"], .opposition-pitch .player-strip-card[data-role-532="gk"] { grid-column: 4; grid-row: 1; }
+      .opposition-pitch[data-formation="433"] .player-strip-card[data-role-433="lb"] { grid-column: 7; grid-row: 2; }
+      .opposition-pitch[data-formation="433"] .player-strip-card[data-role-433="lcb"] { grid-column: 5; grid-row: 2; }
+      .opposition-pitch[data-formation="433"] .player-strip-card[data-role-433="rcb"] { grid-column: 3; grid-row: 2; }
+      .opposition-pitch[data-formation="433"] .player-strip-card[data-role-433="rb"] { grid-column: 1; grid-row: 2; }
+      .opposition-pitch[data-formation="433"] .player-strip-card[data-role-433="lcm"] { grid-column: 6; grid-row: 4; }
+      .opposition-pitch[data-formation="433"] .player-strip-card[data-role-433="dm"] { grid-column: 4; grid-row: 3; }
+      .opposition-pitch[data-formation="433"] .player-strip-card[data-role-433="rcm"] { grid-column: 2; grid-row: 4; }
+      .opposition-pitch[data-formation="433"] .player-strip-card[data-role-433="lw"] { grid-column: 7; grid-row: 6; }
+      .opposition-pitch[data-formation="433"] .player-strip-card[data-role-433="st"] { grid-column: 4; grid-row: 6; }
+      .opposition-pitch[data-formation="433"] .player-strip-card[data-role-433="rw"] { grid-column: 1; grid-row: 6; }
+      .opposition-pitch[data-formation="532"] .player-strip-card[data-role-532="lwb"] { grid-column: 7; grid-row: 3; }
+      .opposition-pitch[data-formation="532"] .player-strip-card[data-role-532="lcb"] { grid-column: 6; grid-row: 2; }
+      .opposition-pitch[data-formation="532"] .player-strip-card[data-role-532="cb"] { grid-column: 4; grid-row: 2; }
+      .opposition-pitch[data-formation="532"] .player-strip-card[data-role-532="rcb"] { grid-column: 2; grid-row: 2; }
+      .opposition-pitch[data-formation="532"] .player-strip-card[data-role-532="rwb"] { grid-column: 1; grid-row: 3; }
+      .opposition-pitch[data-formation="532"] .player-strip-card[data-role-532="lcm"] { grid-column: 6; grid-row: 4; }
+      .opposition-pitch[data-formation="532"] .player-strip-card[data-role-532="cm"] { grid-column: 4; grid-row: 4; }
+      .opposition-pitch[data-formation="532"] .player-strip-card[data-role-532="rcm"] { grid-column: 2; grid-row: 4; }
+      .opposition-pitch[data-formation="532"] .player-strip-card[data-role-532="stl"] { grid-column: 5; grid-row: 6; }
+      .opposition-pitch[data-formation="532"] .player-strip-card[data-role-532="str"] { grid-column: 3; grid-row: 6; }
       .performance-ledger {
         min-width: 0;
-        align-self: stretch;
+        width: 100%;
         border: 1px solid rgba(226, 14, 25, 0.28);
         border-radius: 16px;
         padding: 13px;
@@ -480,7 +589,7 @@
       }
       .performance-ledger h3 { margin: 4px 0 2px; font-size: 1rem; font-weight: 1000; text-transform: uppercase; }
       .performance-ledger p { margin: 0 0 12px; color: var(--muted); font-size: 0.72rem; font-weight: 850; text-transform: uppercase; }
-      .ledger-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+      .ledger-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
       .ledger-stat { border: 1px solid var(--line); border-radius: 10px; padding: 9px; background: rgba(255, 255, 255, 0.035); }
       .ledger-stat span { display: block; color: var(--muted); font-size: 0.56rem; font-weight: 900; letter-spacing: 0.08em; text-transform: uppercase; }
       .ledger-stat strong { display: block; margin-top: 3px; color: #fff; font-size: 1.08rem; font-weight: 1000; }
@@ -667,11 +776,14 @@
         .formation-controls .chip { flex: 1 1 0; }
         
         /* Fixed Mobile Target: Forces pristine 2x2 squad block grid */
-        .squad-pitch-layout { grid-template-columns: 1fr; }
-        .pitch { min-height: 410px; padding: 10px; gap: 5px; }
-        .pitch .player-strip-card { width: 48px; height: 48px; min-height: 48px; padding: 3px; }
-        .position-pill { max-width: 48px; }
-        .pitch .player-strip-card h3 { font-size: 0.48rem; }
+        .tactical-map-grid { grid-template-columns: 1fr; }
+        .pitch { min-height: 300px; padding: 10px; gap: 5px; }
+        .pitch .player-strip-card { width: 38px; }
+        .mini-kit { width: 27px; height: 24px; }
+        .kit-body { left: 6px; width: 15px; height: 20px; }
+        .position-pill { max-width: 42px; }
+        .pitch .player-strip-card h3 { font-size: 0.46rem; }
+        .ledger-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       }
     </style>
   </head>
@@ -782,7 +894,22 @@
                 <button class="chip" type="button" data-formation="532">5-3-2 Solid</button>
               </div>
               <div class="squad-pitch-layout">
-                <div class="player-strip pitch" data-formation="433">{{squadCards}}</div>
+                <div class="tactical-map-grid" aria-label="Tactical match map">
+                  <article class="tactical-pitch-card" aria-label="The Potters Starting XI">
+                    <div class="pitch-card-head">
+                      <h3>The Potters Starting XI</h3>
+                      <span>Home Half</span>
+                    </div>
+                    <div class="player-strip pitch home-pitch" data-formation="433">{{squadCards}}</div>
+                  </article>
+                  <article class="tactical-pitch-card" aria-label="Opposition Scouting">
+                    <div class="pitch-card-head">
+                      <h3>Opposition Scouting</h3>
+                      <span>Mirror Shape</span>
+                    </div>
+                    <div class="player-strip pitch opposition-pitch" data-formation="433">{{oppositionCards}}</div>
+                  </article>
+                </div>
                 <aside class="performance-ledger" aria-live="polite" data-performance-ledger>
                   <span class="section-kicker">Player Performance Ledger</span>
                   <h3 data-ledger-name>Manhoef</h3>
@@ -1002,8 +1129,9 @@
         document.querySelectorAll('.formation-controls .chip').forEach((button) => {
           button.classList.toggle('active-formation', button.dataset.formation === nextFormation);
         });
-        const pitch = document.querySelector('.pitch');
-        if (pitch) pitch.dataset.formation = nextFormation;
+        document.querySelectorAll('.pitch').forEach((pitch) => {
+          pitch.dataset.formation = nextFormation;
+        });
       };
 
       document.querySelectorAll('[data-formation]').forEach((control) => {
