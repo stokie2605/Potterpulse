@@ -31,6 +31,11 @@ const initials = (value) =>
     .map((word) => word[0].toUpperCase())
     .join('') || 'FC';
 
+const shortPlayerName = (value) => {
+  const parts = String(value ?? '').trim().split(/\s+/).filter(Boolean);
+  return parts.at(-1) || value || 'Player';
+};
+
 const formatDate = (dateText) =>
   new Intl.DateTimeFormat('en-GB', {
     weekday: 'short',
@@ -73,8 +78,8 @@ const render = () => {
       .map(
         (player) => `
           <article class="player-strip-card" data-number="#${escapeHtml(player.squad_number)}">
-            <span class="position-pill">#${escapeHtml(player.squad_number)} / ${escapeHtml(player.position)}</span>
-            <h3>${escapeHtml(player.player_name)}</h3>
+            <span class="position-pill">#${escapeHtml(player.squad_number)}</span>
+            <h3 title="${escapeHtml(player.player_name)}">${escapeHtml(shortPlayerName(player.player_name))}</h3>
           </article>
         `,
       )
