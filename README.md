@@ -167,7 +167,7 @@ View responsibilities:
 - `Matches`: next-match hero card and fixture centre.
 - `Squad`: tactical pitch squad view with circular player markers.
 - `Pulse`: independent fanzine/editorial card.
-- `More`: work-in-progress Away Day guide showing travel, ground, pub, and pie-index details.
+- `More`: work-in-progress Away Day guide showing travel, ground, pub, pie-index, form, referee, and weather briefing details.
 
 ## Design Direction
 
@@ -187,6 +187,7 @@ The current direction is closer to a native modern sports app:
 - Formation controls for switching between compact tactical layouts
 - Independent fanzine editorial card for fan voice
 - Away Day guide card for supporter travel notes
+- Pre-match briefing tiles for form, officials, and weather
 - Bottom navigation inspired by mobile sports apps
 
 The goal is not to copy Sky Sports, EA Sports, or bet365 directly. The goal is to borrow the shared product language: compact hierarchy, strong live-match modules, pill tabs, dense rows, dark surfaces, and high-contrast action areas.
@@ -268,6 +269,19 @@ Problems found and solved during this pass:
 - The More tab needed to span the app grid on desktop. The Away Day card now carries `.single-view` so it behaves like the other full-width tab views.
 - Playwright reported a console 404 for `favicon.ico`. That is harmless for this feature pass, but a small favicon asset remains a tidy-up item.
 
+### 10. Static Away Day card vs dynamic pre-match briefing
+
+The Away Day guide now has a server-side briefing layer. `scripts/server.mjs` contains a `nextMatchBriefing` lookup with form strings, referee notes, weather, and kit advice. The render pipeline normalizes opponent names into lookup keys and chooses the first upcoming match in the next-five window that has both guide and briefing data, with Swansea as the current work-in-progress fallback.
+
+The original pasted approach could not be applied directly because the app stores fixture dates as `match_date`, not `date`, and there was no existing `upcomingMatches` variable to replace. The implementation was adapted to the real database shape and existing `hero` fallback instead of replacing a non-existent code path.
+
+Problems found and solved during this pass:
+
+- The West Brom fixture name normalizes to `west_bromwich_albion`, while the guide key is `west_brom`. An alias map now keeps those keys connected.
+- The weather separator briefly rendered as an encoding placeholder. It was changed to a plain ASCII dash so the CSS frontend gets clean text.
+- The guide needed to remain visibly unfinished. The More tab chip now includes `WIP` while still showing the active guide tag.
+- The Playwright MCP browser context closed during DOM inspection, so verification fell back to the reliable Playwright CLI screenshot workflow.
+
 ## Screenshot Workflow
 
 Save the latest dashboard image here:
@@ -297,6 +311,7 @@ Tabbed views present for Matches, Squad, Pulse, and More
 Away Day guide renders without template placeholders
 Formation controls switch active state and marker positions
 Mobile bottom navigation remains fixed to the viewport bottom
+Pre-match briefing renders referee, weather, kit tip, and 10 form pills
 ```
 
 Responsive screenshots were generated during visual QA:
@@ -313,6 +328,8 @@ potterpulse-sticky-nav-mobile.png
 potterpulse-formation-squad.png
 potterpulse-away-guide-mobile.png
 potterpulse-away-guide-desktop.png
+potterpulse-briefing-mobile.png
+potterpulse-briefing-desktop.png
 ```
 
 
@@ -335,6 +352,14 @@ npx playwright screenshot --browser chromium --viewport-size=1280,900 http://loc
 ```
 
 Playwright DOM checks confirmed the mobile Away Day panel fits inside a 390px viewport, the bottom navigation is fixed at the bottom, and the `5-3-2 Solid` formation button updates the active control and marker positions.
+
+
+The pre-match briefing pass was verified with rendered HTML checks and fresh screenshots:
+
+```powershell
+npx playwright screenshot --browser chromium --viewport-size=390,844 http://localhost:4173/#more potterpulse-briefing-mobile.png
+npx playwright screenshot --browser chromium --viewport-size=1280,900 http://localhost:4173/#more potterpulse-briefing-desktop.png
+```
 
 ## GitHub Linking Steps
 

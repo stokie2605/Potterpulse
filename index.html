@@ -265,6 +265,77 @@
         color: var(--muted);
         font-weight: 500;
       }
+      .briefing-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+        margin-top: 14px;
+      }
+      .briefing-card {
+        min-width: 0;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        padding: 10px;
+        background: rgba(0, 0, 0, 0.18);
+      }
+      .briefing-card.full { grid-column: 1 / -1; }
+      .briefing-card span,
+      .form-row span:first-child {
+        display: block;
+        color: var(--muted);
+        font-size: 0.58rem;
+        font-weight: 900;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+      .briefing-card strong {
+        display: block;
+        margin-top: 4px;
+        overflow-wrap: anywhere;
+        color: #fff;
+        font-size: 0.82rem;
+        line-height: 1.2;
+      }
+      .briefing-card small {
+        display: block;
+        margin-top: 3px;
+        color: var(--muted);
+        font-size: 0.68rem;
+        line-height: 1.35;
+      }
+      .form-stack {
+        display: grid;
+        gap: 8px;
+        margin-top: 14px;
+      }
+      .form-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        min-width: 0;
+      }
+      .form-strip {
+        display: inline-flex;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: 5px;
+        min-width: 0;
+      }
+      .form-dot {
+        display: grid;
+        place-items: center;
+        width: 22px;
+        height: 22px;
+        border-radius: 999px;
+        color: #fff;
+        font-size: 0.62rem;
+        font-weight: 1000;
+      }
+      .form-dot.w { background: #0f8f5f; }
+      .form-dot.d { background: #71717a; }
+      .form-dot.l { background: var(--red-2); }
+
       
       /* Global Desktop Fixed: Auto-wrap grid to prevent clipping */
       .player-strip {
@@ -411,7 +482,7 @@
         .fanzine-column-card .section-head { align-items: start; }
         .zine-article-snippet p { font-size: 0.8rem; line-height: 1.4; }
         .zine-meta { font-size: 0.56rem; }
-        .away-guide-grid { grid-template-columns: 1fr; gap: 8px; }
+        .away-guide-grid, .briefing-grid { grid-template-columns: 1fr; gap: 8px; }
         .away-guide-tile strong { white-space: normal; }
         .formation-controls { justify-content: stretch; }
         .formation-controls .chip { flex: 1 1 0; }
@@ -534,7 +605,7 @@
                   <span class="section-kicker">Supporter Survival Guide</span>
                   <h2>Away Day: {{awayOpponent}} (A)</h2>
                 </div>
-                <span class="chip" style="color: #ffb703; border-color: rgba(255,183,3,0.4);">{{awayTag}}</span>
+                <span class="chip" style="color: #ffb703; border-color: rgba(255,183,3,0.4);">WIP - {{awayTag}}</span>
               </div>
 
               <div class="away-guide-grid">
@@ -553,6 +624,32 @@
               <div class="pie-card">
                 <span>The Match-Day Pie Index</span>
                 <p>{{awayPieIndex}} - <em>{{awayPieTip}}</em></p>
+              </div>
+
+              <div class="briefing-grid" aria-label="Pre-Match Briefing">
+                <div class="briefing-card">
+                  <span>Referee Watch</span>
+                  <strong>{{briefingReferee}}</strong>
+                  <small>{{briefingOfficialsNote}}</small>
+                </div>
+                <div class="briefing-card">
+                  <span>Weather</span>
+                  <strong>{{briefingForecastTemp}} - {{briefingForecastCond}}</strong>
+                  <small>{{briefingKitTip}}</small>
+                </div>
+                <div class="briefing-card full">
+                  <span>Form Guide</span>
+                  <div class="form-stack">
+                    <div class="form-row">
+                      <span>Stoke</span>
+                      <div class="form-strip">{{briefingHomeForm}}</div>
+                    </div>
+                    <div class="form-row">
+                      <span>{{awayOpponent}}</span>
+                      <div class="form-strip">{{briefingAwayForm}}</div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </section>
           </div>

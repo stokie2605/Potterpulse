@@ -33,6 +33,47 @@ const awayGuides = {
   },
 };
 
+
+const nextMatchBriefing = {
+  swansea_city: {
+    formHome: ['W', 'D', 'L', 'W', 'W'],
+    formAway: ['L', 'L', 'D', 'W', 'L'],
+    referee: 'Gavin Ward',
+    officialsNote: 'Averages 4.2 yellows / game',
+    forecastTemp: '14 C',
+    forecastCond: 'Heavy rain and wind',
+    kitTip: 'Pack the raincoat. Wind whipping off the bay.',
+  },
+  west_brom: {
+    formHome: ['D', 'W', 'W', 'L', 'W'],
+    formAway: ['W', 'D', 'L', 'D', 'W'],
+    referee: 'David Webb',
+    officialsNote: 'Stricter ref: 4.8 cards per game',
+    forecastTemp: '18 C',
+    forecastCond: 'Clear skies',
+    kitTip: 'Perfect conditions. Standard layers fine.',
+  },
+};
+
+
+const opponentAliases = {
+  west_bromwich_albion: 'west_brom',
+};
+
+const normalizeOpponentKey = (value) => {
+  const key = String(value ?? '')
+    .toLowerCase()
+    .replace(/&/g, 'and')
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '');
+  return opponentAliases[key] ?? key;
+};
+
+const hasMatchContext = (fixture) => {
+  const key = normalizeOpponentKey(fixture?.opponent);
+  return Boolean(awayGuides[key] && nextMatchBriefing[key]);
+};
+
 const escapeHtml = (value) =>
   String(value ?? '')
     .replaceAll('&', '&amp;')
@@ -97,7 +138,14 @@ const render = () => {
         venue: 'home',
       };
 
-    const awayGuide = awayGuides.swansea_city;
+    const nowKeyDate = new Date().toISOString().slice(0, 10);
+    const upcomingMatches = fixtures
+      .filter((fixture) => fixture.match_date >= nowKeyDate)
+      .slice(0, 5);
+    const contextMatch = upcomingMatches.find(hasMatchContext) ?? hero;
+    const contextKey = normalizeOpponentKey(contextMatch.opponent);
+    const awayGuide = awayGuides[contextKey] ?? awayGuides.swansea_city;
+    const matchBriefing = nextMatchBriefing[contextKey] ?? nextMatchBriefing.swansea_city;
 
     const squadCards = squad
       .map(
@@ -153,6 +201,17 @@ const render = () => {
       awayPieIndex: awayGuide.pieIndex,
       awayPieTip: awayGuide.pieTip,
       awayTag: awayGuide.tag,
+      briefingReferee: matchBriefing.referee,
+      briefingOfficialsNote: matchBriefing.officialsNote,
+      briefingForecastTemp: matchBriefing.forecastTemp,
+      briefingForecastCond: matchBriefing.forecastCond,
+      briefingKitTip: matchBriefing.kitTip,
+      briefingHomeForm: matchBriefing.formHome
+        .map((result) => '<span class="form-dot ' + escapeHtml(result.toLowerCase()) + '">' + escapeHtml(result) + '</span>')
+        .join(''),
+      briefingAwayForm: matchBriefing.formAway
+        .map((result) => '<span class="form-dot ' + escapeHtml(result.toLowerCase()) + '">' + escapeHtml(result) + '</span>')
+        .join(''),
     };
 
     return Object.entries(replacements).reduce(
