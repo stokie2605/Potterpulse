@@ -469,6 +469,22 @@
         font-weight: 900;
       }
 
+      .fixture-toggle {
+        flex: 0 0 auto;
+        cursor: pointer;
+        color: #fff;
+        border-color: rgba(226, 14, 25, 0.55);
+        background: rgba(226, 14, 25, 0.14);
+      }
+      .fixture-row.is-collapsed { display: none; }
+      .fixture-list.expanded .fixture-row.is-collapsed { display: grid; }
+      .fixture-summary {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+      }
       .fixture-list { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
       .fixture-row { display: grid; grid-template-columns: 48px minmax(0, 1fr) auto; align-items: center; gap: 9px; min-height: 66px; border-radius: 16px; padding: 9px; }
       .date-tile { display: grid; place-items: center; height: 48px; border-radius: 13px; background: rgba(226, 14, 25, 0.18); color: #fff; font-size: 0.64rem; font-weight: 1000; line-height: 1.05; text-align: center; text-transform: uppercase; }
@@ -569,8 +585,8 @@
             </div>
             <div class="scoreline">
               <div class="club">
-                <div class="crest"><img src="{{homeCrestSrc}}" alt="Stoke City crest" /></div>
-                <div class="club-name">Stoke City</div>
+                <div class="crest"><img src="{{homeCrestSrc}}" alt="{{homeDisplayName}} crest" /></div>
+                <div class="club-name">{{homeDisplayName}}</div>
               </div>
               <div class="versus-block">
                 <span class="micro-label">{{heroVenue}}</span>
@@ -578,15 +594,15 @@
                 <span class="micro-label">{{heroDateShort}}</span>
               </div>
               <div class="club">
-                <div class="crest away"><img src="{{awayCrestSrc}}" alt="{{heroOpponent}} crest" /></div>
-                <div class="club-name">{{heroOpponent}}</div>
+                <div class="crest away"><img src="{{awayCrestSrc}}" alt="{{heroOpponentDisplay}} crest" /></div>
+                <div class="club-name">{{heroOpponentDisplay}}</div>
               </div>
             </div>
-            <h1 class="match-title">Stoke City <span>vs</span><br />{{heroOpponent}}</h1>
+            <h1 class="match-title">{{homeDisplayName}} <span>vs</span><br />{{heroOpponentDisplay}}</h1>
             <div class="match-actions">
               <div class="action-card"><span class="micro-label">Kickoff</span><strong>{{heroDateShort}}</strong></div>
               <div class="action-card"><span class="micro-label">Venue</span><strong>{{heroVenue}}</strong></div>
-              <div class="action-card"><span class="micro-label">Fixture</span><strong>{{fixtureCount}} Match Run</strong></div>
+              <div class="action-card"><span class="micro-label">Culture</span><strong>{{cultureProfileName}}</strong></div>
             </div>
           </article>
           <section class="panel fanzine-column-card single-view" aria-label="The Digital Oatcake">
@@ -621,9 +637,9 @@
                 <span class="section-kicker">Schedule</span>
                 <h2>Fixture Centre</h2>
               </div>
-              <span class="chip">{{fixtureCount}} Matches</span>
+              <div class="fixture-summary"><span class="chip">Showing 5 of {{fixtureCount}}</span><button class="chip fixture-toggle" type="button" data-fixture-toggle aria-expanded="false">Show All</button></div>
             </div>
-            <div class="fixture-list">{{fixtureTimeline}}</div>
+            <div class="fixture-list" data-fixture-list>{{fixtureTimeline}}</div>
           </section>
           </div>
 
@@ -651,7 +667,7 @@
               <div class="section-head">
                 <div>
                   <span class="section-kicker">Supporter Survival Guide</span>
-                  <h2>Away Day: {{awayOpponent}} (A)</h2>
+                  <h2>Away Day: {{awayOpponentDisplay}} (A)</h2>
                 </div>
                 <span class="chip" style="color: #ffb703; border-color: rgba(255,183,3,0.4);">WIP - {{awayTag}}</span>
               </div>
@@ -693,7 +709,7 @@
                       <div class="form-strip">{{briefingHomeForm}}</div>
                     </div>
                     <div class="form-row">
-                      <span>{{awayOpponent}}</span>
+                      <span>{{awayOpponentDisplay}}</span>
                       <div class="form-strip">{{briefingAwayForm}}</div>
                     </div>
                   </div>
@@ -729,6 +745,16 @@
       document.querySelectorAll('[data-view]').forEach((control) => {
         control.addEventListener('click', () => activateView(control.dataset.view));
       });
+
+      const fixtureToggle = document.querySelector('[data-fixture-toggle]');
+      const fixtureList = document.querySelector('[data-fixture-list]');
+      if (fixtureToggle && fixtureList) {
+        fixtureToggle.addEventListener('click', () => {
+          const expanded = fixtureList.classList.toggle('expanded');
+          fixtureToggle.textContent = expanded ? 'Collapse' : 'Show All';
+          fixtureToggle.setAttribute('aria-expanded', String(expanded));
+        });
+      }
 
       const renderPollResults = (results) => {
         const pollGrid = document.querySelector('[data-poll-grid]');

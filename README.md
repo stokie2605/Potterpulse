@@ -41,9 +41,10 @@ The app is intentionally simple:
 1. `potter_pulse.db` stores the squad and fixture data.
 2. `scripts/server.mjs` opens the SQLite database with Node's built-in `node:sqlite` module.
 3. The server reads `index.html` as a template.
-4. It injects live database values into placeholders such as `{{heroOpponent}}`, `{{squadCards}}`, `{{fanPollOptions}}`, and `{{fixtureTimeline}}`.
+4. It injects live database values into placeholders such as `{{heroOpponentDisplay}}`, `{{homeDisplayName}}`, `{{squadCards}}`, `{{fanPollOptions}}`, and `{{fixtureTimeline}}`.
 5. The page is served locally at `http://localhost:4173`.
 6. `POST /api/vote` persists fan performance votes into SQLite and returns updated aggregate poll percentages.
+7. The active culture profile maps canonical team names to supporter-facing display names without mutating fixture data.
 
 This means there is no framework build step, package install, or frontend bundler required for the current version. The app is a fast local prototype with real persisted data.
 
@@ -333,6 +334,18 @@ Problems found and solved during this pass:
 - The first vote verification intentionally changed the local database; the counts were reset to zero after confirming persistence so the committed seed state stays clean.
 - Crest placeholders were still using text initials. The hero now renders SVG images via `{{homeCrestSrc}}` and `{{awayCrestSrc}}`.
 
+### 13. Full fixture wall vs default five-match view and culture profiles
+
+The fixture centre now renders all 47 fixtures in the HTML but collapses everything after the first five rows by default. A mobile-safe `Show All` / `Collapse` control toggles the fixture list with a CSS class instead of rebuilding the DOM, so the full schedule remains available without overwhelming the first viewport.
+
+A lightweight backend culture profile map now lives in `scripts/server.mjs`. The default profile is `the_potters`, labelled `The Potters`, and it maps canonical database team names to supporter-facing labels such as `The Potters`, `The Swans`, and `The Baggies`. The SQLite fixture data stays canonical; only the rendered display names change through helper replacements such as `{{homeDisplayName}}`, `{{heroOpponentDisplay}}`, and `{{awayOpponentDisplay}}`.
+
+Problems found and solved during this pass:
+
+- The fixture list needed to keep all 47 rows available for search/inspection while showing only five by default. The renderer marks rows after index five with `.is-collapsed` and the client toggles `.fixture-list.expanded`.
+- Hard-coded `Stoke City` and opponent labels in the hero would have bypassed localization. Those labels now use backend display-name mappings.
+- Mobile verification confirmed the default view shows five rows, expands to 47 rows, collapses back to five, and keeps the bottom nav fixed.
+
 ## Screenshot Workflow
 
 Save the latest dashboard image here:
@@ -372,6 +385,8 @@ ECS/Fargate Terraform stub defines port 4173 runtime context
 Docker/Terraform CLI validation deferred because those CLIs are not installed locally
 Fan poll votes persist in `fan_poll_votes` through `POST /api/vote`
 Local SVG crest assets render without text crest placeholders
+Fixture Centre shows 5 rows by default and toggles to all 47 rows
+Culture profile renders supporter nicknames from canonical team names
 ```
 
 Responsive screenshots were generated during visual QA:
@@ -431,6 +446,18 @@ The three-tab consolidation pass was verified with rendered HTML checks and scre
 npx playwright screenshot --browser chromium --viewport-size=390,844 http://localhost:4173/#matches potterpulse-3tab-matches-mobile.png
 npx playwright screenshot --browser chromium --viewport-size=390,844 http://localhost:4173/#away-days potterpulse-3tab-away-days-mobile.png
 npx playwright screenshot --browser chromium --viewport-size=1280,900 http://localhost:4173/#matches potterpulse-3tab-matches-desktop.png
+```
+
+
+The fixture toggle and culture profile pass was verified with rendered HTML checks and a mobile Playwright interaction check:
+
+```text
+Default visible fixture rows: 5
+Expanded visible fixture rows: 47
+Collapsed visible fixture rows: 5
+Active culture label: The Potters
+Hero opponent display: The Swans
+Mobile bottom nav position: fixed
 ```
 
 ## GitHub Linking Steps

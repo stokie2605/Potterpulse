@@ -11,6 +11,20 @@ const dbPath = join(rootDir, 'potter_pulse.db');
 const templatePath = join(rootDir, 'index.html');
 const assetsDir = join(rootDir, 'assets');
 const port = Number(process.env.PORT || 4173);
+const activeCultureProfile = process.env.CULTURE_PROFILE || 'the_potters';
+const cultureProfiles = {
+  the_potters: {
+    label: 'The Potters',
+    homeTeam: 'Stoke City',
+    useSupporterNicknames: true,
+    teamNicknames: {
+      stoke_city: 'The Potters',
+      swansea_city: 'The Swans',
+      west_bromwich_albion: 'The Baggies',
+      west_brom: 'The Baggies',
+    },
+  },
+};
 const crestAssets = {
   stoke_city: '/assets/crests/stoke-city.svg',
   swansea_city: '/assets/crests/swansea-city.svg',
@@ -167,6 +181,12 @@ const normalizeOpponentKey = (value) => {
 };
 
 const getCrestSrc = (teamName) => crestAssets[normalizeOpponentKey(teamName)] ?? crestAssets.default;
+const activeCulture = cultureProfiles[activeCultureProfile] ?? cultureProfiles.the_potters;
+const displayTeamName = (teamName) => {
+  const key = normalizeOpponentKey(teamName);
+  if (!activeCulture.useSupporterNicknames) return teamName;
+  return activeCulture.teamNicknames[key] ?? teamName;
+};
 const hasMatchContext = (fixture) => {
   const key = normalizeOpponentKey(fixture?.opponent);
   return Boolean(awayGuides[key] && nextMatchBriefing[key]);
@@ -255,13 +275,13 @@ const render = () => {
 
     const fixtureTimeline = fixtures
       .map(
-        (fixture) => `
-          <article class="fixture-row">
+        (fixture, index) => `
+          <article class="fixture-row${index >= 5 ? ' is-collapsed' : ''}">
             <time class="date-tile" datetime="${escapeHtml(fixture.match_date)}">
               ${escapeHtml(formatShortDate(fixture.match_date))}
             </time>
             <div class="fixture-main">
-              <h3>${escapeHtml(fixture.opponent)}</h3>
+              <h3 title="${escapeHtml(fixture.opponent)}">${escapeHtml(displayTeamName(fixture.opponent))}</h3>
               <div class="fixture-meta">
                 <span>${escapeHtml(fixture.competition)}</span>
                 <span>${escapeHtml(titleCase(fixture.venue))}</span>
@@ -279,6 +299,9 @@ const render = () => {
         minute: '2-digit',
       })}`,
       heroOpponent: hero.opponent,
+      heroOpponentDisplay: displayTeamName(hero.opponent),
+      homeDisplayName: displayTeamName(activeCulture.homeTeam),
+      cultureProfileName: activeCulture.label,
       homeCrestSrc: crestAssets.stoke_city,
       awayCrestSrc: getCrestSrc(hero.opponent),
       heroVenue: titleCase(hero.venue),
@@ -291,6 +314,7 @@ const render = () => {
       fixtureTimeline,
       fanPollOptions,
       awayOpponent: awayGuide.opponent,
+      awayOpponentDisplay: displayTeamName(awayGuide.opponent),
       awayStadium: awayGuide.stadium,
       awayDistance: awayGuide.distance,
       awayTravelTime: awayGuide.travelTime,
