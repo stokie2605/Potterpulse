@@ -18,14 +18,20 @@ Known WIP areas:
 
 ```text
 Potterpulse/
+|-- .github/
+|   |-- workflows/
+|       |-- ci-cd.yml                  # GitHub Actions test and container build pipeline
 |-- Dockerfile                         # Multi-stage Node runtime container
 |-- index.html                         # Single-page dashboard shell and CSS
+|-- package.json                       # CI test scripts and Playwright dependency
+|-- package-lock.json                  # Locked dependency graph for CI
 |-- potter_pulse.db                    # SQLite database used by the renderer
 |-- assets/
 |   |-- crests/                        # Local SVG crest assets
 |-- infra/
 |   |-- main.tf                        # ECS/Fargate infrastructure stub
 |-- scripts/
+|   |-- ci-mobile-layout-check.mjs     # Playwright mobile layout regression check
 |   |-- server.mjs                     # Local Node HTTP server and SQLite renderer
 |   |-- seed-potter-pulse.mjs          # Initial seed script for core players/fixtures
 |-- docs/
@@ -46,7 +52,9 @@ The app is intentionally simple:
 6. `POST /api/vote` persists fan performance votes into SQLite and returns updated aggregate poll percentages.
 7. The active culture profile maps canonical team names to supporter-facing display names without mutating fixture data.
 
-This means there is no framework build step, package install, or frontend bundler required for the current version. The app is a fast local prototype with real persisted data.
+This means there is no framework build step or frontend bundler required for the current version. The app is a fast local prototype with real persisted data.
+
+GitHub Actions now performs the production guardrails that do require tooling: dependency install, Node syntax checks, Playwright mobile layout verification, and Docker image build validation.
 
 ## Database
 
@@ -358,6 +366,19 @@ Problems found and solved during this pass:
 - The card needed to sit above the default five-fixture list without breaking the mobile-safe navigation. Mobile verification confirmed the card fits a `390px` viewport, the fixture toggle still expands from five to 47 rows, and the bottom nav remains fixed.
 - The only browser console issue remained the known `favicon.ico` 404, unrelated to this briefing pass.
 
+### 15. Local manual QA vs GitHub Actions CI/CD pipeline
+
+The project now has a GitHub Actions workflow at `.github/workflows/ci-cd.yml` that runs on pushes to `main`. The `test` job installs Node 24 dependencies, runs `node --check scripts/server.mjs`, and executes a Playwright mobile viewport regression check. The `build` job only runs after tests pass and validates the existing multi-stage Dockerfile with `docker build --tag potter-pulse:ci .`.
+
+Because the project originally had no package metadata, a minimal `package.json` and `package-lock.json` were added for CI-owned scripts and the Playwright dependency. The layout test lives in `scripts/ci-mobile-layout-check.mjs`; it starts the local server on port `4183`, opens the Matches view at a 390px mobile viewport, verifies the matchday briefing card, confirms the default five-fixture state, expands to all 47 fixtures, collapses back to five, and checks the fixed bottom navigation.
+
+Problems found and solved during this pass:
+
+- The first local Playwright run hit sandbox process restrictions, so the check was rerun from an elevated terminal path while keeping the workflow itself standard for GitHub-hosted runners.
+- Port `4173` was already used by the development server, so the CI layout test uses port `4183` by default.
+- CSS uppercase rendering made `innerText` unsuitable for checking the culture display name. The test now uses `textContent` for that assertion while still checking visible layout state through computed styles.
+- Local `node_modules`, Playwright MCP scratch files, and QA screenshots are ignored so the repository stays focused on source, docs, and reproducible pipeline files.
+
 ## Screenshot Workflow
 
 Save the latest dashboard image here:
@@ -400,6 +421,8 @@ Local SVG crest assets render without text crest placeholders
 Fixture Centre shows 5 rows by default and toggles to all 47 rows
 Culture profile renders supporter nicknames from canonical team names
 Matchday briefing card renders culture-aware headline and referee/weather analysis
+GitHub Actions workflow triggers on pushes to main with separate test and Docker build jobs
+CI test script validates mobile layout, fixture toggle behaviour, culture text, and fixed bottom navigation
 ```
 
 Responsive screenshots were generated during visual QA:
@@ -484,6 +507,18 @@ Default visible fixture rows after card insert: 5
 Expanded visible fixture rows after card insert: 47
 Mobile bottom nav position: fixed
 ```
+
+
+The CI/CD pipeline pass was verified locally with:
+
+```powershell
+npm install
+npm run check
+node --check scripts\ci-mobile-layout-check.mjs
+npm run test:layout
+```
+
+The Docker build step is defined in GitHub Actions and will run on the GitHub-hosted Ubuntu runner after the test job passes.
 
 ## GitHub Linking Steps
 
