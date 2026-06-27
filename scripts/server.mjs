@@ -405,6 +405,12 @@ const shortPlayerName = (value) => {
   return parts.at(-1) || value || 'Player';
 };
 
+const getFormRatings = (rating) => {
+  const base = Number.parseFloat(rating);
+  if (!Number.isFinite(base)) return [6.4, 6.5, 6.5, 6.6, 6.7];
+  return [base - 0.4, base - 0.2, base - 0.1, base + 0.1, base].map((value) => Math.max(5.8, Math.min(8.4, value)).toFixed(1));
+};
+
 const renderTacticalNodes = ({ players, squadByNumber = new Map(), variant = 'home' }) =>
   players
     .map((slot) => {
@@ -418,6 +424,7 @@ const renderTacticalNodes = ({ players, squadByNumber = new Map(), variant = 'ho
         yellowCards: slot.stats?.yellowCards ?? 0,
         redCards: slot.stats?.redCards ?? 0,
         rating: slot.stats?.rating ?? '0.0',
+        form: slot.stats?.form ?? getFormRatings(slot.stats?.rating),
       };
       return `
         <button class="player-strip-card kit-node ${variant === 'home' ? 'home-kit' : 'opposition-kit'}${slot.tracked ? ' is-tracked' : ''}" type="button"
@@ -430,7 +437,8 @@ const renderTacticalNodes = ({ players, squadByNumber = new Map(), variant = 'ho
           data-assists="${escapeHtml(stats.assists)}"
           data-yellows="${escapeHtml(stats.yellowCards)}"
           data-reds="${escapeHtml(stats.redCards)}"
-          data-rating="${escapeHtml(stats.rating)}">
+          data-rating="${escapeHtml(stats.rating)}"
+          data-form="${escapeHtml(stats.form.join(','))}">
           <span class="mini-kit" aria-hidden="true"><span class="kit-sleeve left"></span><span class="kit-body"></span><span class="kit-sleeve right"></span></span>
           <span class="position-pill">#${escapeHtml(slot.squadNumber).replace(/^O/, '')}</span>
           <h3 title="${escapeHtml(fullName)}">${escapeHtml(displayName)}</h3>

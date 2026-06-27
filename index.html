@@ -436,25 +436,52 @@
         width: 100%;
         min-height: clamp(300px, 34vw, 390px);
         overflow: hidden;
-        border: 1px dashed rgba(255, 255, 255, 0.12);
+        border: 1px solid rgba(255, 255, 255, 0.14);
         border-radius: 16px;
         padding: 12px;
         background:
-          linear-gradient(to right, rgba(255, 255, 255, 0.12) 2px, transparent 2px) 50% 0 / 2px 100% no-repeat,
-          radial-gradient(circle at 50% 50%, transparent 44px, rgba(255, 255, 255, 0.08) 45px, rgba(255, 255, 255, 0.08) 47px, transparent 48px),
-          linear-gradient(to top, rgba(255, 255, 255, 0.08) 2px, transparent 2px) bottom center / 150px 42px no-repeat,
-          linear-gradient(to bottom, rgba(255, 255, 255, 0.08) 2px, transparent 2px) top center / 150px 42px no-repeat,
-          repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.025) 0 1px, transparent 1px 42px),
+          repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.026) 0 1px, transparent 1px 42px),
           linear-gradient(180deg, rgba(20, 96, 52, 0.78) 0%, rgba(8, 54, 34, 0.94) 100%);
+      }
+      .pitch::before,
+      .pitch::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+      }
+      .home-pitch::before {
+        background:
+          linear-gradient(rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.16)) top center / 100% 2px no-repeat,
+          radial-gradient(circle at 50% 0, transparent 42px, rgba(255, 255, 255, 0.12) 43px, rgba(255, 255, 255, 0.12) 45px, transparent 46px);
+      }
+      .home-pitch::after {
+        background:
+          linear-gradient(to top, rgba(255, 255, 255, 0.12) 2px, transparent 2px) bottom center / 52% 64px no-repeat,
+          linear-gradient(to right, rgba(255, 255, 255, 0.12) 2px, transparent 2px) bottom left 24% / 2px 64px no-repeat,
+          linear-gradient(to left, rgba(255, 255, 255, 0.12) 2px, transparent 2px) bottom right 24% / 2px 64px no-repeat,
+          linear-gradient(to top, rgba(255, 255, 255, 0.12) 2px, transparent 2px) bottom center / 24% 30px no-repeat,
+          linear-gradient(to right, rgba(255, 255, 255, 0.12) 2px, transparent 2px) bottom left 38% / 2px 30px no-repeat,
+          linear-gradient(to left, rgba(255, 255, 255, 0.12) 2px, transparent 2px) bottom right 38% / 2px 30px no-repeat;
       }
       .opposition-pitch {
         background:
-          linear-gradient(to right, rgba(255, 255, 255, 0.12) 2px, transparent 2px) 50% 0 / 2px 100% no-repeat,
-          radial-gradient(circle at 50% 50%, transparent 44px, rgba(255, 255, 255, 0.08) 45px, rgba(255, 255, 255, 0.08) 47px, transparent 48px),
-          linear-gradient(to top, rgba(255, 255, 255, 0.08) 2px, transparent 2px) bottom center / 150px 42px no-repeat,
-          linear-gradient(to bottom, rgba(255, 255, 255, 0.08) 2px, transparent 2px) top center / 150px 42px no-repeat,
-          repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.025) 0 1px, transparent 1px 42px),
+          repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.026) 0 1px, transparent 1px 42px),
           linear-gradient(180deg, rgba(18, 82, 55, 0.88), rgba(6, 45, 33, 0.96));
+      }
+      .opposition-pitch::before {
+        background:
+          linear-gradient(rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.16)) bottom center / 100% 2px no-repeat,
+          radial-gradient(circle at 50% 100%, transparent 42px, rgba(255, 255, 255, 0.12) 43px, rgba(255, 255, 255, 0.12) 45px, transparent 46px);
+      }
+      .opposition-pitch::after {
+        background:
+          linear-gradient(to bottom, rgba(255, 255, 255, 0.12) 2px, transparent 2px) top center / 52% 64px no-repeat,
+          linear-gradient(to right, rgba(255, 255, 255, 0.12) 2px, transparent 2px) top left 24% / 2px 64px no-repeat,
+          linear-gradient(to left, rgba(255, 255, 255, 0.12) 2px, transparent 2px) top right 24% / 2px 64px no-repeat,
+          linear-gradient(to bottom, rgba(255, 255, 255, 0.12) 2px, transparent 2px) top center / 24% 30px no-repeat,
+          linear-gradient(to right, rgba(255, 255, 255, 0.12) 2px, transparent 2px) top left 38% / 2px 30px no-repeat,
+          linear-gradient(to left, rgba(255, 255, 255, 0.12) 2px, transparent 2px) top right 38% / 2px 30px no-repeat;
       }
       .pitch .player-strip-card {
         position: relative;
@@ -584,15 +611,29 @@
         width: 100%;
         border: 1px solid rgba(226, 14, 25, 0.28);
         border-radius: 16px;
-        padding: 13px;
-        background: linear-gradient(180deg, rgba(226, 14, 25, 0.08), rgba(0, 0, 0, 0.22));
+        padding: 14px;
+        background:
+          radial-gradient(circle at 12% 0%, rgba(40, 255, 145, 0.12), transparent 32%),
+          linear-gradient(180deg, rgba(226, 14, 25, 0.09), rgba(0, 0, 0, 0.26));
+        overflow: hidden;
       }
+      .ledger-content { transition: opacity 0.22s ease, transform 0.22s ease; }
+      .performance-ledger.is-updating .ledger-content { opacity: 0; transform: translateY(8px); }
+      .ledger-head { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 12px; }
+      .ledger-identity { min-width: 0; }
       .performance-ledger h3 { margin: 4px 0 2px; font-size: 1rem; font-weight: 1000; text-transform: uppercase; }
-      .performance-ledger p { margin: 0 0 12px; color: var(--muted); font-size: 0.72rem; font-weight: 850; text-transform: uppercase; }
+      .performance-ledger p { margin: 0; color: var(--muted); font-size: 0.72rem; font-weight: 850; text-transform: uppercase; }
+      .form-sparkline { flex: 0 0 148px; width: 148px; height: 42px; overflow: visible; filter: drop-shadow(0 0 8px rgba(31, 255, 136, 0.35)); }
+      .form-sparkline path { fill: none; stroke: #1fff88; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
+      .form-sparkline.declining path { stroke: #ffb703; filter: drop-shadow(0 0 8px rgba(255, 183, 3, 0.42)); }
       .ledger-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
       .ledger-stat { border: 1px solid var(--line); border-radius: 10px; padding: 9px; background: rgba(255, 255, 255, 0.035); }
       .ledger-stat span { display: block; color: var(--muted); font-size: 0.56rem; font-weight: 900; letter-spacing: 0.08em; text-transform: uppercase; }
       .ledger-stat strong { display: block; margin-top: 3px; color: #fff; font-size: 1.08rem; font-weight: 1000; }
+      .discipline-cards { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
+      .discipline-card { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 32px; border-radius: 4px; color: #07080b; font-size: 0.82rem; font-weight: 1000; line-height: 1; }
+      .discipline-card.yellow { background: #ffbd2e; box-shadow: 0 0 16px rgba(255, 189, 46, 0.62), inset 0 1px 0 rgba(255, 255, 255, 0.55); }
+      .discipline-card.red { background: #ff3344; color: #fff; box-shadow: 0 0 16px rgba(255, 51, 68, 0.62), inset 0 1px 0 rgba(255, 255, 255, 0.28); }
       .position-pill, .fixture-pill {
         position: relative;
         z-index: 1;
@@ -783,6 +824,8 @@
         .kit-body { left: 6px; width: 15px; height: 20px; }
         .position-pill { max-width: 42px; }
         .pitch .player-strip-card h3 { font-size: 0.46rem; }
+        .ledger-head { align-items: flex-start; flex-direction: column; }
+        .form-sparkline { width: 100%; max-width: 180px; }
         .ledger-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       }
     </style>
@@ -911,14 +954,23 @@
                   </article>
                 </div>
                 <aside class="performance-ledger" aria-live="polite" data-performance-ledger>
-                  <span class="section-kicker">Player Performance Ledger</span>
-                  <h3 data-ledger-name>Manhoef</h3>
-                  <p data-ledger-role>Forward</p>
-                  <div class="ledger-grid">
-                    <div class="ledger-stat"><span>Goals</span><strong data-ledger-goals>11</strong></div>
-                    <div class="ledger-stat"><span>Assists</span><strong data-ledger-assists>6</strong></div>
-                    <div class="ledger-stat"><span>Yellow / Red</span><strong data-ledger-cards>4 / 0</strong></div>
-                    <div class="ledger-stat"><span>Avg Rating</span><strong data-ledger-rating>7.6</strong></div>
+                  <div class="ledger-content" data-ledger-content>
+                    <div class="ledger-head">
+                      <div class="ledger-identity">
+                        <span class="section-kicker">Player Performance Ledger</span>
+                        <h3 data-ledger-name>Manhoef</h3>
+                        <p data-ledger-role>Forward</p>
+                      </div>
+                      <svg class="form-sparkline" data-ledger-sparkline viewBox="0 0 148 42" role="img" aria-label="Last five match rating trend">
+                        <path data-ledger-sparkline-path d="M4 32 L39 24 L74 20 L109 13 L144 9"></path>
+                      </svg>
+                    </div>
+                    <div class="ledger-grid">
+                      <div class="ledger-stat"><span>Goals</span><strong data-ledger-goals>11</strong></div>
+                      <div class="ledger-stat"><span>Assists</span><strong data-ledger-assists>6</strong></div>
+                      <div class="ledger-stat"><span>Discipline</span><div class="discipline-cards"><span class="discipline-card yellow" data-ledger-yellows>4</span><span class="discipline-card red" data-ledger-reds>0</span></div></div>
+                      <div class="ledger-stat"><span>Avg Rating</span><strong data-ledger-rating>7.6</strong></div>
+                    </div>
                   </div>
                 </aside>
               </div>
@@ -1099,6 +1151,18 @@
         }
       });
 
+      const buildSparklinePath = (values) => {
+        const ratings = values.map((value) => Number.parseFloat(value)).filter(Number.isFinite);
+        const safeRatings = ratings.length === 5 ? ratings : [6.4, 6.6, 6.7, 6.9, 7.1];
+        const min = Math.min(...safeRatings) - 0.15;
+        const max = Math.max(...safeRatings) + 0.15;
+        return safeRatings.map((value, index) => {
+          const x = 4 + index * 35;
+          const y = 38 - ((value - min) / Math.max(0.1, max - min)) * 32;
+          return `${index === 0 ? 'M' : 'L'}${x.toFixed(1)} ${y.toFixed(1)}`;
+        }).join(' ');
+      };
+
       const updateLedger = (playerNode) => {
         if (!playerNode) return;
         document.querySelectorAll('.pitch .player-strip-card').forEach((node) => node.classList.toggle('active-player', node === playerNode));
@@ -1109,19 +1173,33 @@
           const text = String(value).trim();
           return text && text !== 'null' ? text : fallback;
         };
-        const name = clean(playerNode.dataset.playerName, 'Player');
-        const role = clean(playerNode.dataset.playerRole, 'Squad Role');
-        const goals = clean(playerNode.dataset.goals);
-        const assists = clean(playerNode.dataset.assists);
-        const yellows = clean(playerNode.dataset.yellows);
-        const reds = clean(playerNode.dataset.reds);
-        const rating = clean(playerNode.dataset.rating, '0.0');
-        ledger.querySelector('[data-ledger-name]').textContent = name;
-        ledger.querySelector('[data-ledger-role]').textContent = role;
-        ledger.querySelector('[data-ledger-goals]').textContent = goals;
-        ledger.querySelector('[data-ledger-assists]').textContent = assists;
-        ledger.querySelector('[data-ledger-cards]').textContent = yellows + ' / ' + reds;
-        ledger.querySelector('[data-ledger-rating]').textContent = rating;
+        const values = {
+          name: clean(playerNode.dataset.playerName, 'Player'),
+          role: clean(playerNode.dataset.playerRole, 'Squad Role'),
+          goals: clean(playerNode.dataset.goals),
+          assists: clean(playerNode.dataset.assists),
+          yellows: clean(playerNode.dataset.yellows),
+          reds: clean(playerNode.dataset.reds),
+          rating: clean(playerNode.dataset.rating, '0.0'),
+          form: clean(playerNode.dataset.form, '6.4,6.6,6.7,6.9,7.1').split(','),
+        };
+        ledger.classList.add('is-updating');
+        window.setTimeout(() => {
+          ledger.querySelector('[data-ledger-name]').textContent = values.name;
+          ledger.querySelector('[data-ledger-role]').textContent = values.role;
+          ledger.querySelector('[data-ledger-goals]').textContent = values.goals;
+          ledger.querySelector('[data-ledger-assists]').textContent = values.assists;
+          ledger.querySelector('[data-ledger-yellows]').textContent = values.yellows;
+          ledger.querySelector('[data-ledger-reds]').textContent = values.reds;
+          ledger.querySelector('[data-ledger-rating]').textContent = values.rating;
+          const sparkline = ledger.querySelector('[data-ledger-sparkline]');
+          const path = ledger.querySelector('[data-ledger-sparkline-path]');
+          const first = Number.parseFloat(values.form[0]);
+          const last = Number.parseFloat(values.form.at(-1));
+          sparkline.classList.toggle('declining', Number.isFinite(first) && Number.isFinite(last) && last < first);
+          path.setAttribute('d', buildSparklinePath(values.form));
+          ledger.classList.remove('is-updating');
+        }, 120);
       };
 
       const changeFormation = (formation) => {

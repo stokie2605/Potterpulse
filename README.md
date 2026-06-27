@@ -420,6 +420,14 @@ The old oversized circular player nodes have been replaced with CSS-only geometr
 
 Verification confirmed two desktop pitch cards, one-column mobile stacking, 11 home nodes, 11 opposition nodes, 22 mini-kit markers, striped home kits, solid opposition kits, mirrored opposition coordinates, and a full-width ledger beneath the tactical map.
 
+### 20. Split-pitch markings and game-style ledger upgrade
+
+The split Squad pitches now render as connected field halves instead of duplicated full-pitch canvases. The Potters card shows the defensive half with a center line and sliced center circle at the top edge plus the penalty area at the bottom. The Opposition Scouting card mirrors that perspective with the penalty area at the top and the center line plus sliced center circle at the bottom.
+
+The Player Performance Ledger now uses a more video-game style information surface. Raw discipline text has been replaced by glowing amber and crimson card blocks with the counts centered on the cards. The ledger header also includes an inline SVG sparkline built from each player node's last-five rating trend, using neon green for ascending form and amber for declining form.
+
+Ledger updates now fade and slide upward briefly when hovering, focusing, or tapping a shirt node, so metric changes feel animated rather than abruptly swapped. Verification confirmed half-pitch marking layers, bottom/top penalty placement, rendered discipline card blocks, sparkline updates, transition state, and the existing CI mobile layout regression.
+
 ## Screenshot Workflow
 
 Save the latest dashboard image here:
@@ -473,6 +481,8 @@ Away Days master grid balances left briefing stack with unified right travel-gui
 Form W/D/L tokens render as centered 24px circles with mobile-safe bottom padding
 Squad split-pitch map renders home and opposition cards with 22 mini-kit nodes
 Player Performance Ledger spans below the tactical map on desktop and mobile
+Split-pitch markings render connected field halves with sliced center-circle edges
+Ledger renders discipline cards, SVG form sparkline, and fade/slide metric transitions
 ```
 
 Responsive screenshots were generated during visual QA:
