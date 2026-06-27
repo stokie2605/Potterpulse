@@ -469,6 +469,30 @@
         font-weight: 900;
       }
 
+      .matchday-briefing-card {
+        margin: 0 0 12px;
+        border: 1px solid rgba(226, 14, 25, 0.34);
+        border-left: 4px solid var(--red);
+        border-radius: 8px;
+        padding: 12px;
+        background: linear-gradient(135deg, rgba(226, 14, 25, 0.14), rgba(255, 255, 255, 0.035));
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      }
+      .matchday-briefing-card h3 {
+        margin: 0;
+        overflow-wrap: anywhere;
+        color: #fff;
+        font-size: 0.95rem;
+        font-weight: 1000;
+        line-height: 1.15;
+        text-transform: uppercase;
+      }
+      .matchday-briefing-card p {
+        margin: 7px 0 0;
+        color: #d8d9de;
+        font-size: 0.82rem;
+        line-height: 1.45;
+      }
       .fixture-toggle {
         flex: 0 0 auto;
         cursor: pointer;
@@ -639,6 +663,11 @@
               </div>
               <div class="fixture-summary"><span class="chip">Showing 5 of {{fixtureCount}}</span><button class="chip fixture-toggle" type="button" data-fixture-toggle aria-expanded="false">Show All</button></div>
             </div>
+            <article class="matchday-briefing-card" aria-label="Matchday briefing summary">
+              <span class="section-kicker">Matchday Briefing</span>
+              <h3>{{matchdayBriefingHeadline}}</h3>
+              <p>{{matchdayBriefingSummary}}</p>
+            </article>
             <div class="fixture-list" data-fixture-list>{{fixtureTimeline}}</div>
           </section>
           </div>

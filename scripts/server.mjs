@@ -187,6 +187,23 @@ const displayTeamName = (teamName) => {
   if (!activeCulture.useSupporterNicknames) return teamName;
   return activeCulture.teamNicknames[key] ?? teamName;
 };
+const generateMatchdayBriefing = ({ match, briefing, homeName, opponentName }) => {
+  const venueLabel = titleCase(match?.venue ?? 'home');
+  const surfaceCue = String(briefing.forecastCond ?? '').toLowerCase().includes('rain')
+    ? 'a slick surface and faster second balls'
+    : 'a cleaner surface and sharper passing windows';
+  const cardsCue = String(briefing.officialsNote ?? '').toLowerCase().includes('card') || String(briefing.officialsNote ?? '').toLowerCase().includes('yellow')
+    ? 'discipline around transitions matters because the referee profile points toward regular cards'
+    : 'the referee profile should still reward clean timing in midfield duels';
+
+  return {
+    headline: `${homeName} briefing: ${opponentName} under ${briefing.forecastCond.toLowerCase()}`,
+    summary:
+      `${venueLabel} conditions point to ${surfaceCue}, with ${briefing.forecastTemp} and ${briefing.forecastCond.toLowerCase()} shaping the tempo. ` +
+      `${briefing.referee} takes charge, and ${cardsCue}. ` +
+      `${briefing.kitTip}` ,
+  };
+};
 const hasMatchContext = (fixture) => {
   const key = normalizeOpponentKey(fixture?.opponent);
   return Boolean(awayGuides[key] && nextMatchBriefing[key]);
@@ -258,6 +275,15 @@ const render = () => {
     const contextKey = normalizeOpponentKey(contextMatch.opponent);
     const awayGuide = awayGuides[contextKey] ?? awayGuides.swansea_city;
     const matchBriefing = nextMatchBriefing[contextKey] ?? nextMatchBriefing.swansea_city;
+    const homeDisplayName = displayTeamName(activeCulture.homeTeam);
+    const heroOpponentDisplay = displayTeamName(hero.opponent);
+    const awayOpponentDisplay = displayTeamName(awayGuide.opponent);
+    const matchdayBriefing = generateMatchdayBriefing({
+      match: contextMatch,
+      briefing: matchBriefing,
+      homeName: homeDisplayName,
+      opponentName: displayTeamName(contextMatch.opponent),
+    });
 
     const squadCards = squad
       .map(
@@ -299,8 +325,8 @@ const render = () => {
         minute: '2-digit',
       })}`,
       heroOpponent: hero.opponent,
-      heroOpponentDisplay: displayTeamName(hero.opponent),
-      homeDisplayName: displayTeamName(activeCulture.homeTeam),
+      heroOpponentDisplay,
+      homeDisplayName,
       cultureProfileName: activeCulture.label,
       homeCrestSrc: crestAssets.stoke_city,
       awayCrestSrc: getCrestSrc(hero.opponent),
@@ -313,8 +339,10 @@ const render = () => {
       squadCards,
       fixtureTimeline,
       fanPollOptions,
+      matchdayBriefingHeadline: matchdayBriefing.headline,
+      matchdayBriefingSummary: matchdayBriefing.summary,
       awayOpponent: awayGuide.opponent,
-      awayOpponentDisplay: displayTeamName(awayGuide.opponent),
+      awayOpponentDisplay,
       awayStadium: awayGuide.stadium,
       awayDistance: awayGuide.distance,
       awayTravelTime: awayGuide.travelTime,
