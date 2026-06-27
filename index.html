@@ -22,6 +22,8 @@
       }
 
       * { box-sizing: border-box; }
+      .tab-view { display: none; width: 100%; min-width: 0; }
+      .tab-view.active-view { display: contents; }
 
       body {
         margin: 0;
@@ -122,7 +124,7 @@
 
       .sport-tabs { display: flex; gap: 8px; overflow-x: auto; padding: 0 20px 16px; scrollbar-width: none; }
       .sport-tabs::-webkit-scrollbar { display: none; }
-      .tab { flex: 0 0 auto; border: 1px solid var(--line); border-radius: 999px; padding: 10px 13px; background: rgba(255, 255, 255, 0.045); }
+      .tab { flex: 0 0 auto; border: 1px solid var(--line); border-radius: 999px; padding: 10px 13px; background: rgba(255, 255, 255, 0.045); color: var(--muted); cursor: pointer; }
       .tab.active { color: #fff; border-color: rgba(226, 14, 25, 0.7); background: linear-gradient(180deg, rgba(226, 14, 25, 0.92), rgba(144, 8, 17, 0.92)); box-shadow: 0 10px 30px rgba(226, 14, 25, 0.28); }
 
       .content-grid { display: grid; grid-template-columns: minmax(0, 1.08fr) minmax(330px, 0.92fr); gap: 16px; padding: 0 20px 18px; min-width: 0; }
@@ -157,6 +159,39 @@
 
       .right-rail { display: grid; gap: 16px; }
       .panel, .odds-card { border-radius: 18px; padding: 14px; }
+      .fanzine-column-card {
+        border: 2px solid var(--line);
+        background:
+          linear-gradient(180deg, rgba(226, 14, 25, 0.06), rgba(0, 0, 0, 0.36)),
+          var(--card);
+      }
+      .zine-article-snippet {
+        min-width: 0;
+      }
+      .zine-article-snippet p {
+        margin: 0 0 12px;
+        color: #e4e4e7;
+        font-family: ui-serif, Georgia, Cambria, serif;
+        font-size: 0.86rem;
+        font-style: italic;
+        line-height: 1.45;
+      }
+      .zine-meta {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        color: var(--muted);
+        font-size: 0.62rem;
+        font-weight: 900;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+      .zine-meta span {
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
       .section-head { display: flex; align-items: end; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
       .section-head h2 { margin: 0; font-size: 1.08rem; font-weight: 1000; text-transform: uppercase; }
       
@@ -245,6 +280,9 @@
       .odd-box strong { display: block; margin-top: 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #fff; font-size: 1.05rem; font-weight: 1000; }
 
       .fixtures-panel { grid-column: 1 / -1; }
+      .single-view { grid-column: 1 / -1; }
+      .placeholder-panel { grid-column: 1 / -1; }
+      .placeholder-copy { margin: 0; color: var(--muted); line-height: 1.55; }
       .fixture-list { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
       .fixture-row { display: grid; grid-template-columns: 48px minmax(0, 1fr) auto; align-items: center; gap: 9px; min-height: 66px; border-radius: 16px; padding: 9px; }
       .date-tile { display: grid; place-items: center; height: 48px; border-radius: 13px; background: rgba(226, 14, 25, 0.18); color: #fff; font-size: 0.64rem; font-weight: 1000; line-height: 1.05; text-align: center; text-transform: uppercase; }
@@ -256,9 +294,9 @@
       .fixture-arrow { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 999px; background: rgba(255, 255, 255, 0.07); color: var(--red-3); font-weight: 1000; }
 
       .bottom-nav { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; border-top: 1px solid var(--line); padding: 10px 16px 14px; background: rgba(13, 14, 18, 0.94); }
-      .bottom-nav a { display: grid; justify-items: center; gap: 5px; min-width: 0; color: var(--quiet); text-decoration: none; }
+      .bottom-nav button { display: grid; justify-items: center; gap: 5px; min-width: 0; border: 0; background: transparent; color: var(--quiet); font: inherit; cursor: pointer; }
       .nav-icon { width: 22px; height: 22px; border: 2px solid currentColor; border-radius: 8px; }
-      .bottom-nav a.active { color: var(--red-3); }
+      .bottom-nav button.active { color: var(--red-3); }
 
       @media (max-width: 920px) {
         .stage { width: min(480px, calc(100% - 24px)); padding-top: 14px; }
@@ -285,6 +323,9 @@
         .action-card { min-height: 50px; padding: 8px; }
         .action-card strong { font-size: 0.66rem; }
         .match-actions, .odds-grid { grid-template-columns: repeat(3, calc((100% - 12px) / 3)); gap: 6px; }
+        .fanzine-column-card .section-head { align-items: start; }
+        .zine-article-snippet p { font-size: 0.8rem; line-height: 1.4; }
+        .zine-meta { font-size: 0.56rem; }
         
         /* Fixed Mobile Target: Forces pristine 2x2 squad block grid */
         .player-strip { height: 270px; }
@@ -310,14 +351,14 @@
         </header>
 
         <nav class="sport-tabs" aria-label="Sections">
-          <span class="tab active">Matches</span>
-          <span class="tab">Squad</span>
-          <span class="tab">Table</span>
-          <span class="tab">Stats</span>
-          <span class="tab">News</span>
+          <button class="tab active" type="button" data-view="matches">Matches</button>
+          <button class="tab" type="button" data-view="squad">Squad</button>
+          <button class="tab" type="button" data-view="pulse">Pulse</button>
+          <button class="tab" type="button" data-view="more">More</button>
         </nav>
 
         <section class="content-grid">
+          <div id="view-matches" class="tab-view active-view" data-tab-view="matches">
           <article class="match-card" aria-label="Next match against Swansea City">
             <div class="match-header">
               <span class="section-kicker">Next Match</span>
@@ -345,29 +386,6 @@
               <div class="action-card"><span class="micro-label">Fixture</span><strong>{{fixtureCount}} Match Run</strong></div>
             </div>
           </article>
-
-          <aside class="right-rail">
-            <section class="panel" aria-label="Core squad">
-              <div class="section-head">
-                <div>
-                  <span class="section-kicker">Following</span>
-                  <h2>Core Squad</h2>
-                </div>
-                <span class="chip">{{squadCount}} Players</span>
-              </div>
-              <div class="player-strip">{{squadCards}}</div>
-            </section>
-
-            <section class="odds-card" aria-label="Match pulse">
-              <span class="section-kicker">Match Pulse</span>
-              <div class="odds-grid">
-                <div class="odd-box"><span>Form</span><strong>Fresh</strong></div>
-                <div class="odd-box"><span>Focus</span><strong>Home</strong></div>
-                <div class="odd-box"><span>Mode</span><strong>Red</strong></div>
-              </div>
-            </section>
-          </aside>
-
           <section class="panel fixtures-panel" aria-label="Fixture list">
             <div class="section-head">
               <div>
@@ -378,15 +396,88 @@
             </div>
             <div class="fixture-list">{{fixtureTimeline}}</div>
           </section>
+          </div>
+
+          <div id="view-squad" class="tab-view" data-tab-view="squad">
+            <aside class="right-rail single-view">
+            <section class="panel" aria-label="Core squad">
+              <div class="section-head">
+                <div>
+                  <span class="section-kicker">Following</span>
+                  <h2>Core Squad</h2>
+                </div>
+                <span class="chip">{{squadCount}} Players</span>
+              </div>
+              <div class="player-strip">{{squadCards}}</div>
+            </section>
+            </aside>
+          </div>
+
+          <div id="view-pulse" class="tab-view" data-tab-view="pulse">
+            <aside class="right-rail single-view">
+            <section class="panel fanzine-column-card" aria-label="The Digital Oatcake">
+              <div class="section-head">
+                <div>
+                  <span class="section-kicker">Independent Fan Voice</span>
+                  <h2>The Boothen Verdict</h2>
+                </div>
+                <span class="chip" style="color: var(--red-3); border-color: rgba(226,14,25,0.4);">100% Free Zine</span>
+              </div>
+              <div class="zine-article-snippet">
+                <p>"With physical print gone since 2019, the independent noise moves right here. Looking at the squad canvas today, we've got the blistering transition pace with Manhoef and Jun-ho to carve through open channels, as long as our midfield engine actually tracks back on the counter..."</p>
+                <div class="zine-meta">
+                  <span class="author">BoothenEnder92</span>
+                  <span class="date">Just Now</span>
+                </div>
+              </div>
+            </section>
+            </aside>
+          </div>
+
+          <div id="view-more" class="tab-view" data-tab-view="more">
+            <section class="panel placeholder-panel" aria-label="More options">
+              <div class="section-head">
+                <div>
+                  <span class="section-kicker">Workbench</span>
+                  <h2>More Coming Soon</h2>
+                </div>
+                <span class="chip">WIP</span>
+              </div>
+              <p class="placeholder-copy">Potter Pulse is still a work in progress. This area is reserved for table views, deeper player notes, and extra match-day tools.</p>
+            </section>
+          </div>
         </section>
 
         <nav class="bottom-nav" aria-label="Primary app navigation">
-          <a class="active" href="#"><span class="nav-icon"></span><span>Matches</span></a>
-          <a href="#"><span class="nav-icon"></span><span>Squad</span></a>
-          <a href="#"><span class="nav-icon"></span><span>Pulse</span></a>
-          <a href="#"><span class="nav-icon"></span><span>More</span></a>
+          <button class="active" type="button" data-view="matches"><span class="nav-icon"></span><span>Matches</span></button>
+          <button type="button" data-view="squad"><span class="nav-icon"></span><span>Squad</span></button>
+          <button type="button" data-view="pulse"><span class="nav-icon"></span><span>Pulse</span></button>
+          <button type="button" data-view="more"><span class="nav-icon"></span><span>More</span></button>
         </nav>
       </section>
     </main>
+    <script>
+      const validViews = new Set(['matches', 'squad', 'pulse', 'more']);
+
+      const activateView = (viewName, updateHash = true) => {
+        const nextView = validViews.has(viewName) ? viewName : 'matches';
+        document.querySelectorAll('[data-tab-view]').forEach((view) => {
+          view.classList.toggle('active-view', view.dataset.tabView === nextView);
+        });
+        document.querySelectorAll('[data-view]').forEach((control) => {
+          control.classList.toggle('active', control.dataset.view === nextView);
+        });
+        if (updateHash && location.hash.slice(1) !== nextView) {
+          history.replaceState(null, '', '#' + nextView);
+        }
+      };
+
+      document.querySelectorAll('[data-view]').forEach((control) => {
+        control.addEventListener('click', () => activateView(control.dataset.view));
+      });
+
+      addEventListener('hashchange', () => activateView(location.hash.slice(1), false));
+      activateView(location.hash.slice(1) || 'matches', false);
+    </script>
   </body>
 </html>
