@@ -151,23 +151,21 @@ node scripts\server.mjs
 
 ## Current App Views
 
-The UI now has lightweight client-side tab views. The top pill navigation and bottom navigation both target the same view controller.
+The UI now has a streamlined three-tab client-side structure. The top pill navigation and bottom navigation both target the same view controller.
 
 Direct local routes:
 
 ```text
 http://localhost:4173/#matches
 http://localhost:4173/#squad
-http://localhost:4173/#pulse
-http://localhost:4173/#more
+http://localhost:4173/#away-days
 ```
 
 View responsibilities:
 
-- `Matches`: next-match hero card and fixture centre.
+- `Matches`: next-match hero card, Boothen Verdict fanzine block, fan performance poll, and fixture centre.
 - `Squad`: tactical pitch squad view with circular player markers.
-- `Pulse`: independent fanzine/editorial card.
-- `More`: work-in-progress Away Day guide showing travel, ground, pub, pie-index, form, referee, and weather briefing details.
+- `Away Days`: work-in-progress away guide showing ground, travel time, safe pub, pie-index, form, referee, and weather briefing details.
 
 ## Design Direction
 
@@ -177,7 +175,7 @@ The current direction is closer to a native modern sports app:
 
 - Compact top app bar
 - Horizontal pill navigation
-- JavaScript-controlled tab views for Matches, Squad, Pulse, and More
+- JavaScript-controlled tab views for Matches, Squad, and Away Days
 - Premium match-centre card
 - Bold uppercase match typography
 - Black-and-red Stoke colour system
@@ -185,7 +183,8 @@ The current direction is closer to a native modern sports app:
 - Dense fixture rows
 - Tactical pitch squad view with circular player markers
 - Formation controls for switching between compact tactical layouts
-- Independent fanzine editorial card for fan voice
+- Independent fanzine editorial card for fan voice inside the Matches flow
+- Fan performance voting poll inside the Matches flow
 - Away Day guide card for supporter travel notes
 - Pre-match briefing tiles for form, officials, and weather
 - Bottom navigation inspired by mobile sports apps
@@ -282,6 +281,20 @@ Problems found and solved during this pass:
 - The guide needed to remain visibly unfinished. The More tab chip now includes `WIP` while still showing the active guide tag.
 - The Playwright MCP browser context closed during DOM inspection, so verification fell back to the reliable Playwright CLI screenshot workflow.
 
+### 11. Four-tab spread vs streamlined three-tab architecture
+
+The app had grown into four tabs: Matches, Squad, Pulse, and More. That was useful while experimenting, but it made the product feel split across too many shallow surfaces. The layout has now been consolidated into three tabs: Matches, Squad, and Away Days.
+
+The Boothen Verdict moved out of its standalone Pulse view and into the Matches flow directly under the match hero. A new fan performance voting poll sits below the fanzine card and above the fixture list, so the match-day content now reads as one continuous experience before the schedule.
+
+The old More view has been renamed to `#view-away-days` and wired through `data-view="away-days"` / `data-tab-view="away-days"`. It still uses the dynamic server-side away guide and briefing data, now including travel time and a clearer Safe Pub label.
+
+Problems found and solved during this pass:
+
+- There was no existing fan performance poll in the HTML, so a compact poll component was added instead of leaving that directive implied.
+- A broad verification regex counted `tab-view` wrappers as top-level tabs and falsely reported more than three tabs. The check was tightened to count only actual tab buttons, confirming three top tabs and three bottom nav buttons.
+- The away guide had mileage but not travel time. `scripts/server.mjs` now includes a dedicated `travelTime` value for each seeded away guide.
+
 ## Screenshot Workflow
 
 Save the latest dashboard image here:
@@ -312,6 +325,10 @@ Away Day guide renders without template placeholders
 Formation controls switch active state and marker positions
 Mobile bottom navigation remains fixed to the viewport bottom
 Pre-match briefing renders referee, weather, kit tip, and 10 form pills
+Three top tabs and three bottom nav buttons render
+Pulse and More standalone views are removed
+Boothen Verdict and Performance Vote render before Fixture Centre
+Away Days renders travel time, safe pub, and Pie Index metrics
 ```
 
 Responsive screenshots were generated during visual QA:
@@ -322,18 +339,21 @@ potterpulse-mobile-tall.png
 potterpulse-desktop.png
 potterpulse-view-matches.png
 potterpulse-view-squad.png
-potterpulse-view-pulse.png
-potterpulse-view-more.png
+potterpulse-view-pulse.png (legacy four-tab artifact)
+potterpulse-view-more.png (legacy four-tab artifact)
 potterpulse-sticky-nav-mobile.png
 potterpulse-formation-squad.png
 potterpulse-away-guide-mobile.png
 potterpulse-away-guide-desktop.png
 potterpulse-briefing-mobile.png
 potterpulse-briefing-desktop.png
+potterpulse-3tab-matches-mobile.png
+potterpulse-3tab-away-days-mobile.png
+potterpulse-3tab-matches-desktop.png
 ```
 
 
-The latest tab-view pass was verified by rendering direct hash routes with Playwright screenshots:
+The legacy four-tab pass was verified by rendering direct hash routes with Playwright screenshots before consolidation:
 
 ```powershell
 npx playwright screenshot --browser chromium --viewport-size=390,844 http://localhost:4173/#matches potterpulse-view-matches.png
@@ -347,8 +367,8 @@ The Away Day and formation-control pass was verified with:
 
 ```powershell
 npx playwright screenshot --browser chromium --viewport-size=390,844 http://localhost:4173/#squad potterpulse-formation-squad.png
-npx playwright screenshot --browser chromium --viewport-size=390,844 http://localhost:4173/#more potterpulse-away-guide-mobile.png
-npx playwright screenshot --browser chromium --viewport-size=1280,900 http://localhost:4173/#more potterpulse-away-guide-desktop.png
+npx playwright screenshot --browser chromium --viewport-size=390,844 http://localhost:4173/#away-days potterpulse-away-guide-mobile.png
+npx playwright screenshot --browser chromium --viewport-size=1280,900 http://localhost:4173/#away-days potterpulse-away-guide-desktop.png
 ```
 
 Playwright DOM checks confirmed the mobile Away Day panel fits inside a 390px viewport, the bottom navigation is fixed at the bottom, and the `5-3-2 Solid` formation button updates the active control and marker positions.
@@ -357,8 +377,17 @@ Playwright DOM checks confirmed the mobile Away Day panel fits inside a 390px vi
 The pre-match briefing pass was verified with rendered HTML checks and fresh screenshots:
 
 ```powershell
-npx playwright screenshot --browser chromium --viewport-size=390,844 http://localhost:4173/#more potterpulse-briefing-mobile.png
-npx playwright screenshot --browser chromium --viewport-size=1280,900 http://localhost:4173/#more potterpulse-briefing-desktop.png
+npx playwright screenshot --browser chromium --viewport-size=390,844 http://localhost:4173/#away-days potterpulse-briefing-mobile.png
+npx playwright screenshot --browser chromium --viewport-size=1280,900 http://localhost:4173/#away-days potterpulse-briefing-desktop.png
+```
+
+
+The three-tab consolidation pass was verified with rendered HTML checks and screenshots:
+
+```powershell
+npx playwright screenshot --browser chromium --viewport-size=390,844 http://localhost:4173/#matches potterpulse-3tab-matches-mobile.png
+npx playwright screenshot --browser chromium --viewport-size=390,844 http://localhost:4173/#away-days potterpulse-3tab-away-days-mobile.png
+npx playwright screenshot --browser chromium --viewport-size=1280,900 http://localhost:4173/#matches potterpulse-3tab-matches-desktop.png
 ```
 
 ## GitHub Linking Steps

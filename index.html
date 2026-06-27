@@ -425,6 +425,49 @@
       .single-view { grid-column: 1 / -1; }
       .placeholder-panel { grid-column: 1 / -1; }
       .placeholder-copy { margin: 0; color: var(--muted); line-height: 1.55; }
+
+      .fan-poll-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 8px;
+      }
+      .poll-option {
+        min-width: 0;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        padding: 10px;
+        background: rgba(255, 255, 255, 0.035);
+      }
+      .poll-option strong {
+        display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        color: #fff;
+        font-size: 0.78rem;
+        font-weight: 1000;
+        text-transform: uppercase;
+      }
+      .poll-meter {
+        display: block;
+        height: 6px;
+        margin: 9px 0 6px;
+        overflow: hidden;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.08);
+      }
+      .poll-meter span {
+        display: block;
+        height: 100%;
+        border-radius: inherit;
+        background: linear-gradient(90deg, var(--red), var(--red-3));
+      }
+      .poll-option small {
+        color: var(--muted);
+        font-size: 0.68rem;
+        font-weight: 900;
+      }
+
       .fixture-list { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
       .fixture-row { display: grid; grid-template-columns: 48px minmax(0, 1fr) auto; align-items: center; gap: 9px; min-height: 66px; border-radius: 16px; padding: 9px; }
       .date-tile { display: grid; place-items: center; height: 48px; border-radius: 13px; background: rgba(226, 14, 25, 0.18); color: #fff; font-size: 0.64rem; font-weight: 1000; line-height: 1.05; text-align: center; text-transform: uppercase; }
@@ -435,7 +478,7 @@
       .fixture-pill.home { color: #fff; border-color: rgba(226, 14, 25, 0.5); background: rgba(226, 14, 25, 0.16); }
       .fixture-arrow { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 999px; background: rgba(255, 255, 255, 0.07); color: var(--red-3); font-weight: 1000; }
 
-      .bottom-nav { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; border-top: 1px solid var(--line); padding: 10px 16px 14px; background: rgba(13, 14, 18, 0.94); }
+      .bottom-nav { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; border-top: 1px solid var(--line); padding: 10px 16px 14px; background: rgba(13, 14, 18, 0.94); }
       .bottom-nav button { display: grid; justify-items: center; gap: 5px; min-width: 0; border: 0; background: transparent; color: var(--quiet); font: inherit; cursor: pointer; }
       .nav-icon { width: 22px; height: 22px; border: 2px solid currentColor; border-radius: 8px; }
       .bottom-nav button.active { color: var(--red-3); }
@@ -446,7 +489,7 @@
         .content-grid { grid-template-columns: 1fr; padding-inline: 14px; }
         .app-topbar, .sport-tabs { padding-inline: 14px; }
         .match-card { min-height: auto; padding: 14px; }
-        .fixture-list { grid-template-columns: 1fr; }
+        .fixture-list, .fan-poll-grid { grid-template-columns: 1fr; }
       }
 
       @media (max-width: 430px) {
@@ -513,8 +556,7 @@
         <nav class="sport-tabs" aria-label="Sections">
           <button class="tab active" type="button" data-view="matches">Matches</button>
           <button class="tab" type="button" data-view="squad">Squad</button>
-          <button class="tab" type="button" data-view="pulse">Pulse</button>
-          <button class="tab" type="button" data-view="more">More</button>
+          <button class="tab" type="button" data-view="away-days">Away Days</button>
         </nav>
 
         <section class="content-grid">
@@ -546,6 +588,48 @@
               <div class="action-card"><span class="micro-label">Fixture</span><strong>{{fixtureCount}} Match Run</strong></div>
             </div>
           </article>
+          <section class="panel fanzine-column-card single-view" aria-label="The Digital Oatcake">
+            <div class="section-head">
+              <div>
+                <span class="section-kicker">Independent Fan Voice</span>
+                <h2>The Boothen Verdict</h2>
+              </div>
+              <span class="chip" style="color: var(--red-3); border-color: rgba(226,14,25,0.4);">100% Free Zine</span>
+            </div>
+            <div class="zine-article-snippet">
+              <p>"With physical print gone since 2019, the independent noise moves right here. Looking at the squad canvas today, we've got the blistering transition pace with Manhoef and Jun-ho to carve through open channels, as long as our midfield engine actually tracks back on the counter..."</p>
+              <div class="zine-meta">
+                <span class="author">BoothenEnder92</span>
+                <span class="date">Just Now</span>
+              </div>
+            </div>
+          </section>
+          <section class="panel single-view" aria-label="Fan performance vote">
+            <div class="section-head">
+              <div>
+                <span class="section-kicker">Fan Pulse</span>
+                <h2>Performance Vote</h2>
+              </div>
+              <span class="chip">Live Poll</span>
+            </div>
+            <div class="fan-poll-grid">
+              <button class="poll-option" type="button">
+                <strong>Manhoef</strong>
+                <span class="poll-meter"><span style="width: 48%;"></span></span>
+                <small>48% explosive threat</small>
+              </button>
+              <button class="poll-option" type="button">
+                <strong>Jun-ho</strong>
+                <span class="poll-meter"><span style="width: 32%;"></span></span>
+                <small>32% creative spark</small>
+              </button>
+              <button class="poll-option" type="button">
+                <strong>Johansson</strong>
+                <span class="poll-meter"><span style="width: 20%;"></span></span>
+                <small>20% safe hands</small>
+              </button>
+            </div>
+          </section>
           <section class="panel fixtures-panel" aria-label="Fixture list">
             <div class="section-head">
               <div>
@@ -577,28 +661,7 @@
             </aside>
           </div>
 
-          <div id="view-pulse" class="tab-view" data-tab-view="pulse">
-            <aside class="right-rail single-view">
-            <section class="panel fanzine-column-card" aria-label="The Digital Oatcake">
-              <div class="section-head">
-                <div>
-                  <span class="section-kicker">Independent Fan Voice</span>
-                  <h2>The Boothen Verdict</h2>
-                </div>
-                <span class="chip" style="color: var(--red-3); border-color: rgba(226,14,25,0.4);">100% Free Zine</span>
-              </div>
-              <div class="zine-article-snippet">
-                <p>"With physical print gone since 2019, the independent noise moves right here. Looking at the squad canvas today, we've got the blistering transition pace with Manhoef and Jun-ho to carve through open channels, as long as our midfield engine actually tracks back on the counter..."</p>
-                <div class="zine-meta">
-                  <span class="author">BoothenEnder92</span>
-                  <span class="date">Just Now</span>
-                </div>
-              </div>
-            </section>
-            </aside>
-          </div>
-
-          <div id="view-more" class="tab-view" data-tab-view="more">
+          <div id="view-away-days" class="tab-view" data-tab-view="away-days">
             <section class="panel fanzine-column-card single-view" aria-label="Away Day Guide">
               <div class="section-head">
                 <div>
@@ -612,10 +675,10 @@
                 <div class="away-guide-tile">
                   <span>The Ground Info</span>
                   <strong>{{awayStadium}}</strong>
-                  <small>{{awayDistance}} from the Potteries</small>
+                  <small>{{awayDistance}} from the Potteries - {{awayTravelTime}}</small>
                 </div>
                 <div class="away-guide-tile">
-                  <span>The Away Pub</span>
+                  <span>Safe Pub</span>
                   <strong>{{awayPub}}</strong>
                   <small>{{awayPubNote}}</small>
                 </div>
@@ -658,13 +721,12 @@
         <nav class="bottom-nav" aria-label="Primary app navigation">
           <button class="active" type="button" data-view="matches"><span class="nav-icon"></span><span>Matches</span></button>
           <button type="button" data-view="squad"><span class="nav-icon"></span><span>Squad</span></button>
-          <button type="button" data-view="pulse"><span class="nav-icon"></span><span>Pulse</span></button>
-          <button type="button" data-view="more"><span class="nav-icon"></span><span>More</span></button>
+          <button type="button" data-view="away-days"><span class="nav-icon"></span><span>Away Days</span></button>
         </nav>
       </section>
     </main>
     <script>
-      const validViews = new Set(['matches', 'squad', 'pulse', 'more']);
+      const validViews = new Set(['matches', 'squad', 'away-days']);
 
       const activateView = (viewName, updateHash = true) => {
         const nextView = validViews.has(viewName) ? viewName : 'matches';
