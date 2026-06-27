@@ -167,7 +167,7 @@ View responsibilities:
 - `Matches`: next-match hero card and fixture centre.
 - `Squad`: tactical pitch squad view with circular player markers.
 - `Pulse`: independent fanzine/editorial card.
-- `More`: work-in-progress placeholder for future tools.
+- `More`: work-in-progress Away Day guide showing travel, ground, pub, and pie-index details.
 
 ## Design Direction
 
@@ -184,7 +184,9 @@ The current direction is closer to a native modern sports app:
 - Soft crimson glow effects
 - Dense fixture rows
 - Tactical pitch squad view with circular player markers
+- Formation controls for switching between compact tactical layouts
 - Independent fanzine editorial card for fan voice
+- Away Day guide card for supporter travel notes
 - Bottom navigation inspired by mobile sports apps
 
 The goal is not to copy Sky Sports, EA Sports, or bet365 directly. The goal is to borrow the shared product language: compact hierarchy, strong live-match modules, pill tabs, dense rows, dark surfaces, and high-contrast action areas.
@@ -247,6 +249,25 @@ Once the app gained real tab views, the bottom navigation needed to behave like 
 
 The fix was added inside the mobile breakpoint: the bottom nav is fixed to the bottom of the viewport with a high z-index, safe-area padding, and an extra `80px` bottom padding on `.content-grid` so content is not hidden behind the navigation bar. This was verified on the mobile Squad view with a Playwright screenshot.
 
+### 8. Static squad pitch vs interactive formation controls
+
+The tactical pitch initially showed one fixed marker layout. That made the squad tab visually stronger, but it did not yet feel like an app tool. The upgrade added compact formation controls above the pitch with `4-3-3 Attack` and `5-3-2 Solid` options.
+
+The main implementation problem was selector drift. The rendered cards use attributes such as `data-number="#42"`, so the JavaScript formation map had to use the same `#42` keys. Once that was aligned, clicking a formation updates the active chip and adjusts the player marker positions without rebuilding the DOM.
+
+### 9. More placeholder vs Away Day travel guide
+
+The More tab was deliberately labelled as work in progress, but an empty placeholder did not add much value. It has now become the first Away Day guide surface, starting with Swansea City data and a second West Brom entry staged in the server lookup for future switching.
+
+The data lives in `scripts/server.mjs` as an `awayGuides` lookup and is rendered through clean template replacements in `index.html`. This keeps text clean for the CSS frontend and avoids hard-coding travel details directly into the markup.
+
+Problems found and solved during this pass:
+
+- A stale local Node server was still serving the old template, so rendered HTML showed unreplaced placeholders. The server was restarted after the template and server changes landed.
+- The mobile bottom padding fix had been overwritten later in the same media query by another `.content-grid` rule. The later rule now keeps the `80px` padding so content does not sit under the fixed nav.
+- The More tab needed to span the app grid on desktop. The Away Day card now carries `.single-view` so it behaves like the other full-width tab views.
+- Playwright reported a console 404 for `favicon.ico`. That is harmless for this feature pass, but a small favicon asset remains a tidy-up item.
+
 ## Screenshot Workflow
 
 Save the latest dashboard image here:
@@ -273,6 +294,9 @@ No unreplaced template placeholders
 4 squad cards rendered
 App frame present
 Tabbed views present for Matches, Squad, Pulse, and More
+Away Day guide renders without template placeholders
+Formation controls switch active state and marker positions
+Mobile bottom navigation remains fixed to the viewport bottom
 ```
 
 Responsive screenshots were generated during visual QA:
@@ -286,6 +310,9 @@ potterpulse-view-squad.png
 potterpulse-view-pulse.png
 potterpulse-view-more.png
 potterpulse-sticky-nav-mobile.png
+potterpulse-formation-squad.png
+potterpulse-away-guide-mobile.png
+potterpulse-away-guide-desktop.png
 ```
 
 
@@ -297,6 +324,17 @@ npx playwright screenshot --browser chromium --viewport-size=390,844 http://loca
 npx playwright screenshot --browser chromium --viewport-size=390,844 http://localhost:4173/#pulse potterpulse-view-pulse.png
 npx playwright screenshot --browser chromium --viewport-size=390,844 http://localhost:4173/#more potterpulse-view-more.png
 ```
+
+
+The Away Day and formation-control pass was verified with:
+
+```powershell
+npx playwright screenshot --browser chromium --viewport-size=390,844 http://localhost:4173/#squad potterpulse-formation-squad.png
+npx playwright screenshot --browser chromium --viewport-size=390,844 http://localhost:4173/#more potterpulse-away-guide-mobile.png
+npx playwright screenshot --browser chromium --viewport-size=1280,900 http://localhost:4173/#more potterpulse-away-guide-desktop.png
+```
+
+Playwright DOM checks confirmed the mobile Away Day panel fits inside a 390px viewport, the bottom navigation is fixed at the bottom, and the `5-3-2 Solid` formation button updates the active control and marker positions.
 
 ## GitHub Linking Steps
 
@@ -331,6 +369,7 @@ Good next improvements:
 - Move inline CSS into `src` or `styles` if the project grows.
 - Add a route for JSON fixture data.
 - Add filtering by competition, month, and home/away.
+- Add a favicon to remove the browser `favicon.ico` 404 during Playwright checks.
 - Add a proper screenshot in `docs/screenshots/dashboard_latest.png`.
 
 

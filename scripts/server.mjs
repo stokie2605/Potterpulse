@@ -10,6 +10,29 @@ const dbPath = join(rootDir, 'potter_pulse.db');
 const templatePath = join(rootDir, 'index.html');
 const port = Number(process.env.PORT || 4173);
 
+const awayGuides = {
+  swansea_city: {
+    opponent: 'Swansea City',
+    stadium: 'Swansea.com Stadium',
+    distance: '182 miles',
+    pub: 'The Railway Inn',
+    pubNote: 'Away friendly',
+    pieIndex: '3.8 / 5',
+    pieTip: 'Steak & Ale highly recommended',
+    tag: 'Transit Match',
+  },
+  west_brom: {
+    opponent: 'West Bromwich Albion',
+    stadium: 'The Hawthorns',
+    distance: '46 miles',
+    pub: 'The Vine',
+    pubNote: 'Legendary neutral/away mix',
+    pieIndex: '4.5 / 5',
+    pieTip: 'Chicken Balti',
+    tag: 'Short Hop',
+  },
+};
+
 const escapeHtml = (value) =>
   String(value ?? '')
     .replaceAll('&', '&amp;')
@@ -74,6 +97,8 @@ const render = () => {
         venue: 'home',
       };
 
+    const awayGuide = awayGuides.swansea_city;
+
     const squadCards = squad
       .map(
         (player) => `
@@ -120,6 +145,14 @@ const render = () => {
       fixtureCount: fixtures.length,
       squadCards,
       fixtureTimeline,
+      awayOpponent: awayGuide.opponent,
+      awayStadium: awayGuide.stadium,
+      awayDistance: awayGuide.distance,
+      awayPub: awayGuide.pub,
+      awayPubNote: awayGuide.pubNote,
+      awayPieIndex: awayGuide.pieIndex,
+      awayPieTip: awayGuide.pieTip,
+      awayTag: awayGuide.tag,
     };
 
     return Object.entries(replacements).reduce(

@@ -194,6 +194,77 @@
       }
       .section-head { display: flex; align-items: end; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
       .section-head h2 { margin: 0; font-size: 1.08rem; font-weight: 1000; text-transform: uppercase; }
+      .formation-controls {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 8px;
+        margin: 0 0 12px;
+      }
+      .formation-controls .chip {
+        cursor: pointer;
+        background: rgba(255, 255, 255, 0.045);
+      }
+      .formation-controls .chip.active-formation {
+        color: #fff;
+        border-color: rgba(226, 14, 25, 0.7);
+        background: linear-gradient(180deg, rgba(226, 14, 25, 0.92), rgba(144, 8, 17, 0.92));
+        box-shadow: 0 10px 24px rgba(226, 14, 25, 0.2);
+      }
+      .away-guide-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+        margin-top: 14px;
+      }
+      .away-guide-tile {
+        min-width: 0;
+        border-left: 3px solid var(--red);
+        border-radius: 8px;
+        padding: 10px;
+        background: rgba(255, 255, 255, 0.025);
+      }
+      .away-guide-tile span,
+      .pie-card span {
+        display: block;
+        color: var(--muted);
+        font-size: 0.6rem;
+        font-weight: 900;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+      .away-guide-tile strong {
+        display: block;
+        margin-top: 3px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        color: #fff;
+        font-size: 0.86rem;
+      }
+      .away-guide-tile small {
+        display: block;
+        margin-top: 2px;
+        color: var(--muted);
+        font-size: 0.7rem;
+      }
+      .pie-card {
+        margin-top: 14px;
+        border: 1px dashed rgba(226, 14, 25, 0.32);
+        border-radius: 8px;
+        padding: 10px;
+        background: rgba(226, 14, 25, 0.035);
+      }
+      .pie-card p {
+        margin: 4px 0 0;
+        color: #fff;
+        font-size: 0.82rem;
+        font-weight: 900;
+      }
+      .pie-card em {
+        color: var(--muted);
+        font-weight: 500;
+      }
       
       /* Global Desktop Fixed: Auto-wrap grid to prevent clipping */
       .player-strip {
@@ -324,7 +395,7 @@
         }
         .stage { width: 100%; padding: 0; }
         .app-frame { min-height: 100vh; border-width: 0; border-radius: 0; }
-        .content-grid { padding-bottom: 14px; }
+        .content-grid { padding-bottom: 80px; }
         .scoreline { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 10px; margin-bottom: 12px; }
         .scoreline .club:first-child { grid-column: 1; grid-row: 1; }
         .scoreline .club:last-child { grid-column: 2; grid-row: 1; }
@@ -340,6 +411,10 @@
         .fanzine-column-card .section-head { align-items: start; }
         .zine-article-snippet p { font-size: 0.8rem; line-height: 1.4; }
         .zine-meta { font-size: 0.56rem; }
+        .away-guide-grid { grid-template-columns: 1fr; gap: 8px; }
+        .away-guide-tile strong { white-space: normal; }
+        .formation-controls { justify-content: stretch; }
+        .formation-controls .chip { flex: 1 1 0; }
         
         /* Fixed Mobile Target: Forces pristine 2x2 squad block grid */
         .player-strip { height: 270px; }
@@ -422,6 +497,10 @@
                 </div>
                 <span class="chip">{{squadCount}} Players</span>
               </div>
+              <div class="formation-controls" aria-label="Formation controls">
+                <button class="chip active-formation" type="button" data-formation="433">4-3-3 Attack</button>
+                <button class="chip" type="button" data-formation="532">5-3-2 Solid</button>
+              </div>
               <div class="player-strip">{{squadCards}}</div>
             </section>
             </aside>
@@ -449,15 +528,32 @@
           </div>
 
           <div id="view-more" class="tab-view" data-tab-view="more">
-            <section class="panel placeholder-panel" aria-label="More options">
+            <section class="panel fanzine-column-card single-view" aria-label="Away Day Guide">
               <div class="section-head">
                 <div>
-                  <span class="section-kicker">Workbench</span>
-                  <h2>More Coming Soon</h2>
+                  <span class="section-kicker">Supporter Survival Guide</span>
+                  <h2>Away Day: {{awayOpponent}} (A)</h2>
                 </div>
-                <span class="chip">WIP</span>
+                <span class="chip" style="color: #ffb703; border-color: rgba(255,183,3,0.4);">{{awayTag}}</span>
               </div>
-              <p class="placeholder-copy">Potter Pulse is still a work in progress. This area is reserved for table views, deeper player notes, and extra match-day tools.</p>
+
+              <div class="away-guide-grid">
+                <div class="away-guide-tile">
+                  <span>The Ground Info</span>
+                  <strong>{{awayStadium}}</strong>
+                  <small>{{awayDistance}} from the Potteries</small>
+                </div>
+                <div class="away-guide-tile">
+                  <span>The Away Pub</span>
+                  <strong>{{awayPub}}</strong>
+                  <small>{{awayPubNote}}</small>
+                </div>
+              </div>
+
+              <div class="pie-card">
+                <span>The Match-Day Pie Index</span>
+                <p>{{awayPieIndex}} - <em>{{awayPieTip}}</em></p>
+              </div>
             </section>
           </div>
         </section>
@@ -490,8 +586,29 @@
         control.addEventListener('click', () => activateView(control.dataset.view));
       });
 
+      const formationLayouts = {
+        '433': { '#1': '5%', '#22': '31%', '#10': '57%', '#42': '77%' },
+        '532': { '#1': '5%', '#22': '28%', '#10': '52%', '#42': '74%' },
+      };
+
+      const changeFormation = (formation) => {
+        const layout = formationLayouts[formation] ?? formationLayouts['433'];
+        document.querySelectorAll('.formation-controls .chip').forEach((button) => {
+          button.classList.toggle('active-formation', button.dataset.formation === formation);
+        });
+        Object.entries(layout).forEach(([number, bottom]) => {
+          const marker = document.querySelector(`.player-strip-card[data-number="${number}"]`);
+          if (marker) marker.style.bottom = bottom;
+        });
+      };
+
+      document.querySelectorAll('[data-formation]').forEach((control) => {
+        control.addEventListener('click', () => changeFormation(control.dataset.formation));
+      });
+
       addEventListener('hashchange', () => activateView(location.hash.slice(1), false));
       activateView(location.hash.slice(1) || 'matches', false);
+      changeFormation('433');
     </script>
   </body>
 </html>
