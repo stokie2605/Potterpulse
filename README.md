@@ -1,6 +1,6 @@
 ﻿# Potter Pulse
 
-![PotterPulse Dashboard](docs/screenshots/dashboard_latest.png)
+<img src="docs/screenshots/dashboard_latest.png" alt="PotterPulse three-tab dashboard" width="760" />
 
 Potter Pulse is a work-in-progress local Stoke City tracker app built around a small SQLite database and a lightweight Node renderer. It presents the squad and fixture run as a premium black-and-red sports app interface inspired by modern products such as Sky Sports, EA Sports, and bet365, while keeping the look recognisably Stoke-focused. This is not a finished production app yet; it is an actively evolving prototype with real data, a live local renderer, and a documented design direction.
 
@@ -14,7 +14,7 @@ Known WIP areas:
 - Add richer fixture detail screens and interaction states.
 - Improve responsive polish across more viewport sizes.
 - Decide whether to keep the current no-build Node renderer or migrate to a fuller frontend stack later.
-- Add a proper saved dashboard image at `docs/screenshots/dashboard_latest.png`.
+
 ## Current Architecture
 
 ```text
@@ -26,8 +26,8 @@ Potterpulse/
 │   └── seed-potter-pulse.mjs          # Initial seed script for core players/fixtures
 ├── docs/
 │   └── screenshots/
-│       └── dashboard_latest.png       # Intended location for the latest dashboard screenshot
-└── potterpulse-mobile.png             # Local verification screenshot generated during QA
+│       └── dashboard_latest.png       # Latest README hero screenshot
+└── potterpulse-*.png                  # Local verification screenshots generated during QA
 ```
 
 ## How It Works
@@ -303,7 +303,7 @@ Save the latest dashboard image here:
 docs/screenshots/dashboard_latest.png
 ```
 
-That path is intentionally reserved for the current best visual reference of the dashboard.
+That path is the current README hero image and should be refreshed whenever the app design changes materially.
 
 ## Verification Performed
 
@@ -424,6 +424,6 @@ Good next improvements:
 - Add a route for JSON fixture data.
 - Add filtering by competition, month, and home/away.
 - Add a favicon to remove the browser `favicon.ico` 404 during Playwright checks.
-- Add a proper screenshot in `docs/screenshots/dashboard_latest.png`.
+- Keep `docs/screenshots/dashboard_latest.png` refreshed after major UI changes.
 
 
