@@ -240,6 +240,13 @@ As the interface grew, stacking every module on one dashboard started to make th
 
 A proposed script had the right idea, but one replacement target was written as raw HTML instead of a quoted string, which would have crashed immediately. The implementation was applied safely by locating the existing match card, squad panel, fanzine panel, and fixture centre, then wrapping them into dedicated views. A small JavaScript controller now toggles matching top tabs and bottom navigation buttons using `data-view` and `data-tab-view` attributes.
 
+
+### 7. Mobile bottom navigation burial vs sticky safe-area navigation
+
+Once the app gained real tab views, the bottom navigation needed to behave like a native mobile app control. The first version sat in normal document flow, which meant long tab content could separate the nav from the viewport bottom or make the user scroll past the main controls.
+
+The fix was added inside the mobile breakpoint: the bottom nav is fixed to the bottom of the viewport with a high z-index, safe-area padding, and an extra `80px` bottom padding on `.content-grid` so content is not hidden behind the navigation bar. This was verified on the mobile Squad view with a Playwright screenshot.
+
 ## Screenshot Workflow
 
 Save the latest dashboard image here:
@@ -278,6 +285,7 @@ potterpulse-view-matches.png
 potterpulse-view-squad.png
 potterpulse-view-pulse.png
 potterpulse-view-more.png
+potterpulse-sticky-nav-mobile.png
 ```
 
 
