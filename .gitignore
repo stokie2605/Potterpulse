@@ -4,3 +4,4 @@ potterpulse-*.png
 npm-debug.log*
 .env
 .env.*
+potterpulse-preview.log

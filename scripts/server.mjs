@@ -41,25 +41,110 @@ const pollCandidates = [
 const voteSessions = new Map();
 const voteDebounceMs = 8000;
 
-const trackedPlayerStats = {
-  '1': { goals: 0, assists: 0, yellowCards: 1, redCards: 0, rating: '7.1' },
-  '10': { goals: 7, assists: 9, yellowCards: 3, redCards: 0, rating: '7.4' },
-  '22': { goals: 1, assists: 5, yellowCards: 6, redCards: 0, rating: '6.9' },
-  '42': { goals: 11, assists: 6, yellowCards: 4, redCards: 0, rating: '7.6' },
-};
-
 const tacticalXi = [
-  { squadNumber: '1', label: 'Johansson', role433: 'gk', role532: 'gk', tracked: true },
-  { squadNumber: '2', label: 'RB', role433: 'rb', role532: 'rwb' },
-  { squadNumber: '5', label: 'RCB', role433: 'rcb', role532: 'rcb' },
-  { squadNumber: '6', label: 'LCB', role433: 'lcb', role532: 'cb' },
-  { squadNumber: '3', label: 'LB', role433: 'lb', role532: 'lcb' },
-  { squadNumber: '22', label: 'Tchamadeu', role433: 'dm', role532: 'lwb', tracked: true },
-  { squadNumber: '8', label: 'CM', role433: 'rcm', role532: 'rcm' },
-  { squadNumber: '10', label: 'Jun-ho', role433: 'lcm', role532: 'lcm', tracked: true },
-  { squadNumber: '42', label: 'Manhoef', role433: 'lw', role532: 'stl', tracked: true },
-  { squadNumber: '9', label: 'ST', role433: 'st', role532: 'str' },
-  { squadNumber: '7', label: 'RW', role433: 'rw', role532: 'cm' },
+  {
+    squadNumber: '1',
+    name: 'Viktor Johansson',
+    label: 'Johansson',
+    position: 'Goalkeeper',
+    role433: 'gk',
+    role532: 'gk',
+    tracked: true,
+    stats: { goals: 0, assists: 0, yellowCards: 1, redCards: 0, rating: '7.1' },
+  },
+  {
+    squadNumber: '2',
+    name: 'Ki-Jana Hoever',
+    label: 'Hoever',
+    position: 'Right Back',
+    role433: 'rb',
+    role532: 'rwb',
+    stats: { goals: 2, assists: 7, yellowCards: 5, redCards: 0, rating: '6.8' },
+  },
+  {
+    squadNumber: '5',
+    name: 'Michael Rose',
+    label: 'Rose',
+    position: 'Centre Back',
+    role433: 'rcb',
+    role532: 'rcb',
+    stats: { goals: 3, assists: 1, yellowCards: 8, redCards: 0, rating: '6.9' },
+  },
+  {
+    squadNumber: '16',
+    name: 'Ben Wilmot',
+    label: 'Wilmot',
+    position: 'Centre Back',
+    role433: 'lcb',
+    role532: 'cb',
+    stats: { goals: 1, assists: 2, yellowCards: 7, redCards: 1, rating: '6.7' },
+  },
+  {
+    squadNumber: '3',
+    name: 'Enda Stevens',
+    label: 'Stevens',
+    position: 'Left Back',
+    role433: 'lb',
+    role532: 'lcb',
+    stats: { goals: 0, assists: 4, yellowCards: 4, redCards: 0, rating: '6.6' },
+  },
+  {
+    squadNumber: '22',
+    name: 'Junior Tchamadeu',
+    label: 'Tchamadeu',
+    position: 'Wing Back',
+    role433: 'dm',
+    role532: 'lwb',
+    tracked: true,
+    stats: { goals: 1, assists: 5, yellowCards: 6, redCards: 0, rating: '6.9' },
+  },
+  {
+    squadNumber: '28',
+    name: 'Josh Laurent',
+    label: 'Laurent',
+    position: 'Midfielder',
+    role433: 'rcm',
+    role532: 'rcm',
+    stats: { goals: 4, assists: 3, yellowCards: 9, redCards: 0, rating: '6.8' },
+  },
+  {
+    squadNumber: '10',
+    name: 'Bae Jun-ho',
+    label: 'Jun-ho',
+    position: 'Attacking Midfielder',
+    role433: 'lcm',
+    role532: 'lcm',
+    tracked: true,
+    stats: { goals: 7, assists: 9, yellowCards: 3, redCards: 0, rating: '7.4' },
+  },
+  {
+    squadNumber: '42',
+    name: 'Million Manhoef',
+    label: 'Manhoef',
+    position: 'Forward',
+    role433: 'lw',
+    role532: 'stl',
+    tracked: true,
+    stats: { goals: 11, assists: 6, yellowCards: 4, redCards: 0, rating: '7.6' },
+  },
+  {
+    squadNumber: '19',
+    name: 'Sam Gallagher',
+    label: 'Gallagher',
+    position: 'Striker',
+    role433: 'st',
+    role532: 'str',
+    stats: { goals: 9, assists: 2, yellowCards: 5, redCards: 0, rating: '7.0' },
+  },
+  {
+    squadNumber: '7',
+    name: 'Lynden Gooch',
+    label: 'Gooch',
+    position: 'Wide Midfielder',
+    role433: 'rw',
+    role532: 'cm',
+    stats: { goals: 3, assists: 6, yellowCards: 4, redCards: 0, rating: '6.9' },
+  },
 ];
 
 const ensureSchema = (db) => {
@@ -381,17 +466,24 @@ const render = () => {
     const squadByNumber = new Map(squad.map((player) => [String(player.squad_number), player]));
     const squadCards = tacticalXi
       .map((slot) => {
-        const player = squadByNumber.get(slot.squadNumber);
-        const displayName = player ? shortPlayerName(player.player_name) : slot.label;
-        const fullName = player?.player_name ?? slot.label;
-        const stats = trackedPlayerStats[slot.squadNumber] ?? { goals: 0, assists: 0, yellowCards: 0, redCards: 0, rating: 'Scout' };
+        const dbPlayer = squadByNumber.get(slot.squadNumber);
+        const fullName = dbPlayer?.player_name ?? slot.name;
+        const displayName = dbPlayer ? shortPlayerName(dbPlayer.player_name) : slot.label;
+        const position = dbPlayer?.position ?? slot.position;
+        const stats = {
+          goals: slot.stats?.goals ?? 0,
+          assists: slot.stats?.assists ?? 0,
+          yellowCards: slot.stats?.yellowCards ?? 0,
+          redCards: slot.stats?.redCards ?? 0,
+          rating: slot.stats?.rating ?? '0.0',
+        };
         return `
-          <button class="player-strip-card${slot.tracked ? ' is-tracked' : ' is-role-slot'}" type="button"
+          <button class="player-strip-card${slot.tracked ? ' is-tracked' : ''}" type="button"
             data-number="#${escapeHtml(slot.squadNumber)}"
             data-role-433="${escapeHtml(slot.role433)}"
             data-role-532="${escapeHtml(slot.role532)}"
             data-player-name="${escapeHtml(fullName)}"
-            data-player-role="${escapeHtml(player?.position ?? slot.label)}"
+            data-player-role="${escapeHtml(position)}"
             data-goals="${escapeHtml(stats.goals)}"
             data-assists="${escapeHtml(stats.assists)}"
             data-yellows="${escapeHtml(stats.yellowCards)}"
@@ -472,10 +564,12 @@ const render = () => {
         .join(''),
     };
 
-    return Object.entries(replacements).reduce(
+    const renderedHtml = Object.entries(replacements).reduce(
       (html, [key, value]) => html.replaceAll(`{{${key}}}`, String(value)),
       readFileSync(templatePath, 'utf8'),
     );
+
+    return renderedHtml.replaceAll('{{awaySupporterCards}}', renderAwayGuideModules(awayGuide));
   } finally {
     db.close();
   }

@@ -396,6 +396,14 @@ Problems found and solved during this pass:
 - A targeted Playwright smoke check verified 11 pitch nodes, four tracked players, formation movement, ledger updates, three away guide cards, localStorage vote locking, and backend duplicate-vote dropping.
 - Poll counts were reset after smoke verification so local test votes do not pollute the seed state.
 
+### 17. Template leak and pitch-coordinate hardening
+
+The Away Days renderer now has an explicit final replacement guard for `{{awaySupporterCards}}`, so the modular supporter cards render as compiled HTML rather than leaking raw template text. The Squad view now receives a canonical 11-player tactical XI from `scripts/server.mjs`, and the visible counter is locked to `11 PLAYERS`.
+
+The pitch surface now uses the `.pitch` coordinate namespace for the 4-3-3 and 5-3-2 CSS Grid mappings. Each player has distinctive name, position, formation roles, and ledger stats, and the ledger updater now applies defensive fallbacks before writing card values so it cannot output `undefined / undefined`.
+
+Verification confirmed three Away Days guide cards, 11 distinctive player nodes, a mobile pitch width of 332px at a 390px viewport, changed coordinates between formations, no leaked placeholders, and a clean ledger card value.
+
 ## Screenshot Workflow
 
 Save the latest dashboard image here:
@@ -443,6 +451,8 @@ CI test script validates mobile layout, fixture toggle behaviour, culture text, 
 Squad pitch renders 11 nodes with formation switching and performance ledger updates
 Away Days renders three modular supporter guide cards from backend guide modules
 Client vote locking uses localStorage and backend debounce drops rapid duplicate submissions
+Template leak hardening confirms awaySupporterCards compiles into three guide cards
+Pitch hardening confirms 11 distinctive player nodes and no undefined ledger values
 ```
 
 Responsive screenshots were generated during visual QA:

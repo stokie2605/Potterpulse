@@ -355,7 +355,7 @@
         gap: 12px;
         align-items: stretch;
       }
-      .player-strip {
+      .pitch {
         position: relative;
         display: grid;
         grid-template-columns: repeat(7, minmax(0, 1fr));
@@ -374,9 +374,9 @@
           linear-gradient(to top, rgba(255, 255, 255, 0.06) 2px, transparent 2px) bottom center / 170px 48px no-repeat,
           linear-gradient(to right, rgba(255, 255, 255, 0.06) 2px, transparent 2px) bottom left 30% / 2px 48px no-repeat,
           linear-gradient(to left, rgba(255, 255, 255, 0.06) 2px, transparent 2px) bottom right 30% / 2px 48px no-repeat,
-          linear-gradient(180deg, rgba(226, 14, 25, 0.08) 0%, rgba(9, 10, 14, 0.46) 100%);
+          linear-gradient(180deg, rgba(20, 96, 52, 0.72) 0%, rgba(8, 54, 34, 0.92) 100%);
       }
-      .player-strip-card {
+      .pitch .player-strip-card {
         position: relative;
         width: min(68px, 100%);
         height: min(68px, 100%);
@@ -395,32 +395,31 @@
         box-shadow: 0 10px 26px rgba(0, 0, 0, 0.58), inset 0 2px 4px rgba(255, 255, 255, 0.1);
         transition: border-color 0.2s ease, transform 0.2s ease, opacity 0.2s ease;
       }
-      .player-strip-card.is-tracked { border-color: var(--red); }
-      .player-strip-card.is-role-slot { opacity: 0.72; border-style: dashed; }
-      .player-strip-card:hover, .player-strip-card.active-player { border-color: var(--red-3); transform: scale(1.06); }
-      .player-strip-card[data-role-433="gk"], .player-strip-card[data-role-532="gk"] { grid-column: 4; grid-row: 6; }
-      .player-strip[data-formation="433"] .player-strip-card[data-role-433="lb"] { grid-column: 1; grid-row: 5; }
-      .player-strip[data-formation="433"] .player-strip-card[data-role-433="lcb"] { grid-column: 3; grid-row: 5; }
-      .player-strip[data-formation="433"] .player-strip-card[data-role-433="rcb"] { grid-column: 5; grid-row: 5; }
-      .player-strip[data-formation="433"] .player-strip-card[data-role-433="rb"] { grid-column: 7; grid-row: 5; }
-      .player-strip[data-formation="433"] .player-strip-card[data-role-433="lcm"] { grid-column: 2; grid-row: 3; }
-      .player-strip[data-formation="433"] .player-strip-card[data-role-433="dm"] { grid-column: 4; grid-row: 4; }
-      .player-strip[data-formation="433"] .player-strip-card[data-role-433="rcm"] { grid-column: 6; grid-row: 3; }
-      .player-strip[data-formation="433"] .player-strip-card[data-role-433="lw"] { grid-column: 1; grid-row: 1; }
-      .player-strip[data-formation="433"] .player-strip-card[data-role-433="st"] { grid-column: 4; grid-row: 1; }
-      .player-strip[data-formation="433"] .player-strip-card[data-role-433="rw"] { grid-column: 7; grid-row: 1; }
-      .player-strip[data-formation="532"] .player-strip-card[data-role-532="lwb"] { grid-column: 1; grid-row: 4; }
-      .player-strip[data-formation="532"] .player-strip-card[data-role-532="lcb"] { grid-column: 2; grid-row: 5; }
-      .player-strip[data-formation="532"] .player-strip-card[data-role-532="cb"] { grid-column: 4; grid-row: 5; }
-      .player-strip[data-formation="532"] .player-strip-card[data-role-532="rcb"] { grid-column: 6; grid-row: 5; }
-      .player-strip[data-formation="532"] .player-strip-card[data-role-532="rwb"] { grid-column: 7; grid-row: 4; }
-      .player-strip[data-formation="532"] .player-strip-card[data-role-532="lcm"] { grid-column: 2; grid-row: 3; }
-      .player-strip[data-formation="532"] .player-strip-card[data-role-532="cm"] { grid-column: 4; grid-row: 3; }
-      .player-strip[data-formation="532"] .player-strip-card[data-role-532="rcm"] { grid-column: 6; grid-row: 3; }
-      .player-strip[data-formation="532"] .player-strip-card[data-role-532="stl"] { grid-column: 3; grid-row: 1; }
-      .player-strip[data-formation="532"] .player-strip-card[data-role-532="str"] { grid-column: 5; grid-row: 1; }
-      .player-strip-card::after { display: none; }
-      .player-strip-card h3 {
+      .pitch .player-strip-card.is-tracked { border-color: var(--red); }
+      .pitch .player-strip-card:hover, .pitch .player-strip-card.active-player { border-color: var(--red-3); transform: scale(1.06); }
+      .pitch .player-strip-card[data-role-433="gk"], .pitch .player-strip-card[data-role-532="gk"] { grid-column: 4; grid-row: 6; }
+      .pitch[data-formation="433"] .player-strip-card[data-role-433="lb"] { grid-column: 1; grid-row: 5; }
+      .pitch[data-formation="433"] .player-strip-card[data-role-433="lcb"] { grid-column: 3; grid-row: 5; }
+      .pitch[data-formation="433"] .player-strip-card[data-role-433="rcb"] { grid-column: 5; grid-row: 5; }
+      .pitch[data-formation="433"] .player-strip-card[data-role-433="rb"] { grid-column: 7; grid-row: 5; }
+      .pitch[data-formation="433"] .player-strip-card[data-role-433="lcm"] { grid-column: 2; grid-row: 3; }
+      .pitch[data-formation="433"] .player-strip-card[data-role-433="dm"] { grid-column: 4; grid-row: 4; }
+      .pitch[data-formation="433"] .player-strip-card[data-role-433="rcm"] { grid-column: 6; grid-row: 3; }
+      .pitch[data-formation="433"] .player-strip-card[data-role-433="lw"] { grid-column: 1; grid-row: 1; }
+      .pitch[data-formation="433"] .player-strip-card[data-role-433="st"] { grid-column: 4; grid-row: 1; }
+      .pitch[data-formation="433"] .player-strip-card[data-role-433="rw"] { grid-column: 7; grid-row: 1; }
+      .pitch[data-formation="532"] .player-strip-card[data-role-532="lwb"] { grid-column: 1; grid-row: 4; }
+      .pitch[data-formation="532"] .player-strip-card[data-role-532="lcb"] { grid-column: 2; grid-row: 5; }
+      .pitch[data-formation="532"] .player-strip-card[data-role-532="cb"] { grid-column: 4; grid-row: 5; }
+      .pitch[data-formation="532"] .player-strip-card[data-role-532="rcb"] { grid-column: 6; grid-row: 5; }
+      .pitch[data-formation="532"] .player-strip-card[data-role-532="rwb"] { grid-column: 7; grid-row: 4; }
+      .pitch[data-formation="532"] .player-strip-card[data-role-532="lcm"] { grid-column: 2; grid-row: 3; }
+      .pitch[data-formation="532"] .player-strip-card[data-role-532="cm"] { grid-column: 4; grid-row: 3; }
+      .pitch[data-formation="532"] .player-strip-card[data-role-532="rcm"] { grid-column: 6; grid-row: 3; }
+      .pitch[data-formation="532"] .player-strip-card[data-role-532="stl"] { grid-column: 3; grid-row: 1; }
+      .pitch[data-formation="532"] .player-strip-card[data-role-532="str"] { grid-column: 5; grid-row: 1; }
+      .pitch .player-strip-card::after { display: none; }
+      .pitch .player-strip-card h3 {
         position: relative;
         z-index: 1;
         width: 100%;
@@ -627,10 +626,10 @@
         
         /* Fixed Mobile Target: Forces pristine 2x2 squad block grid */
         .squad-pitch-layout { grid-template-columns: 1fr; }
-        .player-strip { min-height: 410px; padding: 10px; gap: 5px; }
-        .player-strip-card { width: 48px; height: 48px; min-height: 48px; padding: 3px; }
+        .pitch { min-height: 410px; padding: 10px; gap: 5px; }
+        .pitch .player-strip-card { width: 48px; height: 48px; min-height: 48px; padding: 3px; }
         .position-pill { max-width: 48px; }
-        .player-strip-card h3 { font-size: 0.48rem; }
+        .pitch .player-strip-card h3 { font-size: 0.48rem; }
       }
     </style>
   </head>
@@ -734,14 +733,14 @@
                   <span class="section-kicker">Following</span>
                   <h2>Core Squad</h2>
                 </div>
-                <span class="chip">{{squadCount}} Players</span>
+                <span class="chip">{{squadCount}} PLAYERS</span>
               </div>
               <div class="formation-controls" aria-label="Formation controls">
                 <button class="chip active-formation" type="button" data-formation="433">4-3-3 Attack</button>
                 <button class="chip" type="button" data-formation="532">5-3-2 Solid</button>
               </div>
               <div class="squad-pitch-layout">
-                <div class="player-strip" data-formation="433">{{squadCards}}</div>
+                <div class="player-strip pitch" data-formation="433">{{squadCards}}</div>
                 <aside class="performance-ledger" aria-live="polite" data-performance-ledger>
                   <span class="section-kicker">Player Performance Ledger</span>
                   <h3 data-ledger-name>Manhoef</h3>
@@ -923,15 +922,27 @@
 
       const updateLedger = (playerNode) => {
         if (!playerNode) return;
-        document.querySelectorAll('.player-strip-card').forEach((node) => node.classList.toggle('active-player', node === playerNode));
+        document.querySelectorAll('.pitch .player-strip-card').forEach((node) => node.classList.toggle('active-player', node === playerNode));
         const ledger = document.querySelector('[data-performance-ledger]');
         if (!ledger) return;
-        ledger.querySelector('[data-ledger-name]').textContent = playerNode.dataset.playerName;
-        ledger.querySelector('[data-ledger-role]').textContent = playerNode.dataset.playerRole;
-        ledger.querySelector('[data-ledger-goals]').textContent = playerNode.dataset.goals;
-        ledger.querySelector('[data-ledger-assists]').textContent = playerNode.dataset.assists;
-        ledger.querySelector('[data-ledger-cards]').textContent = playerNode.dataset.yellows + ' / ' + playerNode.dataset.reds;
-        ledger.querySelector('[data-ledger-rating]').textContent = playerNode.dataset.rating;
+        const clean = (value, fallback = '0') => {
+          if (value == null) return fallback;
+          const text = String(value).trim();
+          return text && text !== 'null' ? text : fallback;
+        };
+        const name = clean(playerNode.dataset.playerName, 'Player');
+        const role = clean(playerNode.dataset.playerRole, 'Squad Role');
+        const goals = clean(playerNode.dataset.goals);
+        const assists = clean(playerNode.dataset.assists);
+        const yellows = clean(playerNode.dataset.yellows);
+        const reds = clean(playerNode.dataset.reds);
+        const rating = clean(playerNode.dataset.rating, '0.0');
+        ledger.querySelector('[data-ledger-name]').textContent = name;
+        ledger.querySelector('[data-ledger-role]').textContent = role;
+        ledger.querySelector('[data-ledger-goals]').textContent = goals;
+        ledger.querySelector('[data-ledger-assists]').textContent = assists;
+        ledger.querySelector('[data-ledger-cards]').textContent = yellows + ' / ' + reds;
+        ledger.querySelector('[data-ledger-rating]').textContent = rating;
       };
 
       const changeFormation = (formation) => {
@@ -939,7 +950,7 @@
         document.querySelectorAll('.formation-controls .chip').forEach((button) => {
           button.classList.toggle('active-formation', button.dataset.formation === nextFormation);
         });
-        const pitch = document.querySelector('.player-strip');
+        const pitch = document.querySelector('.pitch');
         if (pitch) pitch.dataset.formation = nextFormation;
       };
 
@@ -947,14 +958,14 @@
         control.addEventListener('click', () => changeFormation(control.dataset.formation));
       });
 
-      document.querySelectorAll('.player-strip-card').forEach((node) => {
+      document.querySelectorAll('.pitch .player-strip-card').forEach((node) => {
         node.addEventListener('mouseenter', () => updateLedger(node));
         node.addEventListener('focus', () => updateLedger(node));
         node.addEventListener('click', () => updateLedger(node));
       });
 
       applyVoteLockState();
-      updateLedger(document.querySelector('.player-strip-card[data-number="#42"]') || document.querySelector('.player-strip-card'));
+      updateLedger(document.querySelector('.pitch .player-strip-card[data-number="#42"]') || document.querySelector('.pitch .player-strip-card'));
 
       addEventListener('hashchange', () => activateView(location.hash.slice(1), false));
       activateView(location.hash.slice(1) || 'matches', false);
