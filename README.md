@@ -404,6 +404,14 @@ The pitch surface now uses the `.pitch` coordinate namespace for the 4-3-3 and 5
 
 Verification confirmed three Away Days guide cards, 11 distinctive player nodes, a mobile pitch width of 332px at a 390px viewport, changed coordinates between formations, no leaked placeholders, and a clean ledger card value.
 
+### 18. Away Days empty-space correction and form-token centering
+
+The Away Days view now uses an `away-master-grid` desktop layout. The left column stacks Ground Info, Match-Day Pie Index, Referee Watch, Weather, and Form Guide cards; the right column is one tall travel-guide card containing Away-Friendly Pubs, Recommended Hotels, and Transit & Logistics. This removes the loose desktop space on the right while keeping all guide modules grouped as a single supporter-travel surface.
+
+The W/D/L form tokens now use strict 24px square sizing, flex centering, and `line-height: 1` so the characters stay centered inside their circles. A `max-width: 992px` breakpoint collapses the Away Days master grid into one vertical column, and the main content padding now reserves 90px so mobile text scrolls clear of the fixed bottom navigation.
+
+Verification confirmed a two-column desktop grid, height-balanced left and right columns, three travel guide cards inside the unified right panel, one-column mobile layout, 90px mobile bottom padding, and centered 24x24 form circles.
+
 ## Screenshot Workflow
 
 Save the latest dashboard image here:
@@ -453,6 +461,8 @@ Away Days renders three modular supporter guide cards from backend guide modules
 Client vote locking uses localStorage and backend debounce drops rapid duplicate submissions
 Template leak hardening confirms awaySupporterCards compiles into three guide cards
 Pitch hardening confirms 11 distinctive player nodes and no undefined ledger values
+Away Days master grid balances left briefing stack with unified right travel-guide card
+Form W/D/L tokens render as centered 24px circles with mobile-safe bottom padding
 ```
 
 Responsive screenshots were generated during visual QA:

@@ -212,11 +212,25 @@
         background: linear-gradient(180deg, rgba(226, 14, 25, 0.92), rgba(144, 8, 17, 0.92));
         box-shadow: 0 10px 24px rgba(226, 14, 25, 0.2);
       }
+      .away-master-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 0.88fr) minmax(360px, 1.12fr);
+        gap: 14px;
+        align-items: stretch;
+        margin-top: 14px;
+      }
+      .away-left-stack,
+      .away-right-stack {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        min-width: 0;
+      }
+      .away-right-stack { height: 100%; }
       .away-guide-grid, .supporter-guide-grid {
         display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
+        grid-template-columns: 1fr;
         gap: 12px;
-        margin-top: 14px;
       }
       .away-guide-tile {
         min-width: 0;
@@ -249,6 +263,18 @@
         color: var(--muted);
         font-size: 0.7rem;
       }
+      .travel-guide-card {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        min-width: 0;
+        border: 1px solid rgba(226, 14, 25, 0.26);
+        border-radius: 14px;
+        padding: 12px;
+        background: linear-gradient(180deg, rgba(226, 14, 25, 0.08), rgba(255, 255, 255, 0.028));
+      }
+      .travel-guide-card > span { display: block; color: var(--muted); font-size: 0.58rem; font-weight: 900; letter-spacing: 0.08em; text-transform: uppercase; }
+      .travel-guide-card > h3 { margin: 5px 0 12px; color: #fff; font-size: 0.96rem; font-weight: 1000; text-transform: uppercase; }
       .supporter-guide-card {
         min-width: 0;
         border: 1px solid rgba(255, 255, 255, 0.1);
@@ -261,7 +287,6 @@
       .supporter-guide-card h3 { margin: 5px 0 9px; color: #fff; font-size: 0.86rem; font-weight: 1000; text-transform: uppercase; }
       .supporter-guide-card ul { display: grid; gap: 7px; margin: 0; padding-left: 17px; color: #d9dbe1; font-size: 0.72rem; line-height: 1.35; }
       .pie-card {
-        margin-top: 14px;
         border: 1px dashed rgba(226, 14, 25, 0.32);
         border-radius: 8px;
         padding: 10px;
@@ -279,9 +304,8 @@
       }
       .briefing-grid {
         display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-columns: 1fr;
         gap: 10px;
-        margin-top: 14px;
       }
       .briefing-card {
         min-width: 0;
@@ -335,14 +359,27 @@
         min-width: 0;
       }
       .form-dot {
-        display: grid;
-        place-items: center;
-        width: 22px;
-        height: 22px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 24px;
+        height: 24px;
+        aspect-ratio: 1 / 1;
         border-radius: 999px;
         color: #fff;
         font-size: 0.62rem;
         font-weight: 1000;
+        line-height: 1;
+      }
+
+      .briefing-card .form-strip .form-dot {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        width: 24px;
+        height: 24px;
+        aspect-ratio: 1 / 1;
+        line-height: 1 !important;
       }
       .form-dot.w { background: #0f8f5f; }
       .form-dot.d { background: #71717a; }
@@ -577,6 +614,12 @@
       .nav-icon { width: 22px; height: 22px; border: 2px solid currentColor; border-radius: 8px; }
       .bottom-nav button.active { color: var(--red-3); }
 
+      @media (max-width: 992px) {
+        .away-master-grid { grid-template-columns: 1fr; }
+        .travel-guide-card { height: auto; }
+        .content-grid { padding-bottom: 90px; }
+      }
+
       @media (max-width: 920px) {
         .stage { width: min(480px, calc(100% - 24px)); padding-top: 14px; }
         .app-frame { border-radius: 32px; }
@@ -598,12 +641,10 @@
           border-top: 1px solid var(--line);
           padding-bottom: env(safe-area-inset-bottom);
         }
-        .content-grid {
-          padding-bottom: 80px;
-        }
+        .content-grid { padding-bottom: 90px; }
         .stage { width: 100%; padding: 0; }
         .app-frame { min-height: 100vh; border-width: 0; border-radius: 0; }
-        .content-grid { padding-bottom: 80px; }
+        .content-grid { padding-bottom: 90px; }
         .scoreline { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 10px; margin-bottom: 12px; }
         .scoreline .club:first-child { grid-column: 1; grid-row: 1; }
         .scoreline .club:last-child { grid-column: 2; grid-row: 1; }
@@ -619,7 +660,8 @@
         .fanzine-column-card .section-head { align-items: start; }
         .zine-article-snippet p { font-size: 0.8rem; line-height: 1.4; }
         .zine-meta { font-size: 0.56rem; }
-        .away-guide-grid, .supporter-guide-grid, .briefing-grid { grid-template-columns: 1fr; gap: 8px; }
+        .away-master-grid { grid-template-columns: 1fr; gap: 10px; }
+        .away-left-stack, .away-right-stack, .supporter-guide-grid, .briefing-grid { gap: 8px; }
         .away-guide-tile strong { white-space: normal; }
         .formation-controls { justify-content: stretch; }
         .formation-controls .chip { flex: 1 1 0; }
@@ -767,44 +809,54 @@
                 <span class="chip" style="color: #ffb703; border-color: rgba(255,183,3,0.4);">WIP - {{awayTag}}</span>
               </div>
 
-              <div class="away-guide-grid">
-                <div class="away-guide-tile">
-                  <span>The Ground Info</span>
-                  <strong>{{awayStadium}}</strong>
-                  <small>{{awayDistance}} from the Potteries - {{awayTravelTime}}</small>
-                </div>
-              </div>
-
-              <div class="supporter-guide-grid">{{awaySupporterCards}}</div>
-
-              <div class="pie-card">
-                <span>The Match-Day Pie Index</span>
-                <p>{{awayPieIndex}} - <em>{{awayPieTip}}</em></p>
-              </div>
-
-              <div class="briefing-grid" aria-label="Pre-Match Briefing">
-                <div class="briefing-card">
-                  <span>Referee Watch</span>
-                  <strong>{{briefingReferee}}</strong>
-                  <small>{{briefingOfficialsNote}}</small>
-                </div>
-                <div class="briefing-card">
-                  <span>Weather</span>
-                  <strong>{{briefingForecastTemp}} - {{briefingForecastCond}}</strong>
-                  <small>{{briefingKitTip}}</small>
-                </div>
-                <div class="briefing-card full">
-                  <span>Form Guide</span>
-                  <div class="form-stack">
-                    <div class="form-row">
-                      <span>Stoke</span>
-                      <div class="form-strip">{{briefingHomeForm}}</div>
-                    </div>
-                    <div class="form-row">
-                      <span>{{awayOpponentDisplay}}</span>
-                      <div class="form-strip">{{briefingAwayForm}}</div>
+              <div class="away-master-grid">
+                <div class="away-left-stack">
+                  <div class="away-guide-grid">
+                    <div class="away-guide-tile">
+                      <span>The Ground Info</span>
+                      <strong>{{awayStadium}}</strong>
+                      <small>{{awayDistance}} from the Potteries - {{awayTravelTime}}</small>
                     </div>
                   </div>
+
+                  <div class="pie-card">
+                    <span>The Match-Day Pie Index</span>
+                    <p>{{awayPieIndex}} - <em>{{awayPieTip}}</em></p>
+                  </div>
+
+                  <div class="briefing-grid" aria-label="Pre-Match Briefing">
+                    <div class="briefing-card">
+                      <span>Referee Watch</span>
+                      <strong>{{briefingReferee}}</strong>
+                      <small>{{briefingOfficialsNote}}</small>
+                    </div>
+                    <div class="briefing-card">
+                      <span>Weather</span>
+                      <strong>{{briefingForecastTemp}} - {{briefingForecastCond}}</strong>
+                      <small>{{briefingKitTip}}</small>
+                    </div>
+                    <div class="briefing-card full">
+                      <span>Form Guide</span>
+                      <div class="form-stack">
+                        <div class="form-row">
+                          <span>Stoke</span>
+                          <div class="form-strip">{{briefingHomeForm}}</div>
+                        </div>
+                        <div class="form-row">
+                          <span>{{awayOpponentDisplay}}</span>
+                          <div class="form-strip">{{briefingAwayForm}}</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="away-right-stack">
+                  <article class="travel-guide-card" aria-label="Travel Guide Blocks">
+                    <span>Supporter Travel Stack</span>
+                    <h3>Pubs, Hotels & Logistics</h3>
+                    <div class="supporter-guide-grid">{{awaySupporterCards}}</div>
+                  </article>
                 </div>
               </div>
             </section>
