@@ -38,6 +38,30 @@ const pollCandidates = [
   { key: 'johansson', label: 'Johansson', note: 'safe hands' },
 ];
 
+const voteSessions = new Map();
+const voteDebounceMs = 8000;
+
+const trackedPlayerStats = {
+  '1': { goals: 0, assists: 0, yellowCards: 1, redCards: 0, rating: '7.1' },
+  '10': { goals: 7, assists: 9, yellowCards: 3, redCards: 0, rating: '7.4' },
+  '22': { goals: 1, assists: 5, yellowCards: 6, redCards: 0, rating: '6.9' },
+  '42': { goals: 11, assists: 6, yellowCards: 4, redCards: 0, rating: '7.6' },
+};
+
+const tacticalXi = [
+  { squadNumber: '1', label: 'Johansson', role433: 'gk', role532: 'gk', tracked: true },
+  { squadNumber: '2', label: 'RB', role433: 'rb', role532: 'rwb' },
+  { squadNumber: '5', label: 'RCB', role433: 'rcb', role532: 'rcb' },
+  { squadNumber: '6', label: 'LCB', role433: 'lcb', role532: 'cb' },
+  { squadNumber: '3', label: 'LB', role433: 'lb', role532: 'lcb' },
+  { squadNumber: '22', label: 'Tchamadeu', role433: 'dm', role532: 'lwb', tracked: true },
+  { squadNumber: '8', label: 'CM', role433: 'rcm', role532: 'rcm' },
+  { squadNumber: '10', label: 'Jun-ho', role433: 'lcm', role532: 'lcm', tracked: true },
+  { squadNumber: '42', label: 'Manhoef', role433: 'lw', role532: 'stl', tracked: true },
+  { squadNumber: '9', label: 'ST', role433: 'st', role532: 'str' },
+  { squadNumber: '7', label: 'RW', role433: 'rw', role532: 'cm' },
+];
+
 const ensureSchema = (db) => {
   db.exec(
     'CREATE TABLE IF NOT EXISTS fan_poll_votes (' +
@@ -125,22 +149,76 @@ const awayGuides = {
     stadium: 'Swansea.com Stadium',
     distance: '182 miles',
     travelTime: 'Approx. 3h 35m by road',
-    pub: 'The Railway Inn',
-    pubNote: 'Away friendly',
     pieIndex: '3.8 / 5',
     pieTip: 'Steak & Ale highly recommended',
     tag: 'Transit Match',
+    modules: [
+      {
+        title: 'Away-Friendly Pubs',
+        kicker: 'Safe options',
+        items: [
+          'Harvester Morfa Parc Swansea: practical away-day food stop near the retail park.',
+          'The Bank Statement - JD Wetherspoon, Wind St: central option before heading toward the ground.',
+          'Avoid home-only zones and colours-heavy pubs immediately around the stadium footprint.',
+        ],
+      },
+      {
+        title: 'Recommended Hotels',
+        kicker: 'Overnight checklist',
+        items: [
+          'The Grand Hotel: opposite Swansea train station for rail arrivals and early departures.',
+          'Village Hotel Swansea: waterfront base with easier taxi access back into town.',
+          'Book flexible check-in if travelling after Friday traffic on the M4 corridor.',
+        ],
+      },
+      {
+        title: 'Matchday Transit & Logistics',
+        kicker: 'Road plan',
+        items: [
+          'Use Felindre M4 Junction 46 Park & Ride for lower-stress stadium access.',
+          'Arrive early for highway parking and allow time for post-match traffic release.',
+          'Keep the final stadium walk simple; follow official away supporter routing.',
+        ],
+      },
+    ],
   },
   west_brom: {
     opponent: 'West Bromwich Albion',
     stadium: 'The Hawthorns',
     distance: '46 miles',
     travelTime: 'Approx. 55m by road',
-    pub: 'The Vine',
-    pubNote: 'Legendary neutral/away mix',
     pieIndex: '4.5 / 5',
     pieTip: 'Chicken Balti',
     tag: 'Short Hop',
+    modules: [
+      {
+        title: 'Away-Friendly Pubs',
+        kicker: 'Safe options',
+        items: [
+          'The Vine: respected mixed-supporter stop with food before the walk in.',
+          'Use town-centre options if travelling early and keep colours sensible near home-only pubs.',
+          'Avoid forcing routes through dense home supporter approaches close to kick-off.',
+        ],
+      },
+      {
+        title: 'Recommended Hotels',
+        kicker: 'Overnight checklist',
+        items: [
+          'Central Birmingham hotels work well for rail links and late food options.',
+          'West Bromwich town stays reduce matchday travel time but offer fewer late-night choices.',
+          'Check parking terms before booking because matchday restrictions change quickly.',
+        ],
+      },
+      {
+        title: 'Matchday Transit & Logistics',
+        kicker: 'Road plan',
+        items: [
+          'For short-hop driving, leave a buffer for M6/M5 merge delays.',
+          'Use official or clearly marked paid parking rather than residential side streets.',
+          'Rail travellers should check return connections before committing to a late departure.',
+        ],
+      },
+    ],
   },
 };
 
@@ -228,6 +306,21 @@ const shortPlayerName = (value) => {
   return parts.at(-1) || value || 'Player';
 };
 
+const renderAwayGuideModules = (guide) =>
+  (guide.modules ?? [])
+    .map((module) =>
+      [
+        '<article class="supporter-guide-card">',
+        '<span>' + escapeHtml(module.kicker) + '</span>',
+        '<h3>' + escapeHtml(module.title) + '</h3>',
+        '<ul>',
+        ...(module.items ?? []).map((item) => '<li>' + escapeHtml(item) + '</li>'),
+        '</ul>',
+        '</article>',
+      ].join(''),
+    )
+    .join('');
+
 const formatDate = (dateText) =>
   new Intl.DateTimeFormat('en-GB', {
     weekday: 'short',
@@ -285,15 +378,30 @@ const render = () => {
       opponentName: displayTeamName(contextMatch.opponent),
     });
 
-    const squadCards = squad
-      .map(
-        (player) => `
-          <article class="player-strip-card" data-number="#${escapeHtml(player.squad_number)}">
-            <span class="position-pill">#${escapeHtml(player.squad_number)}</span>
-            <h3 title="${escapeHtml(player.player_name)}">${escapeHtml(shortPlayerName(player.player_name))}</h3>
-          </article>
-        `,
-      )
+    const squadByNumber = new Map(squad.map((player) => [String(player.squad_number), player]));
+    const squadCards = tacticalXi
+      .map((slot) => {
+        const player = squadByNumber.get(slot.squadNumber);
+        const displayName = player ? shortPlayerName(player.player_name) : slot.label;
+        const fullName = player?.player_name ?? slot.label;
+        const stats = trackedPlayerStats[slot.squadNumber] ?? { goals: 0, assists: 0, yellowCards: 0, redCards: 0, rating: 'Scout' };
+        return `
+          <button class="player-strip-card${slot.tracked ? ' is-tracked' : ' is-role-slot'}" type="button"
+            data-number="#${escapeHtml(slot.squadNumber)}"
+            data-role-433="${escapeHtml(slot.role433)}"
+            data-role-532="${escapeHtml(slot.role532)}"
+            data-player-name="${escapeHtml(fullName)}"
+            data-player-role="${escapeHtml(player?.position ?? slot.label)}"
+            data-goals="${escapeHtml(stats.goals)}"
+            data-assists="${escapeHtml(stats.assists)}"
+            data-yellows="${escapeHtml(stats.yellowCards)}"
+            data-reds="${escapeHtml(stats.redCards)}"
+            data-rating="${escapeHtml(stats.rating)}">
+            <span class="position-pill">#${escapeHtml(slot.squadNumber)}</span>
+            <h3 title="${escapeHtml(fullName)}">${escapeHtml(displayName)}</h3>
+          </button>
+        `;
+      })
       .join('');
 
     const pollRows = getPollResults(db);
@@ -334,7 +442,7 @@ const render = () => {
       heroDate: formatDate(hero.match_date),
       heroDateShort: formatShortDate(hero.match_date),
       heroCompetition: hero.competition,
-      squadCount: squad.length,
+      squadCount: tacticalXi.length,
       fixtureCount: fixtures.length,
       squadCards,
       fixtureTimeline,
@@ -346,11 +454,11 @@ const render = () => {
       awayStadium: awayGuide.stadium,
       awayDistance: awayGuide.distance,
       awayTravelTime: awayGuide.travelTime,
-      awayPub: awayGuide.pub,
-      awayPubNote: awayGuide.pubNote,
+      awaySupporterCards: renderAwayGuideModules(awayGuide),
       awayPieIndex: awayGuide.pieIndex,
       awayPieTip: awayGuide.pieTip,
       awayTag: awayGuide.tag,
+      voteLockKey: normalizeOpponentKey(hero.opponent) + '_' + hero.match_date,
       briefingReferee: matchBriefing.referee,
       briefingOfficialsNote: matchBriefing.officialsNote,
       briefingForecastTemp: matchBriefing.forecastTemp,
@@ -401,6 +509,24 @@ const handleVote = async (request, response) => {
   try {
     const body = await readJsonBody(request);
     const optionKey = normalizeOpponentKey(body.optionKey ?? body.option ?? '');
+    const sessionId = normalizeOpponentKey(body.sessionId ?? request.headers['x-forwarded-for'] ?? request.socket.remoteAddress ?? 'anonymous');
+    const voteLockKey = normalizeOpponentKey(body.voteLockKey ?? 'current_match');
+    const debounceKey = [sessionId, voteLockKey, optionKey].join(':');
+    const now = Date.now();
+    for (const [key, timestamp] of voteSessions.entries()) {
+      if (now - timestamp > voteDebounceMs) voteSessions.delete(key);
+    }
+    if (voteSessions.has(debounceKey) && now - voteSessions.get(debounceKey) < voteDebounceMs) {
+      const db = new DatabaseSync(dbPath);
+      try {
+        const results = serializePollResults(getPollResults(db));
+        response.writeHead(202, { 'content-type': 'application/json; charset=utf-8' });
+        response.end(JSON.stringify({ ok: true, duplicate: true, results }));
+      } finally {
+        db.close();
+      }
+      return;
+    }
     const db = new DatabaseSync(dbPath);
     try {
       ensureSchema(db);
@@ -413,6 +539,8 @@ const handleVote = async (request, response) => {
         response.end(JSON.stringify({ error: 'Unknown vote option' }));
         return;
       }
+
+      voteSessions.set(debounceKey, now);
 
       db.prepare(
         'UPDATE fan_poll_votes ' +

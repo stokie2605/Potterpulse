@@ -212,9 +212,9 @@
         background: linear-gradient(180deg, rgba(226, 14, 25, 0.92), rgba(144, 8, 17, 0.92));
         box-shadow: 0 10px 24px rgba(226, 14, 25, 0.2);
       }
-      .away-guide-grid {
+      .away-guide-grid, .supporter-guide-grid {
         display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-columns: repeat(3, minmax(0, 1fr));
         gap: 12px;
         margin-top: 14px;
       }
@@ -249,6 +249,17 @@
         color: var(--muted);
         font-size: 0.7rem;
       }
+      .supporter-guide-card {
+        min-width: 0;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-left: 3px solid var(--red);
+        border-radius: 12px;
+        padding: 12px;
+        background: rgba(255, 255, 255, 0.035);
+      }
+      .supporter-guide-card span { display: block; color: var(--muted); font-size: 0.58rem; font-weight: 900; letter-spacing: 0.08em; text-transform: uppercase; }
+      .supporter-guide-card h3 { margin: 5px 0 9px; color: #fff; font-size: 0.86rem; font-weight: 1000; text-transform: uppercase; }
+      .supporter-guide-card ul { display: grid; gap: 7px; margin: 0; padding-left: 17px; color: #d9dbe1; font-size: 0.72rem; line-height: 1.35; }
       .pie-card {
         margin-top: 14px;
         border: 1px dashed rgba(226, 14, 25, 0.32);
@@ -338,15 +349,25 @@
       .form-dot.l { background: var(--red-2); }
 
       
-      /* Global Desktop Fixed: Auto-wrap grid to prevent clipping */
+      .squad-pitch-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1.4fr) minmax(230px, 0.6fr);
+        gap: 12px;
+        align-items: stretch;
+      }
       .player-strip {
         position: relative;
+        display: grid;
+        grid-template-columns: repeat(7, minmax(0, 1fr));
+        grid-template-rows: repeat(6, minmax(44px, 1fr));
+        gap: 8px;
         width: 100%;
-        height: clamp(300px, 44vw, 380px);
+        min-height: clamp(420px, 54vw, 560px);
         overflow: hidden;
         margin-top: 10px;
         border: 1px dashed rgba(255, 255, 255, 0.12);
         border-radius: 20px;
+        padding: 16px;
         background:
           linear-gradient(to right, rgba(255, 255, 255, 0.055) 1px, transparent 1px) 50% 0 / 1px 100% no-repeat,
           radial-gradient(circle at 50% 50%, transparent 54px, rgba(255, 255, 255, 0.055) 55px, rgba(255, 255, 255, 0.055) 57px, transparent 58px),
@@ -356,11 +377,12 @@
           linear-gradient(180deg, rgba(226, 14, 25, 0.08) 0%, rgba(9, 10, 14, 0.46) 100%);
       }
       .player-strip-card {
-        position: absolute;
-        width: clamp(64px, 8vw, 76px);
-        height: clamp(64px, 8vw, 76px);
-        min-height: 0;
-        border: 2px solid var(--red);
+        position: relative;
+        width: min(68px, 100%);
+        height: min(68px, 100%);
+        min-height: 58px;
+        place-self: center;
+        border: 2px solid rgba(255, 255, 255, 0.18);
         border-radius: 999px;
         padding: 5px;
         display: flex;
@@ -368,19 +390,35 @@
         align-items: center;
         justify-content: center;
         text-align: center;
+        cursor: pointer;
         background: radial-gradient(circle at 50% 30%, #252936, #101116 72%);
         box-shadow: 0 10px 26px rgba(0, 0, 0, 0.58), inset 0 2px 4px rgba(255, 255, 255, 0.1);
-        transition: border-color 0.2s ease, transform 0.2s ease;
+        transition: border-color 0.2s ease, transform 0.2s ease, opacity 0.2s ease;
       }
-      .player-strip-card:hover { border-color: var(--red-3); transform: translate(-50%, 0) scale(1.06); }
-      .player-strip-card[data-number="#1"] { bottom: 5%; left: 50%; transform: translateX(-50%); }
-      .player-strip-card[data-number="#22"] { bottom: 31%; left: 50%; transform: translateX(-50%); }
-      .player-strip-card[data-number="#10"] { bottom: 57%; left: 50%; transform: translateX(-50%); }
-      .player-strip-card[data-number="#42"] { bottom: 77%; left: 50%; transform: translateX(-50%); }
-      .player-strip-card:hover[data-number="#1"],
-      .player-strip-card:hover[data-number="#22"],
-      .player-strip-card:hover[data-number="#10"],
-      .player-strip-card:hover[data-number="#42"] { transform: translateX(-50%) scale(1.06); }
+      .player-strip-card.is-tracked { border-color: var(--red); }
+      .player-strip-card.is-role-slot { opacity: 0.72; border-style: dashed; }
+      .player-strip-card:hover, .player-strip-card.active-player { border-color: var(--red-3); transform: scale(1.06); }
+      .player-strip-card[data-role-433="gk"], .player-strip-card[data-role-532="gk"] { grid-column: 4; grid-row: 6; }
+      .player-strip[data-formation="433"] .player-strip-card[data-role-433="lb"] { grid-column: 1; grid-row: 5; }
+      .player-strip[data-formation="433"] .player-strip-card[data-role-433="lcb"] { grid-column: 3; grid-row: 5; }
+      .player-strip[data-formation="433"] .player-strip-card[data-role-433="rcb"] { grid-column: 5; grid-row: 5; }
+      .player-strip[data-formation="433"] .player-strip-card[data-role-433="rb"] { grid-column: 7; grid-row: 5; }
+      .player-strip[data-formation="433"] .player-strip-card[data-role-433="lcm"] { grid-column: 2; grid-row: 3; }
+      .player-strip[data-formation="433"] .player-strip-card[data-role-433="dm"] { grid-column: 4; grid-row: 4; }
+      .player-strip[data-formation="433"] .player-strip-card[data-role-433="rcm"] { grid-column: 6; grid-row: 3; }
+      .player-strip[data-formation="433"] .player-strip-card[data-role-433="lw"] { grid-column: 1; grid-row: 1; }
+      .player-strip[data-formation="433"] .player-strip-card[data-role-433="st"] { grid-column: 4; grid-row: 1; }
+      .player-strip[data-formation="433"] .player-strip-card[data-role-433="rw"] { grid-column: 7; grid-row: 1; }
+      .player-strip[data-formation="532"] .player-strip-card[data-role-532="lwb"] { grid-column: 1; grid-row: 4; }
+      .player-strip[data-formation="532"] .player-strip-card[data-role-532="lcb"] { grid-column: 2; grid-row: 5; }
+      .player-strip[data-formation="532"] .player-strip-card[data-role-532="cb"] { grid-column: 4; grid-row: 5; }
+      .player-strip[data-formation="532"] .player-strip-card[data-role-532="rcb"] { grid-column: 6; grid-row: 5; }
+      .player-strip[data-formation="532"] .player-strip-card[data-role-532="rwb"] { grid-column: 7; grid-row: 4; }
+      .player-strip[data-formation="532"] .player-strip-card[data-role-532="lcm"] { grid-column: 2; grid-row: 3; }
+      .player-strip[data-formation="532"] .player-strip-card[data-role-532="cm"] { grid-column: 4; grid-row: 3; }
+      .player-strip[data-formation="532"] .player-strip-card[data-role-532="rcm"] { grid-column: 6; grid-row: 3; }
+      .player-strip[data-formation="532"] .player-strip-card[data-role-532="stl"] { grid-column: 3; grid-row: 1; }
+      .player-strip[data-formation="532"] .player-strip-card[data-role-532="str"] { grid-column: 5; grid-row: 1; }
       .player-strip-card::after { display: none; }
       .player-strip-card h3 {
         position: relative;
@@ -391,11 +429,25 @@
         text-overflow: ellipsis;
         white-space: nowrap;
         color: #fff;
-        font-size: clamp(0.56rem, 1.4vw, 0.66rem);
+        font-size: clamp(0.52rem, 1.1vw, 0.64rem);
         font-weight: 1000;
         line-height: 1.05;
         text-transform: uppercase;
       }
+      .performance-ledger {
+        min-width: 0;
+        align-self: stretch;
+        border: 1px solid rgba(226, 14, 25, 0.28);
+        border-radius: 16px;
+        padding: 13px;
+        background: linear-gradient(180deg, rgba(226, 14, 25, 0.08), rgba(0, 0, 0, 0.22));
+      }
+      .performance-ledger h3 { margin: 4px 0 2px; font-size: 1rem; font-weight: 1000; text-transform: uppercase; }
+      .performance-ledger p { margin: 0 0 12px; color: var(--muted); font-size: 0.72rem; font-weight: 850; text-transform: uppercase; }
+      .ledger-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+      .ledger-stat { border: 1px solid var(--line); border-radius: 10px; padding: 9px; background: rgba(255, 255, 255, 0.035); }
+      .ledger-stat span { display: block; color: var(--muted); font-size: 0.56rem; font-weight: 900; letter-spacing: 0.08em; text-transform: uppercase; }
+      .ledger-stat strong { display: block; margin-top: 3px; color: #fff; font-size: 1.08rem; font-weight: 1000; }
       .position-pill, .fixture-pill {
         position: relative;
         z-index: 1;
@@ -468,6 +520,8 @@
         font-size: 0.68rem;
         font-weight: 900;
       }
+      .poll-option.is-locked { cursor: not-allowed; opacity: 0.58; }
+      .poll-option.is-selected { opacity: 1; border-color: rgba(226, 14, 25, 0.74); background: rgba(226, 14, 25, 0.12); }
 
       .matchday-briefing-card {
         margin: 0 0 12px;
@@ -566,15 +620,15 @@
         .fanzine-column-card .section-head { align-items: start; }
         .zine-article-snippet p { font-size: 0.8rem; line-height: 1.4; }
         .zine-meta { font-size: 0.56rem; }
-        .away-guide-grid, .briefing-grid { grid-template-columns: 1fr; gap: 8px; }
+        .away-guide-grid, .supporter-guide-grid, .briefing-grid { grid-template-columns: 1fr; gap: 8px; }
         .away-guide-tile strong { white-space: normal; }
         .formation-controls { justify-content: stretch; }
         .formation-controls .chip { flex: 1 1 0; }
         
         /* Fixed Mobile Target: Forces pristine 2x2 squad block grid */
-        .player-strip { height: 270px; }
-        .player-strip-card { width: 56px; height: 56px; padding: 4px; }
-        .player-strip-card[data-number="#42"] { bottom: 74%; }
+        .squad-pitch-layout { grid-template-columns: 1fr; }
+        .player-strip { min-height: 410px; padding: 10px; gap: 5px; }
+        .player-strip-card { width: 48px; height: 48px; min-height: 48px; padding: 3px; }
         .position-pill { max-width: 48px; }
         .player-strip-card h3 { font-size: 0.48rem; }
       }
@@ -653,7 +707,7 @@
               </div>
               <span class="chip">Live Poll</span>
             </div>
-            <div class="fan-poll-grid" data-poll-grid>{{fanPollOptions}}</div>
+            <div class="fan-poll-grid" data-poll-grid data-vote-lock-key="{{voteLockKey}}">{{fanPollOptions}}</div>
           </section>
           <section class="panel fixtures-panel" aria-label="Fixture list">
             <div class="section-head">
@@ -686,7 +740,20 @@
                 <button class="chip active-formation" type="button" data-formation="433">4-3-3 Attack</button>
                 <button class="chip" type="button" data-formation="532">5-3-2 Solid</button>
               </div>
-              <div class="player-strip">{{squadCards}}</div>
+              <div class="squad-pitch-layout">
+                <div class="player-strip" data-formation="433">{{squadCards}}</div>
+                <aside class="performance-ledger" aria-live="polite" data-performance-ledger>
+                  <span class="section-kicker">Player Performance Ledger</span>
+                  <h3 data-ledger-name>Manhoef</h3>
+                  <p data-ledger-role>Forward</p>
+                  <div class="ledger-grid">
+                    <div class="ledger-stat"><span>Goals</span><strong data-ledger-goals>11</strong></div>
+                    <div class="ledger-stat"><span>Assists</span><strong data-ledger-assists>6</strong></div>
+                    <div class="ledger-stat"><span>Yellow / Red</span><strong data-ledger-cards>4 / 0</strong></div>
+                    <div class="ledger-stat"><span>Avg Rating</span><strong data-ledger-rating>7.6</strong></div>
+                  </div>
+                </aside>
+              </div>
             </section>
             </aside>
           </div>
@@ -707,12 +774,9 @@
                   <strong>{{awayStadium}}</strong>
                   <small>{{awayDistance}} from the Potteries - {{awayTravelTime}}</small>
                 </div>
-                <div class="away-guide-tile">
-                  <span>Safe Pub</span>
-                  <strong>{{awayPub}}</strong>
-                  <small>{{awayPubNote}}</small>
-                </div>
               </div>
+
+              <div class="supporter-guide-grid">{{awaySupporterCards}}</div>
 
               <div class="pie-card">
                 <span>The Match-Day Pie Index</span>
@@ -785,54 +849,112 @@
         });
       }
 
+      const getClientSessionId = () => {
+        const key = 'potter_pulse_session_id';
+        const existing = localStorage.getItem(key);
+        if (existing) return existing;
+        const next = crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random().toString(16).slice(2);
+        localStorage.setItem(key, next);
+        return next;
+      };
+
+      const escapeText = (value) => String(value ?? '').replace(/[&<>"']/g, (character) => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;',
+      }[character]));
+
+      const applyVoteLockState = () => {
+        const pollGrid = document.querySelector('[data-poll-grid]');
+        if (!pollGrid) return;
+        const localKey = 'has_voted_match_' + pollGrid.dataset.voteLockKey;
+        const votedOption = localStorage.getItem(localKey);
+        pollGrid.querySelectorAll('[data-vote-option]').forEach((button) => {
+          const isSelected = button.dataset.voteOption === votedOption;
+          button.disabled = Boolean(votedOption);
+          button.classList.toggle('is-locked', Boolean(votedOption));
+          button.classList.toggle('is-selected', isSelected);
+        });
+      };
+
       const renderPollResults = (results) => {
         const pollGrid = document.querySelector('[data-poll-grid]');
         if (!pollGrid) return;
         pollGrid.innerHTML = results.map((option) => [
-          '<button class="poll-option" type="button" data-vote-option="' + option.key + '">',
-          '<strong>' + option.label + '</strong>',
-          '<span class="poll-meter"><span style="width: ' + option.percent + '%;"></span></span>',
-          '<small>' + option.percent + '% ' + option.note + ' - ' + option.votes + ' votes</small>',
+          '<button class="poll-option" type="button" data-vote-option="' + escapeText(option.key) + '">',
+          '<strong>' + escapeText(option.label) + '</strong>',
+          '<span class="poll-meter"><span style="width: ' + Number(option.percent) + '%;"></span></span>',
+          '<small>' + Number(option.percent) + '% ' + escapeText(option.note) + ' - ' + Number(option.votes) + ' votes</small>',
           '</button>',
         ].join('')).join('');
+        applyVoteLockState();
       };
 
       document.addEventListener('click', async (event) => {
         const voteButton = event.target.closest('[data-vote-option]');
         if (!voteButton) return;
-        voteButton.disabled = true;
+        const pollGrid = voteButton.closest('[data-poll-grid]');
+        const localKey = 'has_voted_match_' + pollGrid.dataset.voteLockKey;
+        if (localStorage.getItem(localKey)) {
+          applyVoteLockState();
+          return;
+        }
+        localStorage.setItem(localKey, voteButton.dataset.voteOption);
+        applyVoteLockState();
         try {
           const response = await fetch('/api/vote', {
             method: 'POST',
             headers: { 'content-type': 'application/json' },
-            body: JSON.stringify({ optionKey: voteButton.dataset.voteOption }),
+            body: JSON.stringify({
+              optionKey: voteButton.dataset.voteOption,
+              voteLockKey: pollGrid.dataset.voteLockKey,
+              sessionId: getClientSessionId(),
+            }),
           });
           const payload = await response.json();
           if (response.ok && payload.results) renderPollResults(payload.results);
-        } finally {
-          voteButton.disabled = false;
+        } catch {
+          localStorage.removeItem(localKey);
+          applyVoteLockState();
         }
       });
 
-      const formationLayouts = {
-        '433': { '#1': '5%', '#22': '31%', '#10': '57%', '#42': '77%' },
-        '532': { '#1': '5%', '#22': '28%', '#10': '52%', '#42': '74%' },
+      const updateLedger = (playerNode) => {
+        if (!playerNode) return;
+        document.querySelectorAll('.player-strip-card').forEach((node) => node.classList.toggle('active-player', node === playerNode));
+        const ledger = document.querySelector('[data-performance-ledger]');
+        if (!ledger) return;
+        ledger.querySelector('[data-ledger-name]').textContent = playerNode.dataset.playerName;
+        ledger.querySelector('[data-ledger-role]').textContent = playerNode.dataset.playerRole;
+        ledger.querySelector('[data-ledger-goals]').textContent = playerNode.dataset.goals;
+        ledger.querySelector('[data-ledger-assists]').textContent = playerNode.dataset.assists;
+        ledger.querySelector('[data-ledger-cards]').textContent = playerNode.dataset.yellows + ' / ' + playerNode.dataset.reds;
+        ledger.querySelector('[data-ledger-rating]').textContent = playerNode.dataset.rating;
       };
 
       const changeFormation = (formation) => {
-        const layout = formationLayouts[formation] ?? formationLayouts['433'];
+        const nextFormation = formation === '532' ? '532' : '433';
         document.querySelectorAll('.formation-controls .chip').forEach((button) => {
-          button.classList.toggle('active-formation', button.dataset.formation === formation);
+          button.classList.toggle('active-formation', button.dataset.formation === nextFormation);
         });
-        Object.entries(layout).forEach(([number, bottom]) => {
-          const marker = document.querySelector(`.player-strip-card[data-number="${number}"]`);
-          if (marker) marker.style.bottom = bottom;
-        });
+        const pitch = document.querySelector('.player-strip');
+        if (pitch) pitch.dataset.formation = nextFormation;
       };
 
       document.querySelectorAll('[data-formation]').forEach((control) => {
         control.addEventListener('click', () => changeFormation(control.dataset.formation));
       });
+
+      document.querySelectorAll('.player-strip-card').forEach((node) => {
+        node.addEventListener('mouseenter', () => updateLedger(node));
+        node.addEventListener('focus', () => updateLedger(node));
+        node.addEventListener('click', () => updateLedger(node));
+      });
+
+      applyVoteLockState();
+      updateLedger(document.querySelector('.player-strip-card[data-number="#42"]') || document.querySelector('.player-strip-card'));
 
       addEventListener('hashchange', () => activateView(location.hash.slice(1), false));
       activateView(location.hash.slice(1) || 'matches', false);

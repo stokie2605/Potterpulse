@@ -32,7 +32,7 @@ Potterpulse/
 |   |-- main.tf                        # ECS/Fargate infrastructure stub
 |-- scripts/
 |   |-- ci-mobile-layout-check.mjs     # Playwright mobile layout regression check
-|   |-- server.mjs                     # Local Node HTTP server and SQLite renderer
+|   |-- server.mjs                     # Local Node HTTP server, SQLite renderer, and vote guardrails
 |   |-- seed-potter-pulse.mjs          # Initial seed script for core players/fixtures
 |-- docs/
 |   |-- screenshots/
@@ -379,6 +379,23 @@ Problems found and solved during this pass:
 - CSS uppercase rendering made `innerText` unsuitable for checking the culture display name. The test now uses `textContent` for that assertion while still checking visible layout state through computed styles.
 - Local `node_modules`, Playwright MCP scratch files, and QA screenshots are ignored so the repository stays focused on source, docs, and reproducible pipeline files.
 
+### 16. Four-player spine vs 11-node pitch grid, vote locking, and modular away guide cards
+
+The Squad view now uses an 11-node CSS Grid pitch instead of a four-player vertical spine. The grid keeps the four tracked players active and honest, then fills the remaining seven positions with tactical role slots so the shape reads like a proper football layout without inventing fake squad data. The formation controls now switch the pitch container between `4-3-3 Attack` and `5-3-2 Solid` using data attributes, and the player nodes move through CSS grid coordinates rather than inline bottom offsets.
+
+A new Player Performance Ledger sits beside or below the pitch depending on viewport width. Hovering, focusing, or tapping a player node updates Goals, Assists, Yellow / Red Cards, and Season Average Rating. Manhoef, Jun-ho, Tchamadeu, and Johansson are seeded with localized season stats, while tactical role slots remain clearly secondary.
+
+The Performance Vote now has two layers of spam protection. The client writes a `has_voted_match_*` key to localStorage immediately after a vote click, applies selected/locked visual state, and disables repeat clicks for that match. The backend also tracks rapid identical submissions by session, match key, and option key, returning the current aggregate without incrementing if a duplicate request arrives inside the debounce window.
+
+The Away Days view now renders a modular supporter guide grid from backend `awayGuides.modules` data. Swansea is seeded with three production-style cards: Away-Friendly Pubs, Recommended Hotels, and Matchday Transit & Logistics. The guide includes Harvester Morfa Parc Swansea, The Bank Statement on Wind St, The Grand Hotel, Village Hotel Swansea, and Felindre M4 Junction 46 Park & Ride instructions, plus warnings around home-only zones.
+
+Problems found and solved during this pass:
+
+- The first inline script replacement left a stale `await` fragment from the old vote handler, which stopped all page interactivity. The stale tail was removed and the Playwright regression immediately caught the fixture toggle working again.
+- The existing CI mobile test protected the Matches flow while the Squad and Away Days views changed substantially.
+- A targeted Playwright smoke check verified 11 pitch nodes, four tracked players, formation movement, ledger updates, three away guide cards, localStorage vote locking, and backend duplicate-vote dropping.
+- Poll counts were reset after smoke verification so local test votes do not pollute the seed state.
+
 ## Screenshot Workflow
 
 Save the latest dashboard image here:
@@ -423,6 +440,9 @@ Culture profile renders supporter nicknames from canonical team names
 Matchday briefing card renders culture-aware headline and referee/weather analysis
 GitHub Actions workflow triggers on pushes to main with separate test and Docker build jobs
 CI test script validates mobile layout, fixture toggle behaviour, culture text, and fixed bottom navigation
+Squad pitch renders 11 nodes with formation switching and performance ledger updates
+Away Days renders three modular supporter guide cards from backend guide modules
+Client vote locking uses localStorage and backend debounce drops rapid duplicate submissions
 ```
 
 Responsive screenshots were generated during visual QA:
@@ -520,6 +540,19 @@ npm run test:layout
 
 The Docker build step is defined in GitHub Actions and will run on the GitHub-hosted Ubuntu runner after the test job passes.
 
+
+The pitch, away-guide, and vote-locking overhaul was verified with a targeted Playwright smoke check:
+
+```text
+Squad nodes rendered: 11
+Tracked player nodes rendered: 4
+Formation switched from 4-3-3 to 5-3-2
+Player Performance Ledger updated from Manhoef to Bae Jun-ho
+Mobile pitch width at 390px viewport: 332px
+Supporter guide cards rendered: 3
+Vote buttons locked after first client vote
+Backend duplicate vote response: duplicate true
+```
 ## GitHub Linking Steps
 
 After `git init` and staging are complete, link this local project to a GitHub repository with these commands.
