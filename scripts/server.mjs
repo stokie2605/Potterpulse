@@ -1,6 +1,7 @@
 ﻿import { createServer } from 'node:http';
+import { parse } from 'node:url';
 import { readFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
+import { dirname, extname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { DatabaseSync } from 'node:sqlite';
 
@@ -8,7 +9,101 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const rootDir = join(__dirname, '..');
 const dbPath = join(rootDir, 'potter_pulse.db');
 const templatePath = join(rootDir, 'index.html');
+const assetsDir = join(rootDir, 'assets');
 const port = Number(process.env.PORT || 4173);
+const crestAssets = {
+  stoke_city: '/assets/crests/stoke-city.svg',
+  swansea_city: '/assets/crests/swansea-city.svg',
+  west_brom: '/assets/crests/west-bromwich-albion.svg',
+  west_bromwich_albion: '/assets/crests/west-bromwich-albion.svg',
+  default: '/assets/crests/default-opponent.svg',
+};
+const pollCandidates = [
+  { key: 'manhoef', label: 'Manhoef', note: 'explosive threat' },
+  { key: 'jun_ho', label: 'Jun-ho', note: 'creative spark' },
+  { key: 'johansson', label: 'Johansson', note: 'safe hands' },
+];
+
+const ensureSchema = (db) => {
+  db.exec(
+    'CREATE TABLE IF NOT EXISTS fan_poll_votes (' +
+      'option_key TEXT PRIMARY KEY,' +
+      'label TEXT NOT NULL,' +
+      'note TEXT NOT NULL,' +
+      'vote_count INTEGER NOT NULL DEFAULT 0,' +
+      'created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,' +
+      'updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP' +
+    ')'
+  );
+
+  const seedVote = db.prepare(
+    'INSERT OR IGNORE INTO fan_poll_votes (option_key, label, note, vote_count) ' +
+      'VALUES (?, ?, ?, 0)'
+  );
+
+  for (const candidate of pollCandidates) {
+    seedVote.run(candidate.key, candidate.label, candidate.note);
+  }
+};
+
+const getPollResults = (db) => {
+  ensureSchema(db);
+  return db
+    .prepare(
+      'SELECT option_key, label, note, vote_count ' +
+        'FROM fan_poll_votes ' +
+        'ORDER BY CASE option_key ' +
+        "WHEN 'manhoef' THEN 1 " +
+        "WHEN 'jun_ho' THEN 2 " +
+        "WHEN 'johansson' THEN 3 " +
+        'ELSE 99 END, label'
+    )
+    .all();
+};
+
+const serializePollResults = (rows) => {
+  const totalVotes = rows.reduce((sum, row) => sum + Number(row.vote_count), 0);
+  return rows.map((row) => ({
+    key: row.option_key,
+    label: row.label,
+    note: row.note,
+    votes: Number(row.vote_count),
+    percent: totalVotes > 0 ? Math.round((Number(row.vote_count) / totalVotes) * 100) : 0,
+  }));
+};
+
+const renderPollOptions = (rows) =>
+  serializePollResults(rows)
+    .map((option) =>
+      [
+        '<button class="poll-option" type="button" data-vote-option="' + escapeHtml(option.key) + '">',
+        '<strong>' + escapeHtml(option.label) + '</strong>',
+        '<span class="poll-meter"><span style="width: ' + escapeHtml(option.percent) + '%;"></span></span>',
+        '<small>' + escapeHtml(option.percent) + '% ' + escapeHtml(option.note) + ' - ' + escapeHtml(option.votes) + ' votes</small>',
+        '</button>',
+      ].join(''),
+    )
+    .join('');
+
+const readJsonBody = (request) =>
+  new Promise((resolve, reject) => {
+    let body = '';
+    request.on('data', (chunk) => {
+      body += chunk;
+      if (body.length > 8192) {
+        reject(new Error('Request body too large'));
+        request.destroy();
+      }
+    });
+    request.on('end', () => {
+      try {
+        resolve(body ? JSON.parse(body) : {});
+      } catch {
+        reject(new Error('Invalid JSON body'));
+      }
+    });
+    request.on('error', reject);
+  });
 
 const awayGuides = {
   swansea_city: {
@@ -71,6 +166,7 @@ const normalizeOpponentKey = (value) => {
   return opponentAliases[key] ?? key;
 };
 
+const getCrestSrc = (teamName) => crestAssets[normalizeOpponentKey(teamName)] ?? crestAssets.default;
 const hasMatchContext = (fixture) => {
   const key = normalizeOpponentKey(fixture?.opponent);
   return Boolean(awayGuides[key] && nextMatchBriefing[key]);
@@ -89,13 +185,6 @@ const titleCase = (value) =>
     .toLowerCase()
     .replace(/\b\w/g, (letter) => letter.toUpperCase());
 
-const initials = (value) =>
-  String(value ?? '')
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((word) => word[0].toUpperCase())
-    .join('') || 'FC';
 
 const shortPlayerName = (value) => {
   const parts = String(value ?? '').trim().split(/\s+/).filter(Boolean);
@@ -119,6 +208,7 @@ const formatShortDate = (dateText) =>
 const render = () => {
   const db = new DatabaseSync(dbPath);
   try {
+    ensureSchema(db);
     const squad = db
       .prepare(
         'SELECT player_name, squad_number, position FROM stoke_squad ORDER BY squad_number',
@@ -160,6 +250,9 @@ const render = () => {
       )
       .join('');
 
+    const pollRows = getPollResults(db);
+    const fanPollOptions = renderPollOptions(pollRows);
+
     const fixtureTimeline = fixtures
       .map(
         (fixture) => `
@@ -186,7 +279,8 @@ const render = () => {
         minute: '2-digit',
       })}`,
       heroOpponent: hero.opponent,
-      heroInitials: initials(hero.opponent),
+      homeCrestSrc: crestAssets.stoke_city,
+      awayCrestSrc: getCrestSrc(hero.opponent),
       heroVenue: titleCase(hero.venue),
       heroDate: formatDate(hero.match_date),
       heroDateShort: formatShortDate(hero.match_date),
@@ -195,6 +289,7 @@ const render = () => {
       fixtureCount: fixtures.length,
       squadCards,
       fixtureTimeline,
+      fanPollOptions,
       awayOpponent: awayGuide.opponent,
       awayStadium: awayGuide.stadium,
       awayDistance: awayGuide.distance,
@@ -226,8 +321,79 @@ const render = () => {
   }
 };
 
-const server = createServer((request, response) => {
-  if (request.url === '/' || request.url === '/index.html') {
+const sendAsset = (pathname, response) => {
+  const decodedPath = decodeURIComponent(pathname.replace(/^\/+/, ''));
+  const assetPath = resolve(rootDir, decodedPath);
+  const assetRoot = resolve(assetsDir);
+
+  if (!assetPath.toLowerCase().startsWith(assetRoot.toLowerCase())) {
+    response.writeHead(403, { 'content-type': 'text/plain; charset=utf-8' });
+    response.end('Forbidden');
+    return;
+  }
+
+  try {
+    const extension = extname(assetPath).toLowerCase();
+    const contentTypes = {
+      '.svg': 'image/svg+xml; charset=utf-8',
+      '.png': 'image/png',
+    };
+    response.writeHead(200, { 'content-type': contentTypes[extension] ?? 'application/octet-stream' });
+    response.end(readFileSync(assetPath));
+  } catch {
+    response.writeHead(404, { 'content-type': 'text/plain; charset=utf-8' });
+    response.end('Not found');
+  }
+};
+const handleVote = async (request, response) => {
+  try {
+    const body = await readJsonBody(request);
+    const optionKey = normalizeOpponentKey(body.optionKey ?? body.option ?? '');
+    const db = new DatabaseSync(dbPath);
+    try {
+      ensureSchema(db);
+      const existing = db
+        .prepare('SELECT option_key FROM fan_poll_votes WHERE option_key = ?')
+        .get(optionKey);
+
+      if (!existing) {
+        response.writeHead(400, { 'content-type': 'application/json; charset=utf-8' });
+        response.end(JSON.stringify({ error: 'Unknown vote option' }));
+        return;
+      }
+
+      db.prepare(
+        'UPDATE fan_poll_votes ' +
+          'SET vote_count = vote_count + 1, updated_at = CURRENT_TIMESTAMP ' +
+          'WHERE option_key = ?'
+      ).run(optionKey);
+
+      const results = serializePollResults(getPollResults(db));
+      response.writeHead(200, { 'content-type': 'application/json; charset=utf-8' });
+      response.end(JSON.stringify({ ok: true, results }));
+    } finally {
+      db.close();
+    }
+  } catch (error) {
+    response.writeHead(400, { 'content-type': 'application/json; charset=utf-8' });
+    response.end(JSON.stringify({ error: error.message }));
+  }
+};
+
+const server = createServer(async (request, response) => {
+  const { pathname } = parse(request.url);
+
+  if (request.method === 'GET' && pathname.startsWith('/assets/')) {
+    sendAsset(pathname, response);
+    return;
+  }
+
+  if (request.method === 'POST' && pathname === '/api/vote') {
+    await handleVote(request, response);
+    return;
+  }
+
+  if (request.method === 'GET' && (pathname === '/' || pathname === '/index.html')) {
     response.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
     response.end(render());
     return;

@@ -1,0 +1,8 @@
+.git
+.playwright-mcp
+docs
+infra
+node_modules
+npm-debug.log
+potterpulse-*.png
+*.log

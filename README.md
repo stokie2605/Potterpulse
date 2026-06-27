@@ -10,7 +10,6 @@ Potter Pulse is currently a work in progress. The core local architecture is wor
 
 Known WIP areas:
 
-- Replace placeholder crest blocks with real club crest assets.
 - Add richer fixture detail screens and interaction states.
 - Improve responsive polish across more viewport sizes.
 - Decide whether to keep the current no-build Node renderer or migrate to a fuller frontend stack later.
@@ -19,15 +18,20 @@ Known WIP areas:
 
 ```text
 Potterpulse/
-├── index.html                         # Single-page dashboard shell and CSS
-├── potter_pulse.db                    # SQLite database used by the renderer
-├── scripts/
-│   ├── server.mjs                     # Local Node HTTP server and SQLite renderer
-│   └── seed-potter-pulse.mjs          # Initial seed script for core players/fixtures
-├── docs/
-│   └── screenshots/
-│       └── dashboard_latest.png       # Latest README hero screenshot
-└── potterpulse-*.png                  # Local verification screenshots generated during QA
+|-- Dockerfile                         # Multi-stage Node runtime container
+|-- index.html                         # Single-page dashboard shell and CSS
+|-- potter_pulse.db                    # SQLite database used by the renderer
+|-- assets/
+|   |-- crests/                        # Local SVG crest assets
+|-- infra/
+|   |-- main.tf                        # ECS/Fargate infrastructure stub
+|-- scripts/
+|   |-- server.mjs                     # Local Node HTTP server and SQLite renderer
+|   |-- seed-potter-pulse.mjs          # Initial seed script for core players/fixtures
+|-- docs/
+|   |-- screenshots/
+|       |-- dashboard_latest.png       # Latest README hero screenshot
+|-- potterpulse-*.png                  # Local verification screenshots generated during QA
 ```
 
 ## How It Works
@@ -37,8 +41,9 @@ The app is intentionally simple:
 1. `potter_pulse.db` stores the squad and fixture data.
 2. `scripts/server.mjs` opens the SQLite database with Node's built-in `node:sqlite` module.
 3. The server reads `index.html` as a template.
-4. It injects live database values into placeholders such as `{{heroOpponent}}`, `{{squadCards}}`, and `{{fixtureTimeline}}`.
+4. It injects live database values into placeholders such as `{{heroOpponent}}`, `{{squadCards}}`, `{{fanPollOptions}}`, and `{{fixtureTimeline}}`.
 5. The page is served locally at `http://localhost:4173`.
+6. `POST /api/vote` persists fan performance votes into SQLite and returns updated aggregate poll percentages.
 
 This means there is no framework build step, package install, or frontend bundler required for the current version. The app is a fast local prototype with real persisted data.
 
@@ -93,6 +98,24 @@ updated_at
 ```
 
 Dates are stored as clean `YYYY-MM-DD` text so the frontend can format them consistently.
+
+
+```sql
+fan_poll_votes
+```
+
+Purpose: persists aggregate fan performance poll votes across runtime restarts and page reloads.
+
+Important columns:
+
+```text
+option_key
+label
+note
+vote_count
+created_at
+updated_at
+```
 
 Venues are normalized as lowercase values:
 
@@ -295,6 +318,21 @@ Problems found and solved during this pass:
 - A broad verification regex counted `tab-view` wrappers as top-level tabs and falsely reported more than three tabs. The check was tightened to count only actual tab buttons, confirming three top tabs and three bottom nav buttons.
 - The away guide had mileage but not travel time. `scripts/server.mjs` now includes a dedicated `travelTime` value for each seeded away guide.
 
+### 12. Local prototype vs container-ready runtime, persisted votes, and crest assets
+
+The app now has a deployment-oriented runtime layer. A multi-stage `Dockerfile` checks the Node server syntax in the first stage and runs the app from a non-root `node` user in a lightweight Bookworm-slim runtime stage. The runtime copies only the required app files: `index.html`, `scripts/`, `assets/`, and `potter_pulse.db`. A minimal `infra/main.tf` stub defines the ECS/Fargate task, service, log group, networking inputs, and port `4173` mapping for cloud-native context.
+
+The fan performance vote moved from static HTML into persisted backend state. `scripts/server.mjs` now owns a `fan_poll_votes` table, seeds the known poll options, renders aggregate percentages into `{{fanPollOptions}}`, and exposes `POST /api/vote` so client votes survive page reloads and server restarts.
+
+The match hero no longer depends on text-only crest blocks. Local SVG assets live under `assets/crests/`, are mapped by normalized team keys in the renderer, and are served through a constrained `/assets/...` route. The crest-specific WIP wording was removed from the README because the visible interface now uses local asset paths.
+
+Problems found and solved during this pass:
+
+- The project has no `package.json` or frontend build step, so the container explicitly skips npm/bundler work and validates with `node --check scripts/server.mjs`.
+- The original poll was static markup. It is now server-rendered from SQLite and updated through a JSON POST route.
+- The first vote verification intentionally changed the local database; the counts were reset to zero after confirming persistence so the committed seed state stays clean.
+- Crest placeholders were still using text initials. The hero now renders SVG images via `{{homeCrestSrc}}` and `{{awayCrestSrc}}`.
+
 ## Screenshot Workflow
 
 Save the latest dashboard image here:
@@ -320,7 +358,7 @@ No unreplaced template placeholders
 47 fixture rows rendered
 4 squad cards rendered
 App frame present
-Tabbed views present for Matches, Squad, Pulse, and More
+Tabbed views present for Matches, Squad, and Away Days
 Away Day guide renders without template placeholders
 Formation controls switch active state and marker positions
 Mobile bottom navigation remains fixed to the viewport bottom
@@ -329,6 +367,11 @@ Three top tabs and three bottom nav buttons render
 Pulse and More standalone views are removed
 Boothen Verdict and Performance Vote render before Fixture Centre
 Away Days renders travel time, safe pub, and Pie Index metrics
+Dockerfile includes check and non-root runtime stages
+ECS/Fargate Terraform stub defines port 4173 runtime context
+Docker/Terraform CLI validation deferred because those CLIs are not installed locally
+Fan poll votes persist in `fan_poll_votes` through `POST /api/vote`
+Local SVG crest assets render without text crest placeholders
 ```
 
 Responsive screenshots were generated during visual QA:
@@ -419,7 +462,6 @@ git remote -v
 
 Good next improvements:
 
-- Add real Stoke and opponent crests as image assets.
 - Move inline CSS into `src` or `styles` if the project grows.
 - Add a route for JSON fixture data.
 - Add filtering by competition, month, and home/away.
