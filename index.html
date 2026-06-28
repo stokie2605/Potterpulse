@@ -195,23 +195,6 @@
       }
       .section-head { display: flex; align-items: end; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
       .section-head h2 { margin: 0; font-size: 1.08rem; font-weight: 1000; text-transform: uppercase; }
-      .formation-controls {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 8px;
-        margin: 0 0 12px;
-      }
-      .formation-controls .chip {
-        cursor: pointer;
-        background: rgba(255, 255, 255, 0.045);
-      }
-      .formation-controls .chip.active-formation {
-        color: #fff;
-        border-color: rgba(226, 14, 25, 0.7);
-        background: linear-gradient(180deg, rgba(226, 14, 25, 0.92), rgba(144, 8, 17, 0.92));
-        box-shadow: 0 10px 24px rgba(226, 14, 25, 0.2);
-      }
       .away-master-grid {
         display: grid;
         grid-template-columns: minmax(0, 0.88fr) minmax(360px, 1.12fr);
@@ -386,13 +369,7 @@
       .form-dot.l { background: var(--red-2); }
 
       
-      .squad-pitch-layout {
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-        min-width: 0;
-      }
-      .tactical-map-grid {
+      .squad-hub-grid {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 12px;
@@ -464,25 +441,6 @@
           linear-gradient(to right, rgba(255, 255, 255, 0.12) 2px, transparent 2px) bottom left 38% / 2px 30px no-repeat,
           linear-gradient(to left, rgba(255, 255, 255, 0.12) 2px, transparent 2px) bottom right 38% / 2px 30px no-repeat;
       }
-      .opposition-pitch {
-        background:
-          repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.026) 0 1px, transparent 1px 42px),
-          linear-gradient(180deg, rgba(18, 82, 55, 0.88), rgba(6, 45, 33, 0.96));
-      }
-      .opposition-pitch::before {
-        background:
-          linear-gradient(rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.16)) bottom center / 100% 2px no-repeat,
-          radial-gradient(circle at 50% 100%, transparent 42px, rgba(255, 255, 255, 0.12) 43px, rgba(255, 255, 255, 0.12) 45px, transparent 46px);
-      }
-      .opposition-pitch::after {
-        background:
-          linear-gradient(to bottom, rgba(255, 255, 255, 0.12) 2px, transparent 2px) top center / 52% 64px no-repeat,
-          linear-gradient(to right, rgba(255, 255, 255, 0.12) 2px, transparent 2px) top left 24% / 2px 64px no-repeat,
-          linear-gradient(to left, rgba(255, 255, 255, 0.12) 2px, transparent 2px) top right 24% / 2px 64px no-repeat,
-          linear-gradient(to bottom, rgba(255, 255, 255, 0.12) 2px, transparent 2px) top center / 24% 30px no-repeat,
-          linear-gradient(to right, rgba(255, 255, 255, 0.12) 2px, transparent 2px) top left 38% / 2px 30px no-repeat,
-          linear-gradient(to left, rgba(255, 255, 255, 0.12) 2px, transparent 2px) top right 38% / 2px 30px no-repeat;
-      }
       .pitch .player-strip-card {
         position: relative;
         width: 42px;
@@ -534,12 +492,6 @@
       }
       .kit-sleeve.left { left: 2px; transform: rotate(-24deg); }
       .kit-sleeve.right { right: 2px; transform: rotate(24deg); background: #f4f4f6; }
-      .opposition-kit .kit-body,
-      .opposition-kit .kit-sleeve {
-        background: #f4f4f6;
-      }
-      .opposition-kit .kit-body { border-color: rgba(0, 0, 0, 0.38); }
-      .opposition-kit .kit-sleeve.right { background: #e8eaef; }
       .pitch .position-pill {
         min-width: 23px;
         max-width: 34px;
@@ -564,7 +516,7 @@
         line-height: 1;
         text-transform: uppercase;
       }
-      .home-pitch .player-strip-card[data-role-433="gk"], .home-pitch .player-strip-card[data-role-532="gk"] { grid-column: 4; grid-row: 6; }
+      .home-pitch .player-strip-card[data-role-433="gk"] { grid-column: 4; grid-row: 6; }
       .home-pitch[data-formation="433"] .player-strip-card[data-role-433="lb"] { grid-column: 1; grid-row: 5; }
       .home-pitch[data-formation="433"] .player-strip-card[data-role-433="lcb"] { grid-column: 3; grid-row: 5; }
       .home-pitch[data-formation="433"] .player-strip-card[data-role-433="rcb"] { grid-column: 5; grid-row: 5; }
@@ -575,65 +527,64 @@
       .home-pitch[data-formation="433"] .player-strip-card[data-role-433="lw"] { grid-column: 1; grid-row: 1; }
       .home-pitch[data-formation="433"] .player-strip-card[data-role-433="st"] { grid-column: 4; grid-row: 1; }
       .home-pitch[data-formation="433"] .player-strip-card[data-role-433="rw"] { grid-column: 7; grid-row: 1; }
-      .home-pitch[data-formation="532"] .player-strip-card[data-role-532="lwb"] { grid-column: 1; grid-row: 4; }
-      .home-pitch[data-formation="532"] .player-strip-card[data-role-532="lcb"] { grid-column: 2; grid-row: 5; }
-      .home-pitch[data-formation="532"] .player-strip-card[data-role-532="cb"] { grid-column: 4; grid-row: 5; }
-      .home-pitch[data-formation="532"] .player-strip-card[data-role-532="rcb"] { grid-column: 6; grid-row: 5; }
-      .home-pitch[data-formation="532"] .player-strip-card[data-role-532="rwb"] { grid-column: 7; grid-row: 4; }
-      .home-pitch[data-formation="532"] .player-strip-card[data-role-532="lcm"] { grid-column: 2; grid-row: 3; }
-      .home-pitch[data-formation="532"] .player-strip-card[data-role-532="cm"] { grid-column: 4; grid-row: 3; }
-      .home-pitch[data-formation="532"] .player-strip-card[data-role-532="rcm"] { grid-column: 6; grid-row: 3; }
-      .home-pitch[data-formation="532"] .player-strip-card[data-role-532="stl"] { grid-column: 3; grid-row: 1; }
-      .home-pitch[data-formation="532"] .player-strip-card[data-role-532="str"] { grid-column: 5; grid-row: 1; }
-      .opposition-pitch .player-strip-card[data-role-433="gk"], .opposition-pitch .player-strip-card[data-role-532="gk"] { grid-column: 4; grid-row: 1; }
-      .opposition-pitch[data-formation="433"] .player-strip-card[data-role-433="lb"] { grid-column: 7; grid-row: 2; }
-      .opposition-pitch[data-formation="433"] .player-strip-card[data-role-433="lcb"] { grid-column: 5; grid-row: 2; }
-      .opposition-pitch[data-formation="433"] .player-strip-card[data-role-433="rcb"] { grid-column: 3; grid-row: 2; }
-      .opposition-pitch[data-formation="433"] .player-strip-card[data-role-433="rb"] { grid-column: 1; grid-row: 2; }
-      .opposition-pitch[data-formation="433"] .player-strip-card[data-role-433="lcm"] { grid-column: 6; grid-row: 4; }
-      .opposition-pitch[data-formation="433"] .player-strip-card[data-role-433="dm"] { grid-column: 4; grid-row: 3; }
-      .opposition-pitch[data-formation="433"] .player-strip-card[data-role-433="rcm"] { grid-column: 2; grid-row: 4; }
-      .opposition-pitch[data-formation="433"] .player-strip-card[data-role-433="lw"] { grid-column: 7; grid-row: 6; }
-      .opposition-pitch[data-formation="433"] .player-strip-card[data-role-433="st"] { grid-column: 4; grid-row: 6; }
-      .opposition-pitch[data-formation="433"] .player-strip-card[data-role-433="rw"] { grid-column: 1; grid-row: 6; }
-      .opposition-pitch[data-formation="532"] .player-strip-card[data-role-532="lwb"] { grid-column: 7; grid-row: 3; }
-      .opposition-pitch[data-formation="532"] .player-strip-card[data-role-532="lcb"] { grid-column: 6; grid-row: 2; }
-      .opposition-pitch[data-formation="532"] .player-strip-card[data-role-532="cb"] { grid-column: 4; grid-row: 2; }
-      .opposition-pitch[data-formation="532"] .player-strip-card[data-role-532="rcb"] { grid-column: 2; grid-row: 2; }
-      .opposition-pitch[data-formation="532"] .player-strip-card[data-role-532="rwb"] { grid-column: 1; grid-row: 3; }
-      .opposition-pitch[data-formation="532"] .player-strip-card[data-role-532="lcm"] { grid-column: 6; grid-row: 4; }
-      .opposition-pitch[data-formation="532"] .player-strip-card[data-role-532="cm"] { grid-column: 4; grid-row: 4; }
-      .opposition-pitch[data-formation="532"] .player-strip-card[data-role-532="rcm"] { grid-column: 2; grid-row: 4; }
-      .opposition-pitch[data-formation="532"] .player-strip-card[data-role-532="stl"] { grid-column: 5; grid-row: 6; }
-      .opposition-pitch[data-formation="532"] .player-strip-card[data-role-532="str"] { grid-column: 3; grid-row: 6; }
-      .performance-ledger {
+      .fanzine-noticeboard {
+        display: grid;
+        gap: 12px;
         min-width: 0;
-        width: 100%;
-        border: 1px solid rgba(226, 14, 25, 0.28);
-        border-radius: 16px;
+        align-content: stretch;
+      }
+      .notice-card {
+        position: relative;
+        min-width: 0;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-left: 4px solid var(--red);
+        border-radius: 12px;
         padding: 14px;
         background:
-          radial-gradient(circle at 12% 0%, rgba(40, 255, 145, 0.12), transparent 32%),
-          linear-gradient(180deg, rgba(226, 14, 25, 0.09), rgba(0, 0, 0, 0.26));
-        overflow: hidden;
+          linear-gradient(180deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.02)),
+          rgba(12, 13, 17, 0.94);
       }
-      .ledger-content { transition: opacity 0.22s ease, transform 0.22s ease; }
-      .performance-ledger.is-updating .ledger-content { opacity: 0; transform: translateY(8px); }
-      .ledger-head { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 12px; }
-      .ledger-identity { min-width: 0; }
-      .performance-ledger h3 { margin: 4px 0 2px; font-size: 1rem; font-weight: 1000; text-transform: uppercase; }
-      .performance-ledger p { margin: 0; color: var(--muted); font-size: 0.72rem; font-weight: 850; text-transform: uppercase; }
-      .form-sparkline { flex: 0 0 148px; width: 148px; height: 42px; overflow: visible; filter: drop-shadow(0 0 8px rgba(31, 255, 136, 0.35)); }
-      .form-sparkline path { fill: none; stroke: #1fff88; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
-      .form-sparkline.declining path { stroke: #ffb703; filter: drop-shadow(0 0 8px rgba(255, 183, 3, 0.42)); }
-      .ledger-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
-      .ledger-stat { border: 1px solid var(--line); border-radius: 10px; padding: 9px; background: rgba(255, 255, 255, 0.035); }
-      .ledger-stat span { display: block; color: var(--muted); font-size: 0.56rem; font-weight: 900; letter-spacing: 0.08em; text-transform: uppercase; }
-      .ledger-stat strong { display: block; margin-top: 3px; color: #fff; font-size: 1.08rem; font-weight: 1000; }
-      .discipline-cards { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
-      .discipline-card { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 32px; border-radius: 4px; color: #07080b; font-size: 0.82rem; font-weight: 1000; line-height: 1; }
-      .discipline-card.yellow { background: #ffbd2e; box-shadow: 0 0 16px rgba(255, 189, 46, 0.62), inset 0 1px 0 rgba(255, 255, 255, 0.55); }
-      .discipline-card.red { background: #ff3344; color: #fff; box-shadow: 0 0 16px rgba(255, 51, 68, 0.62), inset 0 1px 0 rgba(255, 255, 255, 0.28); }
+      .notice-card::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background:
+          linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px);
+        background-size: 18px 18px;
+        opacity: 0.55;
+        pointer-events: none;
+      }
+      .notice-card > * { position: relative; z-index: 1; }
+      .notice-card h3 {
+        margin: 5px 0 8px;
+        color: #fff;
+        font-size: 0.96rem;
+        font-weight: 1000;
+        text-transform: uppercase;
+      }
+      .notice-card p {
+        margin: 0;
+        color: #dedfe5;
+        font-family: ui-serif, Georgia, Cambria, serif;
+        font-size: 0.86rem;
+        line-height: 1.45;
+      }
+      .notice-card .zine-meta { margin-top: 12px; }
+      .notice-stamp {
+        display: inline-flex;
+        width: fit-content;
+        max-width: 100%;
+        border: 1px dashed rgba(226, 14, 25, 0.52);
+        border-radius: 4px;
+        padding: 4px 7px;
+        color: #ffd5d8;
+        font-size: 0.56rem;
+        font-weight: 1000;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
       .position-pill, .fixture-pill {
         position: relative;
         z-index: 1;
@@ -813,20 +764,13 @@
         .away-master-grid { grid-template-columns: 1fr; gap: 10px; }
         .away-left-stack, .away-right-stack, .supporter-guide-grid, .briefing-grid { gap: 8px; }
         .away-guide-tile strong { white-space: normal; }
-        .formation-controls { justify-content: stretch; }
-        .formation-controls .chip { flex: 1 1 0; }
-        
-        /* Fixed Mobile Target: Forces pristine 2x2 squad block grid */
-        .tactical-map-grid { grid-template-columns: 1fr; }
+        .squad-hub-grid { grid-template-columns: 1fr; }
         .pitch { min-height: 300px; padding: 10px; gap: 5px; }
         .pitch .player-strip-card { width: 38px; }
         .mini-kit { width: 27px; height: 24px; }
         .kit-body { left: 6px; width: 15px; height: 20px; }
         .position-pill { max-width: 42px; }
         .pitch .player-strip-card h3 { font-size: 0.46rem; }
-        .ledger-head { align-items: flex-start; flex-direction: column; }
-        .form-sparkline { width: 100%; max-width: 180px; }
-        .ledger-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       }
     </style>
   </head>
@@ -932,46 +876,33 @@
                 </div>
                 <span class="chip">{{squadCount}} PLAYERS</span>
               </div>
-              <div class="formation-controls" aria-label="Formation controls">
-                <button class="chip active-formation" type="button" data-formation="433">4-3-3 Attack</button>
-                <button class="chip" type="button" data-formation="532">5-3-2 Solid</button>
-              </div>
-              <div class="squad-pitch-layout">
-                <div class="tactical-map-grid" aria-label="Tactical match map">
-                  <article class="tactical-pitch-card" aria-label="The Potters Starting XI">
-                    <div class="pitch-card-head">
-                      <h3>The Potters Starting XI</h3>
-                      <span>Home Half</span>
-                    </div>
-                    <div class="player-strip pitch home-pitch" data-formation="433">{{squadCards}}</div>
-                  </article>
-                  <article class="tactical-pitch-card" aria-label="Opposition Scouting">
-                    <div class="pitch-card-head">
-                      <h3>Opposition Scouting</h3>
-                      <span>Mirror Shape</span>
-                    </div>
-                    <div class="player-strip pitch opposition-pitch" data-formation="433">{{oppositionCards}}</div>
-                  </article>
-                </div>
-                <aside class="performance-ledger" aria-live="polite" data-performance-ledger>
-                  <div class="ledger-content" data-ledger-content>
-                    <div class="ledger-head">
-                      <div class="ledger-identity">
-                        <span class="section-kicker">Player Performance Ledger</span>
-                        <h3 data-ledger-name>Manhoef</h3>
-                        <p data-ledger-role>Forward</p>
-                      </div>
-                      <svg class="form-sparkline" data-ledger-sparkline viewBox="0 0 148 42" role="img" aria-label="Last five match rating trend">
-                        <path data-ledger-sparkline-path d="M4 32 L39 24 L74 20 L109 13 L144 9"></path>
-                      </svg>
-                    </div>
-                    <div class="ledger-grid">
-                      <div class="ledger-stat"><span>Goals</span><strong data-ledger-goals>11</strong></div>
-                      <div class="ledger-stat"><span>Assists</span><strong data-ledger-assists>6</strong></div>
-                      <div class="ledger-stat"><span>Discipline</span><div class="discipline-cards"><span class="discipline-card yellow" data-ledger-yellows>4</span><span class="discipline-card red" data-ledger-reds>0</span></div></div>
-                      <div class="ledger-stat"><span>Avg Rating</span><strong data-ledger-rating>7.6</strong></div>
-                    </div>
+              <div class="squad-hub-grid" aria-label="Squad fanzine hub">
+                <article class="tactical-pitch-card" aria-label="The Potters Starting XI">
+                  <div class="pitch-card-head">
+                    <h3>The Potters Starting XI</h3>
+                    <span>11-player shape</span>
                   </div>
+                  <div class="player-strip pitch home-pitch" data-formation="433">{{squadCards}}</div>
+                </article>
+                <aside class="fanzine-noticeboard" aria-label="Fanzine noticeboard">
+                  <article class="notice-card">
+                    <span class="notice-stamp">Treatment Room</span>
+                    <h3>The Treatment Room</h3>
+                    <p>Fitness notes, minutes load, and late checks from the training ground. Updates stay clearly marked until the club sheet makes it official.</p>
+                    <div class="zine-meta"><span>Fitness Desk</span><span>Monitored</span></div>
+                  </article>
+                  <article class="notice-card">
+                    <span class="notice-stamp">Rumour Mill</span>
+                    <h3>The Rumour Mill</h3>
+                    <p>Contract chatter, loan links, and agent noise collected with a cold eye. Nothing gets upgraded from buzz to brief until there is a proper source trail.</p>
+                    <div class="zine-meta"><span>Back Page</span><span>Unconfirmed</span></div>
+                  </article>
+                  <article class="notice-card">
+                    <span class="notice-stamp">Terrace Echo</span>
+                    <h3>Terrace Echo</h3>
+                    <p>Red and white in the Boothen End, rain comes down and we go again. Built as original supporter verse so the app carries the spirit without lifting old print copy.</p>
+                    <div class="zine-meta"><span>Fan Voice</span><span>Original Lines</span></div>
+                  </article>
                 </aside>
               </div>
             </section>
@@ -1151,83 +1082,9 @@
         }
       });
 
-      const buildSparklinePath = (values) => {
-        const ratings = values.map((value) => Number.parseFloat(value)).filter(Number.isFinite);
-        const safeRatings = ratings.length === 5 ? ratings : [6.4, 6.6, 6.7, 6.9, 7.1];
-        const min = Math.min(...safeRatings) - 0.15;
-        const max = Math.max(...safeRatings) + 0.15;
-        return safeRatings.map((value, index) => {
-          const x = 4 + index * 35;
-          const y = 38 - ((value - min) / Math.max(0.1, max - min)) * 32;
-          return `${index === 0 ? 'M' : 'L'}${x.toFixed(1)} ${y.toFixed(1)}`;
-        }).join(' ');
-      };
-
-      const updateLedger = (playerNode) => {
-        if (!playerNode) return;
-        document.querySelectorAll('.pitch .player-strip-card').forEach((node) => node.classList.toggle('active-player', node === playerNode));
-        const ledger = document.querySelector('[data-performance-ledger]');
-        if (!ledger) return;
-        const clean = (value, fallback = '0') => {
-          if (value == null) return fallback;
-          const text = String(value).trim();
-          return text && text !== 'null' ? text : fallback;
-        };
-        const values = {
-          name: clean(playerNode.dataset.playerName, 'Player'),
-          role: clean(playerNode.dataset.playerRole, 'Squad Role'),
-          goals: clean(playerNode.dataset.goals),
-          assists: clean(playerNode.dataset.assists),
-          yellows: clean(playerNode.dataset.yellows),
-          reds: clean(playerNode.dataset.reds),
-          rating: clean(playerNode.dataset.rating, '0.0'),
-          form: clean(playerNode.dataset.form, '6.4,6.6,6.7,6.9,7.1').split(','),
-        };
-        ledger.classList.add('is-updating');
-        window.setTimeout(() => {
-          ledger.querySelector('[data-ledger-name]').textContent = values.name;
-          ledger.querySelector('[data-ledger-role]').textContent = values.role;
-          ledger.querySelector('[data-ledger-goals]').textContent = values.goals;
-          ledger.querySelector('[data-ledger-assists]').textContent = values.assists;
-          ledger.querySelector('[data-ledger-yellows]').textContent = values.yellows;
-          ledger.querySelector('[data-ledger-reds]').textContent = values.reds;
-          ledger.querySelector('[data-ledger-rating]').textContent = values.rating;
-          const sparkline = ledger.querySelector('[data-ledger-sparkline]');
-          const path = ledger.querySelector('[data-ledger-sparkline-path]');
-          const first = Number.parseFloat(values.form[0]);
-          const last = Number.parseFloat(values.form.at(-1));
-          sparkline.classList.toggle('declining', Number.isFinite(first) && Number.isFinite(last) && last < first);
-          path.setAttribute('d', buildSparklinePath(values.form));
-          ledger.classList.remove('is-updating');
-        }, 120);
-      };
-
-      const changeFormation = (formation) => {
-        const nextFormation = formation === '532' ? '532' : '433';
-        document.querySelectorAll('.formation-controls .chip').forEach((button) => {
-          button.classList.toggle('active-formation', button.dataset.formation === nextFormation);
-        });
-        document.querySelectorAll('.pitch').forEach((pitch) => {
-          pitch.dataset.formation = nextFormation;
-        });
-      };
-
-      document.querySelectorAll('[data-formation]').forEach((control) => {
-        control.addEventListener('click', () => changeFormation(control.dataset.formation));
-      });
-
-      document.querySelectorAll('.pitch .player-strip-card').forEach((node) => {
-        node.addEventListener('mouseenter', () => updateLedger(node));
-        node.addEventListener('focus', () => updateLedger(node));
-        node.addEventListener('click', () => updateLedger(node));
-      });
-
       applyVoteLockState();
-      updateLedger(document.querySelector('.pitch .player-strip-card[data-number="#42"]') || document.querySelector('.pitch .player-strip-card'));
-
       addEventListener('hashchange', () => activateView(location.hash.slice(1), false));
       activateView(location.hash.slice(1) || 'matches', false);
-      changeFormation('433');
     </script>
   </body>
 </html>

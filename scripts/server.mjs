@@ -147,19 +147,6 @@ const tacticalXi = [
   },
 ];
 
-const oppositionScoutingXi = [
-  { squadNumber: 'O1', name: 'Opposition GK', label: 'GK', position: 'Goalkeeper', role433: 'gk', role532: 'gk', stats: { goals: 0, assists: 0, yellowCards: 0, redCards: 0, rating: 'Scout' } },
-  { squadNumber: 'O2', name: 'Opposition RB', label: 'RB', position: 'Right Back', role433: 'rb', role532: 'rwb', stats: { goals: 0, assists: 2, yellowCards: 3, redCards: 0, rating: 'Press' } },
-  { squadNumber: 'O5', name: 'Opposition RCB', label: 'RCB', position: 'Centre Back', role433: 'rcb', role532: 'rcb', stats: { goals: 1, assists: 0, yellowCards: 5, redCards: 0, rating: 'Aerial' } },
-  { squadNumber: 'O6', name: 'Opposition LCB', label: 'LCB', position: 'Centre Back', role433: 'lcb', role532: 'cb', stats: { goals: 0, assists: 1, yellowCards: 4, redCards: 0, rating: 'Cover' } },
-  { squadNumber: 'O3', name: 'Opposition LB', label: 'LB', position: 'Left Back', role433: 'lb', role532: 'lcb', stats: { goals: 0, assists: 3, yellowCards: 2, redCards: 0, rating: 'Overlap' } },
-  { squadNumber: 'O4', name: 'Opposition DM', label: 'DM', position: 'Defensive Midfielder', role433: 'dm', role532: 'lwb', stats: { goals: 1, assists: 2, yellowCards: 6, redCards: 0, rating: 'Anchor' } },
-  { squadNumber: 'O8', name: 'Opposition RCM', label: 'RCM', position: 'Midfielder', role433: 'rcm', role532: 'rcm', stats: { goals: 3, assists: 4, yellowCards: 3, redCards: 0, rating: 'Tempo' } },
-  { squadNumber: 'O10', name: 'Opposition LCM', label: 'LCM', position: 'Attacking Midfielder', role433: 'lcm', role532: 'lcm', stats: { goals: 5, assists: 5, yellowCards: 2, redCards: 0, rating: 'Creator' } },
-  { squadNumber: 'O11', name: 'Opposition LW', label: 'LW', position: 'Left Wing', role433: 'lw', role532: 'stl', stats: { goals: 6, assists: 4, yellowCards: 2, redCards: 0, rating: 'Wide' } },
-  { squadNumber: 'O9', name: 'Opposition ST', label: 'ST', position: 'Striker', role433: 'st', role532: 'str', stats: { goals: 10, assists: 1, yellowCards: 4, redCards: 0, rating: 'Target' } },
-  { squadNumber: 'O7', name: 'Opposition RW', label: 'RW', position: 'Right Wing', role433: 'rw', role532: 'cm', stats: { goals: 4, assists: 7, yellowCards: 2, redCards: 0, rating: 'Outlet' } },
-];
 
 const ensureSchema = (db) => {
   db.exec(
@@ -427,7 +414,7 @@ const renderTacticalNodes = ({ players, squadByNumber = new Map(), variant = 'ho
         form: slot.stats?.form ?? getFormRatings(slot.stats?.rating),
       };
       return `
-        <button class="player-strip-card kit-node ${variant === 'home' ? 'home-kit' : 'opposition-kit'}${slot.tracked ? ' is-tracked' : ''}" type="button"
+        <button class="player-strip-card kit-node home-kit${slot.tracked ? ' is-tracked' : ''}" type="button"
           data-number="#${escapeHtml(slot.squadNumber)}"
           data-role-433="${escapeHtml(slot.role433)}"
           data-role-532="${escapeHtml(slot.role532)}"
@@ -521,7 +508,6 @@ const render = () => {
 
     const squadByNumber = new Map(squad.map((player) => [String(player.squad_number), player]));
     const squadCards = renderTacticalNodes({ players: tacticalXi, squadByNumber, variant: 'home' });
-    const oppositionCards = renderTacticalNodes({ players: oppositionScoutingXi, variant: 'opposition' });
 
     const pollRows = getPollResults(db);
     const fanPollOptions = renderPollOptions(pollRows);
@@ -564,7 +550,6 @@ const render = () => {
       squadCount: tacticalXi.length,
       fixtureCount: fixtures.length,
       squadCards,
-      oppositionCards,
       fixtureTimeline,
       fanPollOptions,
       matchdayBriefingHeadline: matchdayBriefing.headline,

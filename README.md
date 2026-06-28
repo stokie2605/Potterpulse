@@ -593,6 +593,20 @@ Supporter guide cards rendered: 3
 Vote buttons locked after first client vote
 Backend duplicate vote response: duplicate true
 ```
+### 21. Squad fanzine hub consolidation
+
+Problem: the Squad view had grown into a heavy split-pitch analysis screen with an opposition canvas, formation toggles, and a wide ledger container that left too much dead space above the mobile footer.
+
+Solution: refactored the tab into a balanced two-column hub: the left side keeps the full 11-player Potter XI pitch with the goalkeeper anchored at the bottom, while the right side becomes a compact fanzine-style noticeboard for Treatment Room, Rumour Mill, and Terrace Echo updates.
+
+Verification notes:
+
+- Opposition scouting card and formation toggle controls removed from the rendered Squad view.
+- Bottom performance ledger placeholder removed to tighten spacing above the footer navigation.
+- Desktop grid now resolves to 1fr 1fr; mobile collapses to a single-column stack.
+- Fanzine copy is original/supporter-inspired and avoids reproducing legacy print or chant text.
+- Targeted rendered check: 11 home player nodes, no opposition pitch, no formation controls, no ledger, no template leaks, desktop columns at 548px / 548px, mobile width contained at 390px.
+
 ## GitHub Linking Steps
 
 After `git init` and staging are complete, link this local project to a GitHub repository with these commands.
