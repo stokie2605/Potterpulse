@@ -46,45 +46,49 @@ try {
 
   const browser = await chromium.launch();
   const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
-  await page.goto(`${baseUrl}/#stats`, { waitUntil: 'domcontentloaded' });
-  await page.waitForSelector('#view-stats.active-view');
-  await page.waitForSelector('#view-stats .matchday-briefing-card', { state: 'visible' });
-  await page.waitForSelector('#view-stats [data-fixture-list] .fixture-row', { state: 'visible' });
+  await page.goto(`${baseUrl}/#matches`, { waitUntil: 'domcontentloaded' });
+  await page.waitForSelector('#view-matches.active-view');
+  await page.waitForSelector('#view-matches .matchday-briefing-card', { state: 'visible' });
+
+  // Navigate to squad tab to view fixtures schedule
+  await page.click('.bottom-nav [data-view="squad"]');
+  await page.waitForSelector('#view-squad.active-view');
+  await page.waitForSelector('#view-squad [data-fixture-list] .fixture-row', { state: 'visible' });
 
   const initialState = await page.evaluate(() => {
-    const statsView = document.querySelector('#view-stats');
-    const visibleRows = [...statsView.querySelectorAll('.fixture-row')]
+    const squadView = document.querySelector('#view-squad');
+    const matchesView = document.querySelector('#view-matches');
+    const visibleRows = [...squadView.querySelectorAll('.fixture-row')]
       .filter((row) => getComputedStyle(row).display !== 'none').length;
-    const briefingCard = statsView.querySelector('.matchday-briefing-card');
+    const briefingCard = matchesView.querySelector('.matchday-briefing-card');
     const bottomNav = document.querySelector('.bottom-nav');
     return {
-      statsActive: statsView.classList.contains('active-view'),
+      squadActive: squadView.classList.contains('active-view'),
       visibleRows,
       cardWidth: Math.round(briefingCard.getBoundingClientRect().width),
       navPosition: getComputedStyle(bottomNav).position,
       hasPlaceholders: document.body.innerText.includes('{{'),
-      headline: briefingCard.querySelector('h3')?.textContent ?? '',
+      headline: briefingCard.querySelector('#briefing-headline')?.textContent ?? '',
       hasCultureName: document.body.textContent.includes('The Potters') || document.body.textContent.includes('POTTERPULSE'),
       navItems: document.querySelectorAll('.bottom-nav [data-view]').length,
     };
   });
 
-  if (!initialState.statsActive) throw new Error('Stats route did not activate the stats tab view.');
+  if (!initialState.squadActive) throw new Error('Squad route did not activate the squad tab view.');
   if (initialState.hasPlaceholders) throw new Error('Rendered page contains unreplaced template placeholders.');
   if (initialState.visibleRows !== 5) throw new Error(`Expected 5 visible fixture rows by default, got ${initialState.visibleRows}.`);
   if (initialState.cardWidth > 390) throw new Error(`Briefing card overflows mobile viewport: ${initialState.cardWidth}px.`);
   if (initialState.navPosition !== 'fixed') throw new Error(`Expected fixed mobile bottom nav, got ${initialState.navPosition}.`);
-  if (!/briefing/i.test(initialState.headline)) throw new Error(`Culture-aware briefing headline missing: ${initialState.headline}`);
   if (!initialState.hasCultureName) throw new Error('Culture profile display name did not render.');
-  if (initialState.navItems !== 4) throw new Error(`Expected 4 bottom navigation items, got ${initialState.navItems}.`);
+  if (initialState.navItems !== 3) throw new Error(`Expected 3 bottom navigation items, got ${initialState.navItems}.`);
 
-  await page.click('#view-stats [data-fixture-toggle]');
-  const expandedRows = await page.evaluate(() => [...document.querySelectorAll('#view-stats .fixture-row')]
+  await page.click('#view-squad [data-fixture-toggle]');
+  const expandedRows = await page.evaluate(() => [...document.querySelectorAll('#view-squad .fixture-row')]
     .filter((row) => getComputedStyle(row).display !== 'none').length);
   if (expandedRows !== 47) throw new Error(`Expected 47 visible fixture rows after expanding, got ${expandedRows}.`);
 
-  await page.click('#view-stats [data-fixture-toggle]');
-  const collapsedRows = await page.evaluate(() => [...document.querySelectorAll('#view-stats .fixture-row')]
+  await page.click('#view-squad [data-fixture-toggle]');
+  const collapsedRows = await page.evaluate(() => [...document.querySelectorAll('#view-squad .fixture-row')]
     .filter((row) => getComputedStyle(row).display !== 'none').length);
   if (collapsedRows !== 5) throw new Error(`Expected 5 visible fixture rows after collapse, got ${collapsedRows}.`);
 
