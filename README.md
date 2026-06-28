@@ -607,6 +607,18 @@ Verification notes:
 - Fanzine copy is original/supporter-inspired and avoids reproducing legacy print or chant text.
 - Targeted rendered check: 11 home player nodes, no opposition pitch, no formation controls, no ledger, no template leaks, desktop columns at 548px / 548px, mobile width contained at 390px.
 
+### 22. Forum board feed upgrade
+
+Problem: the Squad fanzine column was useful but still felt static; it needed the energy of supporter discussion without reintroducing the bulky opposition pitch or bottom ledger.
+
+Solution: replaced the static noticeboard with a `.forum-board-feed` component headed `OATCAKE MESSAGE BOARD`, using three dark thread cards with supporter tags, titles, and preview copy. The left-hand XI pitch remains untouched and the desktop layout stays balanced at 1fr 1fr before collapsing to one column on mobile.
+
+Verification notes:
+
+- Rendered Squad view shows 11 home pitch nodes and 3 forum thread cards.
+- Old noticeboard, opposition pitch, formation controls, and ledger UI remain absent.
+- Desktop grid resolves to 548px / 548px; mobile collapses to a 332px single column with 390px document width.
+
 ## GitHub Linking Steps
 
 After `git init` and staging are complete, link this local project to a GitHub repository with these commands.

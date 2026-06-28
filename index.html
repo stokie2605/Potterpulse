@@ -527,63 +527,72 @@
       .home-pitch[data-formation="433"] .player-strip-card[data-role-433="lw"] { grid-column: 1; grid-row: 1; }
       .home-pitch[data-formation="433"] .player-strip-card[data-role-433="st"] { grid-column: 4; grid-row: 1; }
       .home-pitch[data-formation="433"] .player-strip-card[data-role-433="rw"] { grid-column: 7; grid-row: 1; }
-      .fanzine-noticeboard {
+      .forum-board-feed {
         display: grid;
         gap: 12px;
         min-width: 0;
-        align-content: stretch;
+        align-content: start;
       }
-      .notice-card {
+      .forum-feed-header {
+        min-width: 0;
+        border: 1px solid rgba(226, 14, 25, 0.32);
+        border-radius: 12px;
+        padding: 14px;
+        background:
+          linear-gradient(135deg, rgba(226, 14, 25, 0.18), rgba(255, 255, 255, 0.035)),
+          rgba(12, 13, 17, 0.94);
+      }
+      .forum-feed-header h3 {
+        margin: 4px 0 0;
+        color: #fff;
+        font-size: 1rem;
+        font-weight: 1000;
+        text-transform: uppercase;
+      }
+      .forum-thread-item {
         position: relative;
         min-width: 0;
         overflow: hidden;
         border: 1px solid rgba(255, 255, 255, 0.12);
-        border-left: 4px solid var(--red);
         border-radius: 12px;
-        padding: 14px;
+        padding: 13px;
         background:
-          linear-gradient(180deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.02)),
+          linear-gradient(180deg, rgba(255, 255, 255, 0.052), rgba(255, 255, 255, 0.02)),
           rgba(12, 13, 17, 0.94);
       }
-      .notice-card::before {
+      .forum-thread-item::before {
         content: "";
         position: absolute;
-        inset: 0;
-        background:
-          linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
-          linear-gradient(90deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px);
-        background-size: 18px 18px;
-        opacity: 0.55;
-        pointer-events: none;
+        inset: 0 auto 0 0;
+        width: 3px;
+        background: linear-gradient(180deg, var(--red), var(--red-3));
       }
-      .notice-card > * { position: relative; z-index: 1; }
-      .notice-card h3 {
-        margin: 5px 0 8px;
+      .forum-thread-item h4 {
+        position: relative;
+        margin: 0 0 6px;
+        overflow-wrap: anywhere;
         color: #fff;
-        font-size: 0.96rem;
+        font-size: 0.88rem;
         font-weight: 1000;
+        line-height: 1.18;
+      }
+      .thread-user-tag {
+        position: relative;
+        display: block;
+        margin-bottom: 8px;
+        color: var(--red-3);
+        font-size: 0.62rem;
+        font-weight: 900;
+        letter-spacing: 0.06em;
         text-transform: uppercase;
       }
-      .notice-card p {
+      .forum-thread-item p {
+        position: relative;
         margin: 0;
-        color: #dedfe5;
+        color: #d9dbe1;
         font-family: ui-serif, Georgia, Cambria, serif;
-        font-size: 0.86rem;
-        line-height: 1.45;
-      }
-      .notice-card .zine-meta { margin-top: 12px; }
-      .notice-stamp {
-        display: inline-flex;
-        width: fit-content;
-        max-width: 100%;
-        border: 1px dashed rgba(226, 14, 25, 0.52);
-        border-radius: 4px;
-        padding: 4px 7px;
-        color: #ffd5d8;
-        font-size: 0.56rem;
-        font-weight: 1000;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
+        font-size: 0.82rem;
+        line-height: 1.43;
       }
       .position-pill, .fixture-pill {
         position: relative;
@@ -884,24 +893,25 @@
                   </div>
                   <div class="player-strip pitch home-pitch" data-formation="433">{{squadCards}}</div>
                 </article>
-                <aside class="fanzine-noticeboard" aria-label="Fanzine noticeboard">
-                  <article class="notice-card">
-                    <span class="notice-stamp">Treatment Room</span>
-                    <h3>The Treatment Room</h3>
-                    <p>Fitness notes, minutes load, and late checks from the training ground. Updates stay clearly marked until the club sheet makes it official.</p>
-                    <div class="zine-meta"><span>Fitness Desk</span><span>Monitored</span></div>
+                <aside class="forum-board-feed" aria-label="Oatcake message board trending supporter threads">
+                  <div class="forum-feed-header">
+                    <span class="section-kicker">Trending Supporter Threads</span>
+                    <h3>Oatcake Message Board</h3>
+                  </div>
+                  <article class="forum-thread-item">
+                    <h4>Pearson back in training - how long till his first booking?</h4>
+                    <span class="thread-user-tag">Boothen_Ender92 - Just Now</span>
+                    <p>Good to see him sweating it out at Clayton Wood, but let's be real - he'll be walking a suspension tightrope by October anyway. Glad to have his bite back in the engine room though, we need someone to stop us leaking soft goals on Tuesday nights.</p>
                   </article>
-                  <article class="notice-card">
-                    <span class="notice-stamp">Rumour Mill</span>
-                    <h3>The Rumour Mill</h3>
-                    <p>Contract chatter, loan links, and agent noise collected with a cold eye. Nothing gets upgraded from buzz to brief until there is a proper source trail.</p>
-                    <div class="zine-meta"><span>Back Page</span><span>Unconfirmed</span></div>
+                  <article class="forum-thread-item">
+                    <h4>Walters cooking? Retained list cleared &amp; new winger links</h4>
+                    <span class="thread-user-tag">Trentham_Potter - 15m ago</span>
+                    <p>With Baker and Nzonzi off the wage bill, rumours are flying about a domestic winger. Let's just hope we don't panic-buy another flashy squad-filler who goes completely missing the second the winter wind whips off the bay.</p>
                   </article>
-                  <article class="notice-card">
-                    <span class="notice-stamp">Terrace Echo</span>
-                    <h3>Terrace Echo</h3>
-                    <p>Red and white in the Boothen End, rain comes down and we go again. Built as original supporter verse so the app carries the spirit without lifting old print copy.</p>
-                    <div class="zine-meta"><span>Fan Voice</span><span>Original Lines</span></div>
+                  <article class="forum-thread-item">
+                    <h4>Coordinated 'We'll Be With You' for the opener</h4>
+                    <span class="thread-user-tag">Delilah_Roar - 1h ago</span>
+                    <p>Big push from the independent lads to make the home opener deafening the second they walk out of the tunnel. Bring your scarves and leave your lungs on the terraces - none of that quiet main-stand whispering!</p>
                   </article>
                 </aside>
               </div>
