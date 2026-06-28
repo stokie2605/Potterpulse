@@ -50,13 +50,18 @@ PotterPulse is an interactive, premium supporter fanzine and fan portal concept 
 
 ---
 
-## 📸 Screenshots
+## Screenshots
 
-- **SVG Mood Donut Chart**: [Mood Chart Screenshot](file:///C:/Users/Wilshaw/.gemini/antigravity/brain/7e7e021c-2c47-45b6-8f99-345d8db273ea/visual-donut-chart.png)
-- **Terrace Player Ratings**: [Ratings Averages & POTM Crown](file:///C:/Users/Wilshaw/.gemini/antigravity/brain/7e7e021c-2c47-45b6-8f99-345d8db273ea/player-ratings-view.png)
-- **Interactive Range Sliders**: [Ratings Form Sliders](file:///C:/Users/Wilshaw/.gemini/antigravity/brain/7e7e021c-2c47-45b6-8f99-345d8db273ea/player-ratings-sliders.png)
-- **Away Day Journey Planner**: [Transit Planner Calculations](file:///C:/Users/Wilshaw/.gemini/antigravity/brain/7e7e021c-2c47-45b6-8f99-345d8db273ea/away-journey-planner.png)
-- **Terrace Threads (Forum Wire)**: [Categorized Forum Feed](file:///C:/Users/Wilshaw/.gemini/antigravity/brain/7e7e021c-2c47-45b6-8f99-345d8db273ea/dynamic-forum-board.png)
+Fresh verification screenshots are stored in the repository so GitHub renders them as thumbnails instead of local machine links.
+
+| Feature | Preview |
+| --- | --- |
+| SVG Mood Donut Chart | <img src="docs/screenshots/mood-donut-chart.png" alt="Terrace Temperature Check mood donut chart" width="260" /> |
+| Terrace Player Ratings | <img src="docs/screenshots/player-ratings-view.png" alt="Terrace player ratings averages and POTM crown" width="260" /> |
+| Interactive Range Sliders | <img src="docs/screenshots/player-ratings-sliders.png" alt="Player ratings range slider form" width="260" /> |
+| Away Day Journey Planner | <img src="docs/screenshots/away-journey-planner.png" alt="Away day journey planner route calculation" width="260" /> |
+| Terrace Threads Feed | <img src="docs/screenshots/terrace-threads-feed.png" alt="Terrace Threads categorized forum feed" width="260" /> |
+| Squad Pitch + Terrace Threads | <img src="docs/screenshots/squad-pitch-terrace-threads.png" alt="Isometric squad pitch beside Terrace Threads feed" width="260" /> |
 
 ---
 
