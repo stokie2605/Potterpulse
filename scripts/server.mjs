@@ -1155,7 +1155,19 @@ server.listen(port, () => {
 
 // Live Real-World Football API Synchronization & Simulator
 function runLiveSyncService() {
-  const apiKey = process.env.FOOTBALL_API_KEY;
+  let apiKey = process.env.FOOTBALL_API_KEY;
+  if (!apiKey) {
+    try {
+      const dotenvContent = readFileSync(resolve(rootDir, '.env'), 'utf8');
+      const match = dotenvContent.match(/FOOTBALL_API_KEY\s*=\s*["']?([a-f0-9]+)["']?/i);
+      if (match) {
+        apiKey = match[1];
+      }
+    } catch (err) {
+      // Ignore if file doesn't exist
+    }
+  }
+
   const syncIntervalMs = 60000 * 5; // 5 minutes sync cycle
   
   const performSync = async () => {
@@ -1190,7 +1202,7 @@ function runLiveSyncService() {
         }
       } else {
         // Simulation Mode: Dynamic updates simulating team announcements
-        console.log("[LiveSync] Operating in local simulation mode. Set FOOTBALL_API_KEY to connect real-world data.");
+        console.log("[LiveSync] Operating in local simulation mode. Set FOOTBALL_API_KEY in .env to connect real-world data.");
       }
     } catch (err) {
       console.error("[LiveSync] Error in sync service loop:", err);
