@@ -52,7 +52,6 @@ const pollCandidates = [
 
 const voteSessions = new Map();
 const voteDebounceMs = 8000;
-
 const tacticalXi = [
   {
     squadNumber: '1',
@@ -66,66 +65,74 @@ const tacticalXi = [
   },
   {
     squadNumber: '2',
-    name: 'Ki-Jana Hoever',
-    label: 'Hoever',
-    position: 'Right Back',
+    name: 'Junior Tchamadeu',
+    label: 'Tchamadeu',
+    position: 'Defender',
     role433: 'rb',
     role532: 'rwb',
-    stats: { goals: 2, assists: 7, yellowCards: 5, redCards: 0, rating: '6.8' },
-  },
-  {
-    squadNumber: '5',
-    name: 'Michael Rose',
-    label: 'Rose',
-    position: 'Centre Back',
-    role433: 'rcb',
-    role532: 'rcb',
-    stats: { goals: 3, assists: 1, yellowCards: 8, redCards: 0, rating: '6.9' },
+    stats: { goals: 1, assists: 5, yellowCards: 6, redCards: 0, rating: '6.9' },
   },
   {
     squadNumber: '16',
     name: 'Ben Wilmot',
     label: 'Wilmot',
-    position: 'Centre Back',
-    role433: 'lcb',
-    role532: 'cb',
+    position: 'Defender',
+    role433: 'rcb',
+    role532: 'rcb',
     stats: { goals: 1, assists: 2, yellowCards: 7, redCards: 1, rating: '6.7' },
   },
   {
+    squadNumber: '23',
+    name: 'Ben Gibson',
+    label: 'Gibson',
+    position: 'Defender',
+    role433: 'lcb',
+    role532: 'cb',
+    stats: { goals: 0, assists: 1, yellowCards: 4, redCards: 0, rating: '6.8' },
+  },
+  {
     squadNumber: '3',
-    name: 'Enda Stevens',
-    label: 'Stevens',
-    position: 'Left Back',
+    name: 'Eric Bocat',
+    label: 'Bocat',
+    position: 'Defender',
     role433: 'lb',
     role532: 'lcb',
-    stats: { goals: 0, assists: 4, yellowCards: 4, redCards: 0, rating: '6.6' },
+    stats: { goals: 0, assists: 3, yellowCards: 3, redCards: 0, rating: '6.6' },
   },
   {
-    squadNumber: '22',
-    name: 'Junior Tchamadeu',
-    label: 'Tchamadeu',
-    position: 'Wing Back',
+    squadNumber: '6',
+    name: 'Wouter Burger',
+    label: 'Burger',
+    position: 'Midfielder',
     role433: 'dm',
     role532: 'lwb',
-    tracked: true,
-    stats: { goals: 1, assists: 5, yellowCards: 6, redCards: 0, rating: '6.9' },
+    stats: { goals: 4, assists: 4, yellowCards: 8, redCards: 0, rating: '7.0' },
   },
   {
-    squadNumber: '28',
-    name: 'Josh Laurent',
-    label: 'Laurent',
+    squadNumber: '15',
+    name: 'Tatsuki Seko',
+    label: 'Seko',
     position: 'Midfielder',
     role433: 'rcm',
     role532: 'rcm',
-    stats: { goals: 4, assists: 3, yellowCards: 9, redCards: 0, rating: '6.8' },
+    stats: { goals: 0, assists: 2, yellowCards: 2, redCards: 0, rating: '6.7' },
+  },
+  {
+    squadNumber: '8',
+    name: 'Andrew Moran',
+    label: 'Moran',
+    position: 'Midfielder',
+    role433: 'lcm',
+    role532: 'lcm',
+    stats: { goals: 2, assists: 4, yellowCards: 3, redCards: 0, rating: '6.8' },
   },
   {
     squadNumber: '10',
     name: 'Bae Jun-ho',
     label: 'Jun-ho',
     position: 'Attacking Midfielder',
-    role433: 'lcm',
-    role532: 'lcm',
+    role433: 'lw',
+    role532: 'stl',
     tracked: true,
     stats: { goals: 7, assists: 9, yellowCards: 3, redCards: 0, rating: '7.4' },
   },
@@ -134,28 +141,19 @@ const tacticalXi = [
     name: 'Million Manhoef',
     label: 'Manhoef',
     position: 'Forward',
-    role433: 'lw',
-    role532: 'stl',
+    role433: 'rw',
+    role532: 'cm',
     tracked: true,
     stats: { goals: 11, assists: 6, yellowCards: 4, redCards: 0, rating: '7.6' },
   },
   {
-    squadNumber: '19',
-    name: 'Sam Gallagher',
-    label: 'Gallagher',
+    squadNumber: '9',
+    name: 'Tom Cannon',
+    label: 'Tom Cannon',
     position: 'Striker',
     role433: 'st',
     role532: 'str',
-    stats: { goals: 9, assists: 2, yellowCards: 5, redCards: 0, rating: '7.0' },
-  },
-  {
-    squadNumber: '7',
-    name: 'Lynden Gooch',
-    label: 'Gooch',
-    position: 'Wide Midfielder',
-    role433: 'rw',
-    role532: 'cm',
-    stats: { goals: 3, assists: 6, yellowCards: 4, redCards: 0, rating: '6.9' },
+    stats: { goals: 8, assists: 2, yellowCards: 2, redCards: 0, rating: '7.1' },
   },
 ];
 
@@ -340,6 +338,35 @@ const ensureSchema = (db) => {
     seedTransfer.run('Wesley', 'OUT', 'Released - Perm');
     seedTransfer.run('Luke Cundle', 'OUT', 'End of Loan');
   }
+
+  // 6. Current Squad list database creation
+  db.exec('DROP TABLE IF EXISTS stoke_squad');
+  db.exec(
+    'CREATE TABLE stoke_squad (' +
+      'id INTEGER PRIMARY KEY AUTOINCREMENT,' +
+      'player_name TEXT NOT NULL,' +
+      'position TEXT NOT NULL,' +
+      'squad_number INTEGER NOT NULL,' +
+      'created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,' +
+      'updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP' +
+    ')'
+  );
+  
+  const seedSquadPlayer = db.prepare('INSERT INTO stoke_squad (player_name, position, squad_number) VALUES (?, ?, ?)');
+  seedSquadPlayer.run('Viktor Johansson', 'goalkeeper', 1);
+  seedSquadPlayer.run('Junior Tchamadeu', 'defender', 2);
+  seedSquadPlayer.run('Ben Wilmot', 'defender', 16);
+  seedSquadPlayer.run('Ben Gibson', 'defender', 23);
+  seedSquadPlayer.run('Eric Bocat', 'defender', 3);
+  seedSquadPlayer.run('Wouter Burger', 'midfielder', 6);
+  seedSquadPlayer.run('Tatsuki Seko', 'midfielder', 15);
+  seedSquadPlayer.run('Andrew Moran', 'midfielder', 8);
+  seedSquadPlayer.run('Bae Jun-ho', 'midfielder', 10);
+  seedSquadPlayer.run('Million Manhoef', 'forward', 42);
+  seedSquadPlayer.run('Tom Cannon', 'forward', 9);
+  seedSquadPlayer.run('Lewis Koumas', 'forward', 11);
+  seedSquadPlayer.run('Jordan Thompson', 'midfielder', 7);
+  seedSquadPlayer.run('Niall Ennis', 'forward', 14);
 };
 
 const getPollResults = (db) => {
@@ -722,9 +749,30 @@ const render = () => {
       )
       .join('');
 
+    const squadTableRows = squad
+      .map((p) => {
+        let posTag = p.position.slice(0, 2).toUpperCase();
+        if (posTag === 'GO') posTag = 'GK';
+        if (posTag === 'DE') posTag = 'DF';
+        if (posTag === 'MI') posTag = 'MF';
+        if (posTag === 'FO') posTag = 'FW';
+        return `
+          <tr style="border-bottom:1px solid rgba(255,255,255,0.04);">
+            <td style="padding:6px 4px; font-weight:800;">${escapeHtml(p.player_name)}</td>
+            <td style="padding:6px 4px; text-align:center; color:var(--muted); text-transform:uppercase;">${escapeHtml(posTag)}</td>
+            <td style="padding:6px 4px; text-align:center;">-</td>
+            <td style="padding:6px 4px; text-align:center;">-</td>
+            <td style="padding:6px 4px; text-align:center;">-</td>
+            <td style="padding:6px 4px; text-align:center;"><span style="background:var(--red-3); color:#fff; padding:1px 4px; border-radius:4px; font-weight:900;">7.0</span></td>
+          </tr>
+        `;
+      })
+      .join('');
+
     const replacements = {
       transfersInList,
       transfersOutList,
+      squadTableRows,
       generatedAt: `Updated ${new Date().toLocaleTimeString('en-GB', {
         hour: '2-digit',
         minute: '2-digit',
