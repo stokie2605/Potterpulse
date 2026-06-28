@@ -254,7 +254,7 @@ const ensureSchema = (db) => {
     // Seed comments for Oldham Athletic match poll (past match)
     seedComment.run("oldham_athletic_2026-08-08", "StokeFan1863", "Robins has got us playing some proper football. Bring on the Swans!");
     seedComment.run("oldham_athletic_2026-08-08", "ST4_Lager", "Johansson is an absolute monster in net. That save at the end was class.");
-    seedComment.run("oldham_athletic_2026-08-08", "OatcakeOli", "Hope we sign one more winger before the window closes, but the starting XI looks solid.");
+    seedComment.run("oldham_athletic_2026-08-08", "ST4_Oli", "Hope we sign one more winger before the window closes, but the starting XI looks solid.");
     // Seed comments for Swansea City match poll (current match)
     seedComment.run("swansea_city_2026-08-15_15:00", "PotterPride", "Blind optimism as always! Let's get the 3 points.");
     seedComment.run("swansea_city_2026-08-15_15:00", "ST4_Lager", "Scarred regular here. Happy with a hard-fought draw to be honest.");

@@ -1,6 +1,9 @@
-﻿# Potter Pulse
+# Potter Pulse
 
 <img src="docs/screenshots/dashboard_latest.png" alt="PotterPulse three-tab dashboard" width="760" />
+
+> [!NOTE]
+> **Disclaimer**: PotterPulse is an independent fan-dashboard concept. It is not affiliated with, endorsed by, or replacing The Oatcake, Stoke City FC, or any existing supporter forum.
 
 Potter Pulse is a work-in-progress local Stoke City tracker app built around a small SQLite database and a lightweight Node renderer. It presents the squad and fixture run as a premium black-and-red high-density sports data dashboard, drawing on patterns from real-time telemetry interfaces while keeping the look recognisably Stoke-focused. This is not a finished production app yet; it is an actively evolving prototype with real data, a live local renderer, and a documented design direction.
 
@@ -611,7 +614,7 @@ Verification notes:
 
 Problem: the Squad fanzine column was useful but still felt static; it needed the energy of supporter discussion without reintroducing the bulky opposition pitch or bottom ledger.
 
-Solution: replaced the static noticeboard with a `.forum-board-feed` component headed `OATCAKE MESSAGE BOARD`, using three dark thread cards with supporter tags, titles, and preview copy. The left-hand XI pitch remains untouched and the desktop layout stays balanced at 1fr 1fr before collapsing to one column on mobile.
+Solution: replaced the static noticeboard with a `.forum-board-feed` component headed `TERRACE THREADS`, using three dark thread cards with supporter tags, titles, and preview copy. The left-hand XI pitch remains untouched and the desktop layout stays balanced at 1fr 1fr before collapsing to one column on mobile.
 
 Verification notes:
 
