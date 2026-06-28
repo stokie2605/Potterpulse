@@ -1,4 +1,4 @@
-﻿import { createServer } from 'node:http';
+import { createServer } from 'node:http';
 import { parse } from 'node:url';
 import { readFileSync } from 'node:fs';
 import { dirname, extname, join, resolve } from 'node:path';
@@ -33,9 +33,21 @@ const crestAssets = {
   default: '/assets/crests/default-opponent.svg',
 };
 const pollCandidates = [
-  { key: 'manhoef', label: 'Manhoef', note: 'explosive threat' },
-  { key: 'jun_ho', label: 'Jun-ho', note: 'creative spark' },
-  { key: 'johansson', label: 'Johansson', note: 'safe hands' },
+  {
+    key: 'blind_optimism',
+    label: 'Blind Optimism (3-0 Cruise)',
+    note: 'Robins has cooked a masterclass over pre-season and Soumaré is going to absolutely boss the middle.',
+  },
+  {
+    key: 'scarred_regular',
+    label: 'The Scarred Regular (Scrappy 1-0)',
+    note: "I'd snap your hand off for any win right now. Just don't pass it straight to their strikers in the first 10 minutes.",
+  },
+  {
+    key: 'chronic_pessimism',
+    label: 'Chronic Pessimism (The Usual ST4 Cold Shower)',
+    note: '75% possession for them, a soft counter-attack goal conceded, and freezing rain whipping off the bay.',
+  },
 ];
 
 const voteSessions = new Map();
@@ -160,6 +172,10 @@ const ensureSchema = (db) => {
     ')'
   );
 
+  db.exec(
+    "DELETE FROM fan_poll_votes WHERE option_key NOT IN ('blind_optimism', 'scarred_regular', 'chronic_pessimism')"
+  );
+
   const seedVote = db.prepare(
     'INSERT OR IGNORE INTO fan_poll_votes (option_key, label, note, vote_count) ' +
       'VALUES (?, ?, ?, 0)'
@@ -177,9 +193,9 @@ const getPollResults = (db) => {
       'SELECT option_key, label, note, vote_count ' +
         'FROM fan_poll_votes ' +
         'ORDER BY CASE option_key ' +
-        "WHEN 'manhoef' THEN 1 " +
-        "WHEN 'jun_ho' THEN 2 " +
-        "WHEN 'johansson' THEN 3 " +
+        "WHEN 'blind_optimism' THEN 1 " +
+        "WHEN 'scarred_regular' THEN 2 " +
+        "WHEN 'chronic_pessimism' THEN 3 " +
         'ELSE 99 END, label'
     )
     .all();
@@ -201,9 +217,13 @@ const renderPollOptions = (rows) =>
     .map((option) =>
       [
         '<button class="poll-option" type="button" data-vote-option="' + escapeHtml(option.key) + '">',
+        '<div class="vote-progress-fill" style="width: ' + escapeHtml(option.percent) + '%;"></div>',
+        '<div class="radio-indicator"></div>',
+        '<div class="option-content">',
         '<strong>' + escapeHtml(option.label) + '</strong>',
-        '<span class="poll-meter"><span style="width: ' + escapeHtml(option.percent) + '%;"></span></span>',
-        '<small>' + escapeHtml(option.percent) + '% ' + escapeHtml(option.note) + ' - ' + escapeHtml(option.votes) + ' votes</small>',
+        '<p>' + escapeHtml(option.note) + '</p>',
+        '</div>',
+        '<span class="poll-percentage">' + escapeHtml(option.percent) + '%</span>',
         '</button>',
       ].join(''),
     )

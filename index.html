@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
@@ -681,48 +681,115 @@
       .placeholder-copy { margin: 0; color: var(--muted); line-height: 1.55; }
 
       .fan-poll-grid {
-        display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 8px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
       }
       .poll-option {
-        min-width: 0;
+        display: flex;
+        align-items: flex-start;
+        gap: 16px;
+        width: 100%;
         border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 8px;
-        padding: 10px;
+        border-radius: 12px;
+        padding: 16px;
         background: rgba(255, 255, 255, 0.035);
-      }
-      .poll-option strong {
-        display: block;
+        cursor: pointer;
+        text-align: left;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
         overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
+      }
+      .poll-option:hover:not(.is-locked) {
+        border-color: rgba(226, 14, 25, 0.4);
+        background: rgba(226, 14, 25, 0.06);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(226, 14, 25, 0.08);
+      }
+      .radio-indicator {
+        flex-shrink: 0;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        border: 2px solid var(--quiet);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 2px;
+        transition: all 0.25s ease;
+        position: relative;
+        z-index: 1;
+      }
+      .poll-option.is-selected .radio-indicator {
+        border-color: var(--red-3);
+      }
+      .poll-option.is-selected .radio-indicator::after {
+        content: "";
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: var(--red-3);
+        box-shadow: 0 0 8px var(--red-3);
+      }
+      .option-content {
+        flex-grow: 1;
+        min-width: 0;
+        position: relative;
+        z-index: 1;
+      }
+      .option-content strong {
+        display: block;
         color: #fff;
-        font-size: 0.78rem;
-        font-weight: 1000;
-        text-transform: uppercase;
+        font-size: 0.95rem;
+        font-weight: 800;
+        margin-bottom: 4px;
+        text-transform: none;
       }
-      .poll-meter {
-        display: block;
-        height: 6px;
-        margin: 9px 0 6px;
-        overflow: hidden;
-        border-radius: 999px;
-        background: rgba(255, 255, 255, 0.08);
-      }
-      .poll-meter span {
-        display: block;
-        height: 100%;
-        border-radius: inherit;
-        background: linear-gradient(90deg, var(--red), var(--red-3));
-      }
-      .poll-option small {
+      .option-content p {
+        margin: 0;
         color: var(--muted);
-        font-size: 0.68rem;
-        font-weight: 900;
+        font-size: 0.8rem;
+        line-height: 1.4;
       }
-      .poll-option.is-locked { cursor: not-allowed; opacity: 0.58; }
-      .poll-option.is-selected { opacity: 1; border-color: rgba(226, 14, 25, 0.74); background: rgba(226, 14, 25, 0.12); }
+      .poll-percentage {
+        flex-shrink: 0;
+        font-size: 1.2rem;
+        font-weight: 900;
+        color: var(--red-3);
+        opacity: 0;
+        transform: scale(0.8);
+        transition: all 0.25s ease;
+        align-self: center;
+        position: relative;
+        z-index: 1;
+      }
+      .poll-option.is-locked .poll-percentage {
+        opacity: 1;
+        transform: scale(1);
+      }
+      .poll-option.is-locked:not(.is-selected) {
+        opacity: 0.65;
+        border-color: rgba(255, 255, 255, 0.04);
+      }
+      .poll-option.is-locked {
+        cursor: not-allowed;
+      }
+      .poll-option.is-selected {
+        border-color: rgba(226, 14, 25, 0.74);
+        background: rgba(226, 14, 25, 0.12);
+      }
+      .vote-progress-fill {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        top: 0;
+        height: 100%;
+        background: linear-gradient(90deg, rgba(226, 14, 25, 0.14) 0%, rgba(226, 14, 25, 0.02) 100%);
+        z-index: 0;
+        width: 0;
+        transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        pointer-events: none;
+      }
 
       .matchday-briefing-card {
         margin: 0 0 12px;
@@ -782,17 +849,28 @@
       @media (max-width: 992px) {
         .away-master-grid { grid-template-columns: 1fr; }
         .travel-guide-card { height: auto; }
-        .content-grid { padding-bottom: 90px; }
+        .content-grid { padding-bottom: 70px; }
       }
 
       @media (max-width: 920px) {
         .stage { width: min(480px, calc(100% - 24px)); padding-top: 14px; }
         .app-frame { border-radius: 32px; }
-        .content-grid { grid-template-columns: 1fr; padding-inline: 14px; }
+        .content-grid { grid-template-columns: 1fr; padding-inline: 14px; padding-bottom: 70px; }
         .next-match-grid { grid-template-columns: 1fr; gap: 12px; }
-        .app-topbar, .sport-tabs { padding-inline: 14px; }
+        .app-topbar { padding-inline: 14px; }
+        .sport-tabs { display: none; }
         .match-card { min-height: auto; padding: 14px; }
         .fixture-list, .fan-poll-grid { grid-template-columns: 1fr; }
+        .bottom-nav {
+          position: fixed;
+          bottom: 0;
+          left: 0;
+          width: 100%;
+          z-index: 1000;
+          background: #111217;
+          border-top: 1px solid var(--line);
+          padding-bottom: env(safe-area-inset-bottom);
+        }
       }
 
       @media (max-width: 430px) {
@@ -802,15 +880,14 @@
           bottom: 0;
           left: 0;
           width: 100%;
-          z-index: 9999;
+          z-index: 1000;
           background: #111217;
           border-top: 1px solid var(--line);
           padding-bottom: env(safe-area-inset-bottom);
         }
-        .content-grid { padding-bottom: 90px; }
+        .content-grid { padding-bottom: 70px; }
         .stage { width: 100%; padding: 0; }
         .app-frame { min-height: 100vh; border-width: 0; border-radius: 0; }
-        .content-grid { padding-bottom: 90px; }
         .scoreline { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 10px; margin-bottom: 12px; }
         .scoreline .club:first-child { grid-column: 1; grid-row: 1; }
         .scoreline .club:last-child { grid-column: 2; grid-row: 1; }
@@ -910,11 +987,11 @@
               </div>
             </div>
           </section>
-          <section class="panel single-view" aria-label="Fan performance vote">
+          <section class="panel single-view" aria-label="Terrace Temperature Check">
             <div class="section-head">
               <div>
-                <span class="section-kicker">Fan Pulse</span>
-                <h2>Performance Vote</h2>
+                <span class="section-kicker">The Pre-Match Verdict</span>
+                <h2>TERRACE TEMPERATURE CHECK</h2>
               </div>
               <span class="chip">Live Poll</span>
             </div>
@@ -1117,9 +1194,13 @@
         if (!pollGrid) return;
         pollGrid.innerHTML = results.map((option) => [
           '<button class="poll-option" type="button" data-vote-option="' + escapeText(option.key) + '">',
+          '<div class="vote-progress-fill" style="width: ' + Number(option.percent) + '%;"></div>',
+          '<div class="radio-indicator"></div>',
+          '<div class="option-content">',
           '<strong>' + escapeText(option.label) + '</strong>',
-          '<span class="poll-meter"><span style="width: ' + Number(option.percent) + '%;"></span></span>',
-          '<small>' + Number(option.percent) + '% ' + escapeText(option.note) + ' - ' + Number(option.votes) + ' votes</small>',
+          '<p>' + escapeText(option.note) + '</p>',
+          '</div>',
+          '<span class="poll-percentage">' + Number(option.percent) + '%</span>',
           '</button>',
         ].join('')).join('');
         applyVoteLockState();
