@@ -665,22 +665,61 @@ const formatShortDate = (dateText) =>
     month: 'short',
   }).format(new Date(`${dateText}T12:00:00Z`));
 
-const render = () => {
+let supabaseUrl = process.env.SUPABASE_URL;
+let supabaseKey = process.env.SUPABASE_ANON_KEY;
+
+function loadEnvConfig() {
+  if (!supabaseUrl || !supabaseKey) {
+    try {
+      const dotenvContent = readFileSync(resolve(rootDir, '.env'), 'utf8');
+      const urlMatch = dotenvContent.match(/SUPABASE_URL\s*=\s*["']?([^\s"'#]+)["']?/i);
+      const keyMatch = dotenvContent.match(/SUPABASE_ANON_KEY\s*=\s*["']?([^\s"'#]+)["']?/i);
+      if (urlMatch) supabaseUrl = urlMatch[1];
+      if (keyMatch) supabaseKey = keyMatch[1];
+    } catch (err) {
+      // Ignore
+    }
+  }
+}
+
+async function fetchSupabase(table, queryParams = '', options = {}) {
+  const url = `${supabaseUrl}/rest/v1/${table}?${queryParams}`;
+  const headers = {
+    'apikey': supabaseKey,
+    'Authorization': `Bearer ${supabaseKey}`,
+    'Content-Type': 'application/json'
+  };
+  const res = await fetch(url, {
+    method: options.method || 'GET',
+    headers,
+    body: options.body ? JSON.stringify(options.body) : undefined
+  });
+  if (res.ok) {
+    if (options.method === 'POST' || options.method === 'PATCH' || options.method === 'DELETE') {
+      return { ok: true };
+    }
+    return await res.json();
+  } else {
+    throw new Error(`Supabase error on ${table}: ${res.status} ${await res.text()}`);
+  }
+}
+
+const render = async () => {
+  loadEnvConfig();
+  const useSupabase = Boolean(supabaseUrl && supabaseKey);
   const db = new DatabaseSync(dbPath);
   try {
-    ensureSchema(db);
-    const squad = db
-      .prepare(
-        'SELECT player_name, squad_number, position FROM stoke_squad ORDER BY squad_number',
-      )
-      .all();
-
-    const fixtures = db
-      .prepare(
-        'SELECT opponent, match_date, competition, venue, status, stoke_score, opponent_score FROM efl_fixtures ORDER BY match_date',
-      )
-      .all();
-    const transfers = db.prepare('SELECT player_name, direction, details FROM stoke_transfers ORDER BY id DESC').all();
+    let squad, fixtures, transfers;
+    if (useSupabase) {
+      squad = await fetchSupabase('stoke_squad', 'select=player_name,squad_number,position&order=squad_number.asc');
+      fixtures = await fetchSupabase('efl_fixtures', 'select=opponent,match_date,competition,venue,status,stoke_score,opponent_score&order=match_date.asc');
+      transfers = await fetchSupabase('stoke_transfers', 'select=player_name,direction,details&order=id.desc');
+    } else {
+      ensureSchema(db);
+      squad = db.prepare('SELECT player_name, squad_number, position FROM stoke_squad ORDER BY squad_number').all();
+      fixtures = db.prepare('SELECT opponent, match_date, competition, venue, status, stoke_score, opponent_score FROM efl_fixtures ORDER BY match_date').all();
+      transfers = db.prepare('SELECT player_name, direction, details FROM stoke_transfers ORDER BY id DESC').all();
+    }
     const transfersInList = transfers
       .filter((t) => t.direction === 'IN')
       .map((t) => `<li style="color:#fff; font-weight:800;">• ${escapeHtml(t.player_name)} <span style="color:var(--muted); font-size:9px; font-weight:400;">(${escapeHtml(t.details)})</span></li>`)
@@ -1220,7 +1259,7 @@ const server = createServer(async (request, response) => {
 
   if (request.method === 'GET' && (pathname === '/' || pathname === '/index.html')) {
     response.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
-    response.end(render());
+    response.end(await render());
     return;
   }
 
@@ -1254,27 +1293,48 @@ function runLiveSyncService() {
     try {
       if (apiKey) {
         console.log("[LiveSync] Syncing with real-world Football API (api.football-data.org)...");
-        const res = await fetch('https://api.football-data.org/v4/teams/107/matches?status=SCHEDULED', {
+        const res = await fetch('https://api.football-data.org/v4/teams/70/matches?status=SCHEDULED', {
           headers: { 'X-Auth-Token': apiKey }
         });
         if (res.ok) {
           const data = await res.json();
           if (data && data.matches) {
             console.log(`[LiveSync] Successfully retrieved ${data.matches.length} fixtures from Football API.`);
-            const db = new DatabaseSync(dbPath);
-            try {
-              const updateStmt = db.prepare(
-                'UPDATE efl_fixtures SET match_date = ?, competition = ? WHERE opponent = ?'
-              );
+            
+            loadEnvConfig();
+            const useSupabase = Boolean(supabaseUrl && supabaseKey);
+            
+            if (useSupabase) {
               for (const match of data.matches) {
-                const opponentName = match.homeTeam.id === 107 ? match.awayTeam.name : match.homeTeam.name;
+                const opponentName = match.homeTeam.id === 70 ? match.awayTeam.name : match.homeTeam.name;
                 const matchDate = match.utcDate.slice(0, 10);
                 const comp = match.competition.name;
-                updateStmt.run(matchDate, comp, opponentName);
+                try {
+                  await fetchSupabase('efl_fixtures', `opponent=eq.${encodeURIComponent(opponentName)}`, {
+                    method: 'PATCH',
+                    body: { match_date: matchDate, competition: comp }
+                  });
+                } catch (e) {
+                  // Ignore if row doesn't exist
+                }
               }
-              console.log("[LiveSync] SQLite database successfully updated with real fixture dates.");
-            } finally {
-              db.close();
+              console.log("[LiveSync] Supabase cloud database successfully updated with real fixture dates.");
+            } else {
+              const db = new DatabaseSync(dbPath);
+              try {
+                const updateStmt = db.prepare(
+                  'UPDATE efl_fixtures SET match_date = ?, competition = ? WHERE opponent = ?'
+                );
+                for (const match of data.matches) {
+                  const opponentName = match.homeTeam.id === 70 ? match.awayTeam.name : match.homeTeam.name;
+                  const matchDate = match.utcDate.slice(0, 10);
+                  const comp = match.competition.name;
+                  updateStmt.run(matchDate, comp, opponentName);
+                }
+                console.log("[LiveSync] SQLite database successfully updated with real fixture dates.");
+              } finally {
+                db.close();
+              }
             }
           }
         } else {
