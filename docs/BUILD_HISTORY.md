@@ -1,0 +1,478 @@
+# PotterPulse Build History
+
+This file preserves the detailed engineering diary that used to live in the main README. The root README is intentionally shorter for portfolio scanning; this document keeps the implementation context, tradeoffs, problems, and verification notes.
+
+## Engineering Struggle Log
+
+### 1. Hand-coded data fatigue vs automated Node REPL bulk data ingestion
+
+At the start, adding fixture data manually would have meant repeatedly writing individual SQL inserts and checking them by hand. That was slow, error-prone, and exactly the kind of work that creates subtle inconsistencies in dates, venues, and competition labels.
+
+The solution was to use the Node REPL MCP with Node's SQLite support to parse the complete pipe-delimited fixture table and insert all 47 rows using clean parameters. The import normalized dates to `YYYY-MM-DD` and venues to lowercase `home` / `away` / `neutral`. That made the data reliable for the CSS frontend and removed the fatigue of hand-coded rows.
+
+### 2. Browser sandbox process breakpoint crash `0x80000003` vs manual browser inspection workaround
+
+During visual verification, browser automation hit environment and sandbox friction. Playwright initially could not find the expected Chromium runtime from the Node REPL environment, and browser launching from the sandboxed MCP runtime was blocked. This class of failure was treated as a browser sandbox/process breakpoint problem, including the kind of local Windows crash/debug behaviour represented by `0x80000003`.
+
+The workaround was practical: run the local Node server directly, open the app manually in the browser, and use Playwright from the terminal where browser process launch permissions were available. Screenshots were captured with `npx playwright screenshot`, then inspected from the generated image. When the image viewer could not read from the temp path, the screenshot was saved into the project and emitted through the Node REPL as an inline image.
+
+That gave us a reliable visual inspection loop without blocking the build on sandbox-specific browser launch behaviour.
+
+### 3. Flat old-school admin styling vs ultra-premium glassmorphic sports design
+
+The first version worked, but it looked like a dark admin dashboard rather than a modern sports product. It had useful panels, but the styling lacked the compact, immersive feel of high-end sports apps.
+
+The redesign moved the interface toward a premium mobile sports app language:
+
+- Radial dark backgrounds instead of flat solid fills
+- Translucent cards and layered dark surfaces
+- Thin semi-transparent borders
+- Deep outer shadows
+- Heavy uppercase typography
+- Crimson glow behind the match module
+- App-style tabs, cards, fixture rows, and bottom navigation
+
+The result keeps Potter Pulse black and red, but gives it more of the energy and density seen in modern match-centre apps.
+
+
+### 4. Squad-card clipping vs tactical pitch layout
+
+The squad section originally used compact horizontal cards. That solved some height issues, but it still created a familiar mobile problem: long names and position labels could clip, and the row looked like generic app chrome rather than something native to football.
+
+The solution was to turn the squad section into a tactical pitch view. The four tracked players are now rendered as circular markers on a pitch-style canvas. A key implementation issue was that the generated HTML used data attributes such as `data-number="#42"`, while the first selector idea targeted `data-number="42"`. The selectors were corrected to match the rendered markup exactly. We also shortened player names in `scripts/server.mjs` so the marker labels fit cleanly on mobile and desktop.
+
+### 5. Corporate stats card vs independent fanzine voice
+
+The old `Match Pulse` card was useful, but it felt corporate and generic. To give Potter Pulse more local identity, it was replaced with `The Boothen Verdict`, an editorial-style fanzine card inspired by the independent Stoke fan voice.
+
+The first pass needed care because the replacement had to fit beside the tactical pitch on desktop and below it on mobile. The final version uses serif italic body copy, compact metadata, and a strong `100% Free Zine` chip while keeping the block responsive.
+
+### 6. Single dashboard layout vs tabbed app structure
+
+As the interface grew, stacking every module on one dashboard started to make the app feel crowded. The next architecture step was to introduce tab-view wrappers for `Matches`, `Squad`, `Pulse`, and `More`.
+
+A proposed script had the right idea, but one replacement target was written as raw HTML instead of a quoted string, which would have crashed immediately. The implementation was applied safely by locating the existing match card, squad panel, fanzine panel, and fixture centre, then wrapping them into dedicated views. A small JavaScript controller now toggles matching top tabs and bottom navigation buttons using `data-view` and `data-tab-view` attributes.
+
+
+### 7. Mobile bottom navigation burial vs sticky safe-area navigation
+
+Once the app gained real tab views, the bottom navigation needed to behave like a native mobile app control. The first version sat in normal document flow, which meant long tab content could separate the nav from the viewport bottom or make the user scroll past the main controls.
+
+The fix was added inside the mobile breakpoint: the bottom nav is fixed to the bottom of the viewport with a high z-index, safe-area padding, and an extra `80px` bottom padding on `.content-grid` so content is not hidden behind the navigation bar. This was verified on the mobile Squad view with a Playwright screenshot.
+
+### 8. Static squad pitch vs interactive formation controls
+
+The tactical pitch initially showed one fixed marker layout. That made the squad tab visually stronger, but it did not yet feel like an app tool. The upgrade added compact formation controls above the pitch with `4-3-3 Attack` and `5-3-2 Solid` options.
+
+The main implementation problem was selector drift. The rendered cards use attributes such as `data-number="#42"`, so the JavaScript formation map had to use the same `#42` keys. Once that was aligned, clicking a formation updates the active chip and adjusts the player marker positions without rebuilding the DOM.
+
+### 9. More placeholder vs Away Day travel guide
+
+The More tab was deliberately labelled as work in progress, but an empty placeholder did not add much value. It has now become the first Away Day guide surface, starting with Swansea City data and a second West Brom entry staged in the server lookup for future switching.
+
+The data lives in `scripts/server.mjs` as an `awayGuides` lookup and is rendered through clean template replacements in `index.html`. This keeps text clean for the CSS frontend and avoids hard-coding travel details directly into the markup.
+
+Problems found and solved during this pass:
+
+- A stale local Node server was still serving the old template, so rendered HTML showed unreplaced placeholders. The server was restarted after the template and server changes landed.
+- The mobile bottom padding fix had been overwritten later in the same media query by another `.content-grid` rule. The later rule now keeps the `80px` padding so content does not sit under the fixed nav.
+- The More tab needed to span the app grid on desktop. The Away Day card now carries `.single-view` so it behaves like the other full-width tab views.
+- Playwright reported a console 404 for `favicon.ico`. That is harmless for this feature pass, but a small favicon asset remains a tidy-up item.
+
+### 10. Static Away Day card vs dynamic pre-match briefing
+
+The Away Day guide now has a server-side briefing layer. `scripts/server.mjs` contains a `nextMatchBriefing` lookup with form strings, referee notes, weather, and kit advice. The render pipeline normalizes opponent names into lookup keys and chooses the first upcoming match in the next-five window that has both guide and briefing data, with Swansea as the current work-in-progress fallback.
+
+The original pasted approach could not be applied directly because the app stores fixture dates as `match_date`, not `date`, and there was no existing `upcomingMatches` variable to replace. The implementation was adapted to the real database shape and existing `hero` fallback instead of replacing a non-existent code path.
+
+Problems found and solved during this pass:
+
+- The West Brom fixture name normalizes to `west_bromwich_albion`, while the guide key is `west_brom`. An alias map now keeps those keys connected.
+- The weather separator briefly rendered as an encoding placeholder. It was changed to a plain ASCII dash so the CSS frontend gets clean text.
+- The guide needed to remain visibly unfinished. The More tab chip now includes `WIP` while still showing the active guide tag.
+- The Playwright MCP browser context closed during DOM inspection, so verification fell back to the reliable Playwright CLI screenshot workflow.
+
+### 11. Four-tab spread vs streamlined three-tab architecture
+
+The app had grown into four tabs: Matches, Squad, Pulse, and More. That was useful while experimenting, but it made the product feel split across too many shallow surfaces. The layout has now been consolidated into three tabs: Matches, Squad, and Away Days.
+
+The Boothen Verdict moved out of its standalone Pulse view and into the Matches flow directly under the match hero. A new fan performance voting poll sits below the fanzine card and above the fixture list, so the match-day content now reads as one continuous experience before the schedule.
+
+The old More view has been renamed to `#view-away-days` and wired through `data-view="away-days"` / `data-tab-view="away-days"`. It still uses the dynamic server-side away guide and briefing data, now including travel time and a clearer Safe Pub label.
+
+Problems found and solved during this pass:
+
+- There was no existing fan performance poll in the HTML, so a compact poll component was added instead of leaving that directive implied.
+- A broad verification regex counted `tab-view` wrappers as top-level tabs and falsely reported more than three tabs. The check was tightened to count only actual tab buttons, confirming three top tabs and three bottom nav buttons.
+- The away guide had mileage but not travel time. `scripts/server.mjs` now includes a dedicated `travelTime` value for each seeded away guide.
+
+### 12. Local prototype vs container-ready runtime, persisted votes, and crest assets
+
+The app now has a deployment-oriented runtime layer. A multi-stage `Dockerfile` checks the Node server syntax in the first stage and runs the app from a non-root `node` user in a lightweight Bookworm-slim runtime stage. The runtime copies only the required app files: `index.html`, `scripts/`, `assets/`, and `potter_pulse.db`. A minimal `infra/main.tf` stub defines the ECS/Fargate task, service, log group, networking inputs, and port `4173` mapping for cloud-native context.
+
+The fan performance vote moved from static HTML into persisted backend state. `scripts/server.mjs` now owns a `fan_poll_votes` table, seeds the known poll options, renders aggregate percentages into `{{fanPollOptions}}`, and exposes `POST /api/vote` so client votes survive page reloads and server restarts.
+
+The match hero no longer depends on text-only crest blocks. Local SVG assets live under `assets/crests/`, are mapped by normalized team keys in the renderer, and are served through a constrained `/assets/...` route. The crest-specific WIP wording was removed from the README because the visible interface now uses local asset paths.
+
+Problems found and solved during this pass:
+
+- The project has no `package.json` or frontend build step, so the container explicitly skips npm/bundler work and validates with `node --check scripts/server.mjs`.
+- The original poll was static markup. It is now server-rendered from SQLite and updated through a JSON POST route.
+- The first vote verification intentionally changed the local database; the counts were reset to zero after confirming persistence so the committed seed state stays clean.
+- Crest placeholders were still using text initials. The hero now renders SVG images via `{{homeCrestSrc}}` and `{{awayCrestSrc}}`.
+
+### 13. Full fixture wall vs default five-match view and culture profiles
+
+The fixture centre now renders all 47 fixtures in the HTML but collapses everything after the first five rows by default. A mobile-safe `Show All` / `Collapse` control toggles the fixture list with a CSS class instead of rebuilding the DOM, so the full schedule remains available without overwhelming the first viewport.
+
+A lightweight backend culture profile map now lives in `scripts/server.mjs`. The default profile is `the_potters`, labelled `The Potters`, and it maps canonical database team names to supporter-facing labels such as `The Potters`, `The Swans`, and `The Baggies`. The SQLite fixture data stays canonical; only the rendered display names change through helper replacements such as `{{homeDisplayName}}`, `{{heroOpponentDisplay}}`, and `{{awayOpponentDisplay}}`.
+
+Problems found and solved during this pass:
+
+- The fixture list needed to keep all 47 rows available for search/inspection while showing only five by default. The renderer marks rows after index five with `.is-collapsed` and the client toggles `.fixture-list.expanded`.
+- Hard-coded `Stoke City` and opponent labels in the hero would have bypassed localization. Those labels now use backend display-name mappings.
+- Mobile verification confirmed the default view shows five rows, expands to 47 rows, collapses back to five, and keeps the bottom nav fixed.
+
+### 14. Raw referee/weather tiles vs generated matchday briefing analysis
+
+The fixture centre now has a highlighted matchday briefing card generated by `scripts/server.mjs`. The generator reads the active upcoming match context, referee profile, weather condition, forecast temperature, and culture-aware team labels, then outputs a headline and a three-sentence analytical summary for the Fixture Centre.
+
+The current default profile renders a headline like `The Potters briefing: The Swans under heavy rain and wind`. The summary combines surface conditions, temperature, referee discipline risk, and kit advice so the briefing feels like analysis rather than disconnected data tiles.
+
+Problems found and solved during this pass:
+
+- The referee and weather data already existed in `nextMatchBriefing`, but it only appeared as separate Away Days tiles. The new `generateMatchdayBriefing` function turns that structured data into a culture-aware narrative.
+- The card needed to sit above the default five-fixture list without breaking the mobile-safe navigation. Mobile verification confirmed the card fits a `390px` viewport, the fixture toggle still expands from five to 47 rows, and the bottom nav remains fixed.
+- The only browser console issue remained the known `favicon.ico` 404, unrelated to this briefing pass.
+
+### 15. Local manual QA vs GitHub Actions CI/CD pipeline
+
+The project now has a GitHub Actions workflow at `.github/workflows/ci-cd.yml` that runs on pushes to `main`. The `test` job installs Node 24 dependencies, runs `node --check scripts/server.mjs`, and executes a Playwright mobile viewport regression check. The `build` job only runs after tests pass and validates the existing multi-stage Dockerfile with `docker build --tag potter-pulse:ci .`.
+
+Because the project originally had no package metadata, a minimal `package.json` and `package-lock.json` were added for CI-owned scripts and the Playwright dependency. The layout test lives in `scripts/ci-mobile-layout-check.mjs`; it starts the local server on port `4183`, opens the Matches view at a 390px mobile viewport, verifies the matchday briefing card, confirms the default five-fixture state, expands to all 47 fixtures, collapses back to five, and checks the fixed bottom navigation.
+
+Problems found and solved during this pass:
+
+- The first local Playwright run hit sandbox process restrictions, so the check was rerun from an elevated terminal path while keeping the workflow itself standard for GitHub-hosted runners.
+- Port `4173` was already used by the development server, so the CI layout test uses port `4183` by default.
+- CSS uppercase rendering made `innerText` unsuitable for checking the culture display name. The test now uses `textContent` for that assertion while still checking visible layout state through computed styles.
+- Local `node_modules`, Playwright MCP scratch files, and QA screenshots are ignored so the repository stays focused on source, docs, and reproducible pipeline files.
+
+### 16. Four-player spine vs 11-node pitch grid, vote locking, and modular away guide cards
+
+The Squad view now uses an 11-node CSS Grid pitch instead of a four-player vertical spine. The grid keeps the four tracked players active and honest, then fills the remaining seven positions with tactical role slots so the shape reads like a proper football layout without inventing fake squad data. The formation controls now switch the pitch container between `4-3-3 Attack` and `5-3-2 Solid` using data attributes, and the player nodes move through CSS grid coordinates rather than inline bottom offsets.
+
+A new Player Performance Ledger sits beside or below the pitch depending on viewport width. Hovering, focusing, or tapping a player node updates Goals, Assists, Yellow / Red Cards, and Season Average Rating. Manhoef, Jun-ho, Tchamadeu, and Johansson are seeded with localized season stats, while tactical role slots remain clearly secondary.
+
+The Performance Vote now has two layers of spam protection. The client writes a `has_voted_match_*` key to localStorage immediately after a vote click, applies selected/locked visual state, and disables repeat clicks for that match. The backend also tracks rapid identical submissions by session, match key, and option key, returning the current aggregate without incrementing if a duplicate request arrives inside the debounce window.
+
+The Away Days view now renders a modular supporter guide grid from backend `awayGuides.modules` data. Swansea is seeded with three production-style cards: Away-Friendly Pubs, Recommended Hotels, and Matchday Transit & Logistics. The guide includes Harvester Morfa Parc Swansea, The Bank Statement on Wind St, The Grand Hotel, Village Hotel Swansea, and Felindre M4 Junction 46 Park & Ride instructions, plus warnings around home-only zones.
+
+Problems found and solved during this pass:
+
+- The first inline script replacement left a stale `await` fragment from the old vote handler, which stopped all page interactivity. The stale tail was removed and the Playwright regression immediately caught the fixture toggle working again.
+- The existing CI mobile test protected the Matches flow while the Squad and Away Days views changed substantially.
+- A targeted Playwright smoke check verified 11 pitch nodes, four tracked players, formation movement, ledger updates, three away guide cards, localStorage vote locking, and backend duplicate-vote dropping.
+- Poll counts were reset after smoke verification so local test votes do not pollute the seed state.
+
+### 17. Template leak and pitch-coordinate hardening
+
+The Away Days renderer now has an explicit final replacement guard for `{{awaySupporterCards}}`, so the modular supporter cards render as compiled HTML rather than leaking raw template text. The Squad view now receives a canonical 11-player tactical XI from `scripts/server.mjs`, and the visible counter is locked to `11 PLAYERS`.
+
+The pitch surface now uses the `.pitch` coordinate namespace for the 4-3-3 and 5-3-2 CSS Grid mappings. Each player has distinctive name, position, formation roles, and ledger stats, and the ledger updater now applies defensive fallbacks before writing card values so it cannot output `undefined / undefined`.
+
+Verification confirmed three Away Days guide cards, 11 distinctive player nodes, a mobile pitch width of 332px at a 390px viewport, changed coordinates between formations, no leaked placeholders, and a clean ledger card value.
+
+### 18. Away Days empty-space correction and form-token centering
+
+The Away Days view now uses an `away-master-grid` desktop layout. The left column stacks Ground Info, Match-Day Pie Index, Referee Watch, Weather, and Form Guide cards; the right column is one tall travel-guide card containing Away-Friendly Pubs, Recommended Hotels, and Transit & Logistics. This removes the loose desktop space on the right while keeping all guide modules grouped as a single supporter-travel surface.
+
+The W/D/L form tokens now use strict 24px square sizing, flex centering, and `line-height: 1` so the characters stay centered inside their circles. A `max-width: 992px` breakpoint collapses the Away Days master grid into one vertical column, and the main content padding now reserves 90px so mobile text scrolls clear of the fixed bottom navigation.
+
+Verification confirmed a two-column desktop grid, height-balanced left and right columns, three travel guide cards inside the unified right panel, one-column mobile layout, 90px mobile bottom padding, and centered 24x24 form circles.
+
+### 19. Single squad pitch vs split tactical match map
+
+The Squad view now uses a vertical architecture: the tactical match map sits in the upper section and the Player Performance Ledger spans the full width directly beneath it. On desktop, the upper section splits into two symmetrical cards: `The Potters Starting XI` and `Opposition Scouting`. On mobile, those cards collapse into one column so the opposition map stacks below the home map before the ledger.
+
+The old oversized circular player nodes have been replaced with CSS-only geometric mini-kit markers. The home nodes use minimalist red-and-white striping, while the opposition scouting nodes use a solid light away-kit tone with no badges, logos, or commercial marks. Both pitch canvases share the formation controls, so switching from 4-3-3 to 5-3-2 updates the home and opposition maps together.
+
+Verification confirmed two desktop pitch cards, one-column mobile stacking, 11 home nodes, 11 opposition nodes, 22 mini-kit markers, striped home kits, solid opposition kits, mirrored opposition coordinates, and a full-width ledger beneath the tactical map.
+
+### 20. Split-pitch markings and game-style ledger upgrade
+
+The split Squad pitches now render as connected field halves instead of duplicated full-pitch canvases. The Potters card shows the defensive half with a center line and sliced center circle at the top edge plus the penalty area at the bottom. The Opposition Scouting card mirrors that perspective with the penalty area at the top and the center line plus sliced center circle at the bottom.
+
+The Player Performance Ledger now uses a more video-game style information surface. Raw discipline text has been replaced by glowing amber and crimson card blocks with the counts centered on the cards. The ledger header also includes an inline SVG sparkline built from each player node's last-five rating trend, using neon green for ascending form and amber for declining form.
+
+Ledger updates now fade and slide upward briefly when hovering, focusing, or tapping a shirt node, so metric changes feel animated rather than abruptly swapped. Verification confirmed half-pitch marking layers, bottom/top penalty placement, rendered discipline card blocks, sparkline updates, transition state, and the existing CI mobile layout regression.
+
+## Screenshot Workflow
+
+Save the latest dashboard image here:
+
+```text
+docs/screenshots/dashboard_latest.png
+```
+
+That path is the current README hero image and should be refreshed whenever the app design changes materially.
+
+## Verification Performed
+
+The app has been checked locally with:
+
+```powershell
+node --check scripts\server.mjs
+```
+
+The rendered page was also checked over `http://localhost:4173` to confirm:
+
+```text
+No unreplaced template placeholders
+47 fixture rows rendered
+4 squad cards rendered
+App frame present
+Tabbed views present for Matches, Squad, and Away Days
+Away Day guide renders without template placeholders
+Formation controls switch active state and marker positions
+Mobile bottom navigation remains fixed to the viewport bottom
+Pre-match briefing renders referee, weather, kit tip, and 10 form pills
+Three top tabs and three bottom nav buttons render
+Pulse and More standalone views are removed
+Boothen Verdict and Performance Vote render before Fixture Centre
+Away Days renders travel time, safe pub, and Pie Index metrics
+Dockerfile includes check and non-root runtime stages
+ECS/Fargate Terraform stub defines port 4173 runtime context
+Docker/Terraform CLI validation deferred because those CLIs are not installed locally
+Fan poll votes persist in `fan_poll_votes` through `POST /api/vote`
+Local SVG crest assets render without text crest placeholders
+Fixture Centre shows 5 rows by default and toggles to all 47 rows
+Culture profile renders supporter nicknames from canonical team names
+Matchday briefing card renders culture-aware headline and referee/weather analysis
+GitHub Actions workflow triggers on pushes to main with separate test and Docker build jobs
+CI test script validates mobile layout, fixture toggle behaviour, culture text, and fixed bottom navigation
+Squad pitch renders 11 nodes with formation switching and performance ledger updates
+Away Days renders three modular supporter guide cards from backend guide modules
+Client vote locking uses localStorage and backend debounce drops rapid duplicate submissions
+Template leak hardening confirms awaySupporterCards compiles into three guide cards
+Pitch hardening confirms 11 distinctive player nodes and no undefined ledger values
+Away Days master grid balances left briefing stack with unified right travel-guide card
+Form W/D/L tokens render as centered 24px circles with mobile-safe bottom padding
+Squad split-pitch map renders home and opposition cards with 22 mini-kit nodes
+Player Performance Ledger spans below the tactical map on desktop and mobile
+Split-pitch markings render connected field halves with sliced center-circle edges
+Ledger renders discipline cards, SVG form sparkline, and fade/slide metric transitions
+```
+
+Responsive screenshots were generated during visual QA:
+
+```text
+potterpulse-mobile.png
+potterpulse-mobile-tall.png
+potterpulse-desktop.png
+potterpulse-view-matches.png
+potterpulse-view-squad.png
+potterpulse-view-pulse.png (legacy four-tab artifact)
+potterpulse-view-more.png (legacy four-tab artifact)
+potterpulse-sticky-nav-mobile.png
+potterpulse-formation-squad.png
+potterpulse-away-guide-mobile.png
+potterpulse-away-guide-desktop.png
+potterpulse-briefing-mobile.png
+potterpulse-briefing-desktop.png
+potterpulse-3tab-matches-mobile.png
+potterpulse-3tab-away-days-mobile.png
+potterpulse-3tab-matches-desktop.png
+```
+
+
+The legacy four-tab pass was verified by rendering direct hash routes with Playwright screenshots before consolidation:
+
+```powershell
+npx playwright screenshot --browser chromium --viewport-size=390,844 http://localhost:4173/#matches potterpulse-view-matches.png
+npx playwright screenshot --browser chromium --viewport-size=390,844 http://localhost:4173/#squad potterpulse-view-squad.png
+npx playwright screenshot --browser chromium --viewport-size=390,844 http://localhost:4173/#pulse potterpulse-view-pulse.png
+npx playwright screenshot --browser chromium --viewport-size=390,844 http://localhost:4173/#more potterpulse-view-more.png
+```
+
+
+The Away Day and formation-control pass was verified with:
+
+```powershell
+npx playwright screenshot --browser chromium --viewport-size=390,844 http://localhost:4173/#squad potterpulse-formation-squad.png
+npx playwright screenshot --browser chromium --viewport-size=390,844 http://localhost:4173/#away-days potterpulse-away-guide-mobile.png
+npx playwright screenshot --browser chromium --viewport-size=1280,900 http://localhost:4173/#away-days potterpulse-away-guide-desktop.png
+```
+
+Playwright DOM checks confirmed the mobile Away Day panel fits inside a 390px viewport, the bottom navigation is fixed at the bottom, and the `5-3-2 Solid` formation button updates the active control and marker positions.
+
+
+The pre-match briefing pass was verified with rendered HTML checks and fresh screenshots:
+
+```powershell
+npx playwright screenshot --browser chromium --viewport-size=390,844 http://localhost:4173/#away-days potterpulse-briefing-mobile.png
+npx playwright screenshot --browser chromium --viewport-size=1280,900 http://localhost:4173/#away-days potterpulse-briefing-desktop.png
+```
+
+
+The three-tab consolidation pass was verified with rendered HTML checks and screenshots:
+
+```powershell
+npx playwright screenshot --browser chromium --viewport-size=390,844 http://localhost:4173/#matches potterpulse-3tab-matches-mobile.png
+npx playwright screenshot --browser chromium --viewport-size=390,844 http://localhost:4173/#away-days potterpulse-3tab-away-days-mobile.png
+npx playwright screenshot --browser chromium --viewport-size=1280,900 http://localhost:4173/#matches potterpulse-3tab-matches-desktop.png
+```
+
+
+The fixture toggle and culture profile pass was verified with rendered HTML checks and a mobile Playwright interaction check:
+
+```text
+Default visible fixture rows: 5
+Expanded visible fixture rows: 47
+Collapsed visible fixture rows: 5
+Active culture label: The Potters
+Hero opponent display: The Swans
+Mobile bottom nav position: fixed
+```
+
+
+The matchday briefing generator pass was verified with rendered HTML checks and a mobile Playwright interaction check:
+
+```text
+Briefing headline: The Potters briefing: The Swans under heavy rain and wind
+Briefing summary includes: 14 C, heavy rain and wind, Gavin Ward, card-risk analysis, and kit advice
+Mobile card width at 390px viewport: 318px
+Default visible fixture rows after card insert: 5
+Expanded visible fixture rows after card insert: 47
+Mobile bottom nav position: fixed
+```
+
+
+The CI/CD pipeline pass was verified locally with:
+
+```powershell
+npm install
+npm run check
+node --check scripts\ci-mobile-layout-check.mjs
+npm run test:layout
+```
+
+The Docker build step is defined in GitHub Actions and will run on the GitHub-hosted Ubuntu runner after the test job passes.
+
+
+The pitch, away-guide, and vote-locking overhaul was verified with a targeted Playwright smoke check:
+
+```text
+Squad nodes rendered: 11
+Tracked player nodes rendered: 4
+Formation switched from 4-3-3 to 5-3-2
+Player Performance Ledger updated from Manhoef to Bae Jun-ho
+Mobile pitch width at 390px viewport: 332px
+Supporter guide cards rendered: 3
+Vote buttons locked after first client vote
+Backend duplicate vote response: duplicate true
+```
+### 21. Squad fanzine hub consolidation
+
+Problem: the Squad view had grown into a heavy split-pitch analysis screen with an opposition canvas, formation toggles, and a wide ledger container that left too much dead space above the mobile footer.
+
+Solution: refactored the tab into a balanced two-column hub: the left side keeps the full 11-player Potter XI pitch with the goalkeeper anchored at the bottom, while the right side becomes a compact fanzine-style noticeboard for Treatment Room, Rumour Mill, and Terrace Echo updates.
+
+Verification notes:
+
+- Opposition scouting card and formation toggle controls removed from the rendered Squad view.
+- Bottom performance ledger placeholder removed to tighten spacing above the footer navigation.
+- Desktop grid now resolves to 1fr 1fr; mobile collapses to a single-column stack.
+- Fanzine copy is original/supporter-inspired and avoids reproducing legacy print or chant text.
+- Targeted rendered check: 11 home player nodes, no opposition pitch, no formation controls, no ledger, no template leaks, desktop columns at 548px / 548px, mobile width contained at 390px.
+
+### 22. Forum board feed upgrade
+
+Problem: the Squad fanzine column was useful but still felt static; it needed the energy of supporter discussion without reintroducing the bulky opposition pitch or bottom ledger.
+
+Solution: replaced the static noticeboard with a `.forum-board-feed` component headed `TERRACE THREADS`, using three dark thread cards with supporter tags, titles, and preview copy. The left-hand XI pitch remains untouched and the desktop layout stays balanced at 1fr 1fr before collapsing to one column on mobile.
+
+Verification notes:
+
+- Rendered Squad view shows 11 home pitch nodes and 3 forum thread cards.
+- Old noticeboard, opposition pitch, formation controls, and ledger UI remain absent.
+- Desktop grid resolves to 548px / 548px; mobile collapses to a 332px single column with 390px document width.
+
+### 23. Balanced next-match briefing header
+
+Problem: the top next-match hero was visually strong but did not yet follow the same balanced dual-column card language used by the Squad and Away Days layouts.
+
+Solution: wrapped the existing match display in `#next-match.next-match-grid`, preserved the left visual card exactly, and added a right-hand `.next-match-briefing-card` for THE BOOTHEN DEBRIEF with matching dark card padding, borders, radius, and responsive collapse behavior.
+
+Verification notes:
+
+- Rendered desktop grid resolves to 561px / 561px with 20px card radius and 16px briefing padding.
+- Mobile collapses to one 362px column with 390px document width and no horizontal overflow.
+- Briefing copy renders with the Soumare accent and em dash intact, and no template markers leak.
+
+### 24. Isometric static home pitch board
+
+Problem: the Starting XI pitch still read as a flat tactical grid and the player nodes retained button semantics even though the current Squad view is meant to be a static fanzine graphic.
+
+Solution: converted the home pitch into a 3D isometric board with perspective, rotateX/rotateZ tilt, a thick turf edge, and drop shadow. Player nodes are rendered as static spans with pointer events disabled, counter-rotated upright above the pitch, and given dark high-contrast name badges. *(Note: player cards were later made interactive again to support stats tooltips).*
+
+Verification notes:
+
+- Fresh rendered check shows 11 static span nodes, 0 player buttons, and `pointer-events: none` on the player nodes. *(Note: player cards were later made interactive again to support stats tooltips).*
+- Viktor Johansson (#1) resolves to grid row 6 / column 4, keeping the goalkeeper firmly bottom center.
+- Pitch transform, 6px turf edge, drop shadow, dark badges, and mobile 390px no-overflow check passed.
+
+### 25. Thick isometric turf sub-board
+
+Problem: the first isometric pass gave the Squad pitch depth, but the board still needed a crisper sub-board feel with thicker turf construction, stronger white markings, and more figurine-like standing kits.
+
+Solution: rebuilt the `.home-pitch` styling around `transform: perspective(1400px) rotateX(54deg) rotateZ(-2deg)`, a 12px dirt-brown board edge, deeper ambient shadow, full pitch markings, upright inverse-transformed kit tokens, a neon-green goalkeeper kit, and black name badges under every player.
+
+Verification notes:
+
+- Fresh rendered check shows 11 static span nodes, 0 pitch buttons, and `pointer-events: none` on the player nodes. *(Note: player cards were later made interactive again to support stats tooltips).*
+- Viktor Johansson remains grid row 6 / column 4 with a neon-green keeper kit.
+- Outfield kits render as red/white striped CSS figurines; label badges do not overlap.
+- Mobile check stays within 390px viewport with a 370px rendered pitch width.
+
+### 26. Single-shape player kit cleanup
+
+Problem: the isometric pitch kits used nested sleeve/body spans plus pseudo-elements, which made some player tokens look duplicated and messy under the 3D inverse transform.
+
+Solution: reduced each player token to exactly one `.mini-kit` container with a simple striped CSS jersey shape, black lower edge/base, and a solid green keeper variant. Player nodes now use `rotateZ(2deg) rotateX(-54deg) translateY(-10px)` with `transform-style: flat` so the badges stand upright and stay tucked underneath.
+
+Verification notes:
+
+- Fresh rendered check shows 11 player nodes, 11 `.mini-kit` elements, 0 `.kit-body`, 0 `.kit-sleeve`, and 0 player number pills.
+- Player nodes remain non-clickable with `pointer-events: none`; transform style resolves to `flat`. *(Note: player cards were later made interactive again to support stats tooltips).*
+- Keeper kit renders solid green, outfield kits render red/white stripes, badges sit beneath kits, and labels do not overlap.
+- Mobile remains contained at 390px viewport with a 342px rendered pitch width.
+
+### 27. Visual telemetry UI redesign and four-tab routing
+
+Problem: the portfolio build needed a stronger premium mobile-app feel and a clearer high-density telemetry structure that grouped match sentiment, squad canvas, fixture stats, and away-day planning into distinct product zones.
+
+Solution: completely refactored `index.html` around a dark telemetry mobile mockup. The UI now uses `Outfit` for headings and badges, `Inter` for metrics, an uppercase `POTTERPULSE` brand header, and a pulsing live status signal `((?))` to reinforce the live-dashboard tone.
+
+Navigation and routing updates:
+
+- Replaced the top tab buttons with a sticky bottom SVG navigation bar.
+- Added four primary routes: `Live`, `Squad`, `Stats`, and `Away`.
+- `Live` groups the match sentiment donut, formation nodes, performance sliders, and POTM leader cards.
+- `Squad` contains the 3D Starting XI grass canvas and categorized Terrace Threads feed.
+- `Stats` contains fixture schedules, editorial verdict logs, and detailed match stats popovers.
+- `Away` contains ground guides, pub/travel information, route calculator, and grayscale map assets.
+- Added `hashchange` handling and startup view activation so direct URLs such as `/index.html#stats` work correctly and browser back/forward navigation remains reliable.
+
+Realtime telemetry notes:
+
+- Injected Firebase and Firestore compat SDK support behind an isolated `firebaseConfig` block.
+- If Firebase keys are configured, the client opens realtime `.onSnapshot()` listeners.
+- If keys are left at defaults, the app gracefully falls back to local storage and existing SQLite-backed endpoints.
+- Added a `telemetry-rating-form` submit flow for live team metrics: Attacking Intensity, Defensive Solidity, and Manager Tactics.
+
+Verification notes:
+
+- Added local assets under `assets/`, including `potm_leader.png` and `hull_map.png`, to avoid placeholder gaps in the visual layout.
+- Updated `scripts/ci-mobile-layout-check.mjs` to validate the new `#stats` view layout parameters.
+- Playwright layout checks were run successfully after the redesign.
