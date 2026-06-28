@@ -2,7 +2,7 @@
 
 PotterPulse is a high-density Stoke City supporter dashboard that combines fixtures, live fan sentiment, player ratings, Terrace Threads, squad visuals, and away-day planning in a single Node/SQLite web app.
 
-<img src="docs/screenshots/dashboard_latest.png" alt="PotterPulse dashboard" width="760" />
+<img src="assets/screenshots/matchday-mobile.png" alt="PotterPulse matchday mobile view" width="320" />
 
 > [!NOTE]
 > PotterPulse is an independent fan-dashboard portfolio concept. It is not affiliated with, endorsed by, or replacing The Oatcake, Stoke City FC, or any existing supporter forum.
@@ -16,14 +16,11 @@ PotterPulse is a high-density Stoke City supporter dashboard that combines fixtu
 
 ## Screenshots
 
-| Feature | Preview |
-| --- | --- |
-| Mood Donut Chart | <img src="docs/screenshots/mood-donut-chart.png" alt="Terrace mood donut chart" width="250" /> |
-| Player Ratings | <img src="docs/screenshots/player-ratings-view.png" alt="Player ratings and POTM" width="250" /> |
-| Rating Sliders | <img src="docs/screenshots/player-ratings-sliders.png" alt="Player rating sliders" width="250" /> |
-| Away Journey Planner | <img src="docs/screenshots/away-journey-planner.png" alt="Away journey planner" width="250" /> |
-| Terrace Threads | <img src="docs/screenshots/terrace-threads-feed.png" alt="Terrace Threads feed" width="250" /> |
-| Squad Pitch | <img src="docs/screenshots/squad-pitch-terrace-threads.png" alt="Squad pitch and Terrace Threads" width="250" /> |
+Fresh mobile captures from the current app build:
+
+| Matchday | Squad | Away Days |
+| --- | --- | --- |
+| <img src="assets/screenshots/matchday-mobile.png" alt="PotterPulse Matchday mobile view" width="220" /> | <img src="assets/screenshots/squad-mobile.png" alt="PotterPulse Squad mobile view" width="220" /> | <img src="assets/screenshots/away-days-mobile.png" alt="PotterPulse Away Days mobile view" width="220" /> |
 
 ## Tech Stack
 
@@ -58,7 +55,7 @@ npm run test:layout
 ## Project Notes
 
 - Full engineering diary: [docs/BUILD_HISTORY.md](docs/BUILD_HISTORY.md)
-- Main screenshot path: [docs/screenshots/dashboard_latest.png](docs/screenshots/dashboard_latest.png)
+- Fresh screenshot paths: [matchday](assets/screenshots/matchday-mobile.png), [squad](assets/screenshots/squad-mobile.png), [away days](assets/screenshots/away-days-mobile.png)
 - SQLite database: `potter_pulse.db`
 
 ## Next Steps
