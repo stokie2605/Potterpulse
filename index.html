@@ -844,6 +844,18 @@
       .placeholder-panel { grid-column: 1 / -1; }
       .placeholder-copy { margin: 0; color: var(--muted); line-height: 1.55; }
 
+      .poll-split-layout {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 20px;
+        align-items: center;
+      }
+      @media (min-width: 600px) {
+        .poll-split-layout {
+          grid-template-columns: 1.2fr 0.8fr;
+        }
+      }
+
       .fan-poll-grid {
         display: flex;
         flex-direction: column;
@@ -1159,7 +1171,30 @@
               </div>
               <span class="chip">Live Poll</span>
             </div>
-            <div class="fan-poll-grid" data-poll-grid data-vote-lock-key="{{voteLockKey}}">{{fanPollOptions}}</div>
+            <div class="poll-split-layout" style="display: grid; grid-template-columns: 1fr; gap: 20px; align-items: center; margin-top: 10px; width: 100%;">
+              <!-- Left: Poll Options -->
+              <div class="fan-poll-grid" data-poll-grid data-vote-lock-key="{{voteLockKey}}" style="display:grid; grid-template-columns: 1fr; gap: 8px; width: 100%;">{{fanPollOptions}}</div>
+              
+              <!-- Right: SVG Analytics Chart -->
+              <div id="poll-chart-container" style="display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(0,0,0,0.15); border: 1px solid var(--line); border-radius: 12px; padding: 16px; position: relative; width: 100%;">
+                <svg width="130" height="130" viewBox="0 0 150 150" style="transform: rotate(-90deg);">
+                  <circle cx="75" cy="75" r="55" fill="transparent" stroke="rgba(255,255,255,0.06)" stroke-width="14"></circle>
+                  <circle id="chart-segment-optimism" cx="75" cy="75" r="55" fill="transparent" stroke="var(--red-3)" stroke-width="14" stroke-dasharray="345.5" stroke-dashoffset="345.5" style="transition: stroke-dashoffset 0.6s ease;"></circle>
+                  <circle id="chart-segment-regular" cx="75" cy="75" r="55" fill="transparent" stroke="#f4a261" stroke-width="14" stroke-dasharray="345.5" stroke-dashoffset="345.5" style="transition: stroke-dashoffset 0.6s ease;"></circle>
+                  <circle id="chart-segment-pessimism" cx="75" cy="75" r="55" fill="transparent" stroke="#e76f51" stroke-width="14" stroke-dasharray="345.5" stroke-dashoffset="345.5" style="transition: stroke-dashoffset 0.6s ease;"></circle>
+                </svg>
+                <!-- Central stats overlay -->
+                <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -60%); text-align: center; pointer-events: none;">
+                  <span class="micro-label" style="display:block; font-size:8px;">Total Votes</span>
+                  <strong id="chart-total-votes" style="font-size: 1.4rem; font-weight: 1000; color: #fff; line-height: 1;">0</strong>
+                </div>
+                <div style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 10px; font-size: 9px; font-weight: 800;">
+                  <span style="display:flex; align-items:center; gap:4px; color:#fff;"><span style="width:8px; height:8px; border-radius:50%; background:var(--red-3); display:inline-block;"></span>Optimism</span>
+                  <span style="display:flex; align-items:center; gap:4px; color:#fff;"><span style="width:8px; height:8px; border-radius:50%; background:#f4a261; display:inline-block;"></span>Regular</span>
+                  <span style="display:flex; align-items:center; gap:4px; color:#fff;"><span style="width:8px; height:8px; border-radius:50%; background:#e76f51; display:inline-block;"></span>Pessimism</span>
+                </div>
+              </div>
+            </div>
             
             <!-- Terrace Debates Poll Comments -->
             <div class="poll-comments-section" style="margin-top: 18px; border-top: 1px solid var(--line); padding-top: 16px;">
@@ -1236,6 +1271,39 @@
                   <span>Fouls</span>
                   <span style="color:#fff; font-weight:800;"><span id="stats-fouls-home">12</span> - <span id="stats-fouls-away">10</span></span>
                 </div>
+              </div>
+              
+              <!-- Rate the Players Section -->
+              <div id="ratings-section" style="margin-top: 14px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 12px; pointer-events: auto;">
+                <span class="section-kicker" style="margin-bottom: 6px; display: block;">Terrace Player Ratings</span>
+                
+                <div style="display: flex; gap: 8px; margin-bottom: 10px;">
+                  <button id="view-ratings-tab-btn" class="chip active" type="button" style="cursor: pointer; font-size: 10px; font-weight: 800;">View Averages</button>
+                  <button id="submit-ratings-tab-btn" class="chip" type="button" style="cursor: pointer; font-size: 10px; font-weight: 800;">Rate Players</button>
+                </div>
+
+                <!-- View averages list & POTM -->
+                <div id="ratings-view-tab" style="display: block;">
+                  <div style="display: flex; align-items: center; gap: 10px; background: rgba(226, 14, 25, 0.08); border: 1px solid rgba(226, 14, 25, 0.2); border-radius: 8px; padding: 8px 12px; margin-bottom: 10px;">
+                    <span style="font-size: 1.5rem; line-height: 1;">👑</span>
+                    <div>
+                      <div class="micro-label">Terrace POTM</div>
+                      <strong id="potm-display-name" style="color: #fff; font-size: 12px; text-transform: uppercase;">None yet</strong>
+                      <span id="potm-display-rating" style="background: var(--red-3); color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 900; margin-left: 6px;">0.0</span>
+                    </div>
+                  </div>
+                  <div id="ratings-averages-list" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; max-height: 150px; overflow-y: auto; padding-right: 4px;">
+                    <!-- Rendered dynamically -->
+                  </div>
+                </div>
+
+                <!-- Rate players form -->
+                <form id="ratings-submit-tab" style="display: none; flex-direction: column; gap: 10px;">
+                  <div id="ratings-sliders-list" style="display: grid; gap: 8px; max-height: 180px; overflow-y: auto; padding-right: 4px;">
+                    <!-- Sliders rendered dynamically -->
+                  </div>
+                  <button type="submit" class="chip" style="cursor: pointer; background: var(--red-3); border: 0; color: #fff; padding: 8px; border-radius: 6px; font-weight: 800; align-self: flex-end; font-size: 11px; width: 100%;">Submit Supporter Ratings</button>
+                </form>
               </div>
             </div>
           </section>
@@ -1329,6 +1397,32 @@
                       <span>The Ground Info</span>
                       <strong id="away-stadium">{{awayStadium}}</strong>
                       <small id="away-travel">{{awayDistance}} from the Potteries - {{awayTravelTime}}</small>
+                    </div>
+                  </div>
+
+                  <div class="pie-card journey-planner-card" style="pointer-events: auto; background: linear-gradient(135deg, rgba(226, 14, 25, 0.05), rgba(255, 255, 255, 0.015)); border: 1px solid rgba(226, 14, 25, 0.2);">
+                    <span class="section-kicker" style="margin-bottom:4px; display:block;">Journey Planner</span>
+                    <h3 style="font-size: 0.95rem; font-weight:900; margin:0 0 10px; color:#fff; text-transform:uppercase;">Supporter Route Calculator</h3>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 12px;">
+                      <div>
+                        <label class="micro-label" style="display:block; margin-bottom:4px;">Depart From</label>
+                        <select id="journey-from" class="chip" style="background: rgba(13, 14, 18, 0.9); border: 1px solid var(--line); color: #fff; width: 100%; padding: 6px; font-size: 11px; border-radius: 6px; cursor: pointer; font-family: inherit; font-weight: 800;">
+                          <option value="stoke" selected>Stoke-on-Trent</option>
+                          <option value="london">London (Euston)</option>
+                          <option value="birmingham">Birmingham</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label class="micro-label" style="display:block; margin-bottom:4px;">Transit Method</label>
+                        <select id="journey-method" class="chip" style="background: rgba(13, 14, 18, 0.9); border: 1px solid var(--line); color: #fff; width: 100%; padding: 6px; font-size: 11px; border-radius: 6px; cursor: pointer; font-family: inherit; font-weight: 800;">
+                          <option value="car" selected>Driving (Car)</option>
+                          <option value="train">Rail (Train)</option>
+                          <option value="coach">Official Coach</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div id="journey-results" style="background: rgba(13, 14, 18, 0.6); padding: 12px; border-radius: 10px; border: 1px solid var(--line); font-size: 11px; line-height: 1.4; color: #eee; min-height: 50px;">
+                      Select options above to compute route...
                     </div>
                   </div>
 
@@ -1443,11 +1537,56 @@
         });
       };
 
+      const updatePollChart = () => {
+        const pollGrid = document.querySelector('[data-poll-grid]');
+        if (!pollGrid) return;
+        
+        let optimismVotes = 0;
+        let regularVotes = 0;
+        let pessimismVotes = 0;
+        
+        pollGrid.querySelectorAll('[data-vote-option]').forEach(button => {
+          const key = button.getAttribute('data-vote-option');
+          const votes = parseInt(button.getAttribute('data-votes')) || 0;
+          if (key === 'blind_optimism') optimismVotes = votes;
+          else if (key === 'scarred_regular') regularVotes = votes;
+          else if (key === 'chronic_pessimism') pessimismVotes = votes;
+        });
+
+        const totalVotes = optimismVotes + regularVotes + pessimismVotes;
+        const totalVotesElem = document.getElementById('chart-total-votes');
+        if (totalVotesElem) totalVotesElem.textContent = totalVotes;
+
+        const optimismPct = totalVotes > 0 ? (optimismVotes / totalVotes) * 100 : 0;
+        const regularPct = totalVotes > 0 ? (regularVotes / totalVotes) * 100 : 0;
+        const pessimismPct = totalVotes > 0 ? (pessimismVotes / totalVotes) * 100 : 0;
+
+        const circumference = 345.575;
+        
+        const optElem = document.getElementById('chart-segment-optimism');
+        if (optElem) {
+          const optOffset = circumference - (optimismPct / 100) * circumference;
+          optElem.setAttribute('stroke-dashoffset', String(optOffset));
+        }
+
+        const regElem = document.getElementById('chart-segment-regular');
+        if (regElem) {
+          const regOffset = circumference - ((optimismPct + regularPct) / 100) * circumference;
+          regElem.setAttribute('stroke-dashoffset', String(regOffset));
+        }
+
+        const pesElem = document.getElementById('chart-segment-pessimism');
+        if (pesElem) {
+          const pesOffset = circumference - ((optimismPct + regularPct + pessimismPct) / 100) * circumference;
+          pesElem.setAttribute('stroke-dashoffset', String(pesOffset));
+        }
+      };
+
       const renderPollResults = (results) => {
         const pollGrid = document.querySelector('[data-poll-grid]');
         if (!pollGrid) return;
         pollGrid.innerHTML = results.map((option) => [
-          '<button class="poll-option" type="button" data-vote-option="' + escapeText(option.key) + '">',
+          '<button class="poll-option" type="button" data-vote-option="' + escapeText(option.key) + '" data-votes="' + Number(option.votes) + '">',
           '<div class="vote-progress-fill" style="width: ' + Number(option.percent) + '%;"></div>',
           '<div class="radio-indicator"></div>',
           '<div class="option-content">',
@@ -1458,6 +1597,7 @@
           '</button>',
         ].join('')).join('');
         applyVoteLockState();
+        updatePollChart();
       };
 
       document.addEventListener('click', async (event) => {
@@ -1612,6 +1752,9 @@
 
                 document.getElementById('stats-fouls-home').textContent = s.fouls_home;
                 document.getElementById('stats-fouls-away').textContent = s.fouls_away;
+
+                // Load ratings from DB for this completed game
+                loadCompletedMatchRatings(opponentName, matchDate);
 
                 if (matchStatsCard) {
                   // Hide briefing, show stats card overlay
@@ -1882,6 +2025,234 @@
           }
         });
       }
+
+      // 5. Supporter Player Ratings Dashboard & POTM
+      const matchRoster = [
+        { num: '1', name: 'Johansson' },
+        { num: '2', name: 'Hoever' },
+        { num: '3', name: 'Stevens' },
+        { num: '5', name: 'Rose' },
+        { num: '10', name: 'Bae Jun-ho' },
+        { num: '16', name: 'Wilmot' },
+        { num: '22', name: 'Tchamadeu' },
+        { num: '28', name: 'Laurent' },
+        { num: '42', name: 'Manhoef' }
+      ];
+
+      let currentRatingsOpponent = '';
+      let currentRatingsMatchDate = '';
+
+      const loadCompletedMatchRatings = async (opponent, matchDate) => {
+        currentRatingsOpponent = opponent;
+        currentRatingsMatchDate = matchDate;
+        
+        showRatingsTab('view');
+
+        try {
+          const response = await fetch(`/api/player-ratings?opponent=${encodeURIComponent(opponent)}&matchDate=${encodeURIComponent(matchDate)}`);
+          const data = await response.json();
+          if (response.ok) {
+            renderRatingsView(data.ratings, data.potmNumber, data.maxAvg);
+            renderRatingsSubmitSliders();
+          }
+        } catch (err) {
+          console.error('Failed to load completed match ratings:', err);
+        }
+      };
+
+      const renderRatingsView = (ratings, potmNumber, maxAvg) => {
+        const listContainer = document.getElementById('ratings-averages-list');
+        if (!listContainer) return;
+
+        listContainer.innerHTML = matchRoster.map(p => {
+          const r = ratings[p.num];
+          const avg = r ? parseFloat(r.avg).toFixed(1) : '0.0';
+          const count = r ? r.count : 0;
+          return `
+            <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.015); border:1px solid rgba(255,255,255,0.03); border-radius:6px; padding:6px 10px; font-size:11px;">
+              <span>#${p.num} ${escapeHtml(p.name)}</span>
+              <strong style="color:#fff;">${avg} <span style="font-size:9px; color:var(--quiet); font-weight:400;">(${count})</span></strong>
+            </div>
+          `;
+        }).join('');
+
+        const potmNameElem = document.getElementById('potm-display-name');
+        const potmRatingElem = document.getElementById('potm-display-rating');
+
+        if (potmNameElem && potmRatingElem) {
+          if (potmNumber && maxAvg > 0) {
+            const p = matchRoster.find(x => x.num === potmNumber);
+            potmNameElem.textContent = p ? p.name : 'Unknown';
+            potmRatingElem.textContent = parseFloat(maxAvg).toFixed(1);
+          } else {
+            potmNameElem.textContent = 'None yet';
+            potmRatingElem.textContent = '0.0';
+          }
+        }
+      };
+
+      const renderRatingsSubmitSliders = () => {
+        const slidersContainer = document.getElementById('ratings-sliders-list');
+        if (!slidersContainer) return;
+
+        slidersContainer.innerHTML = matchRoster.map(p => `
+          <div style="display:flex; flex-direction:column; gap:4px; background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.04); border-radius:8px; padding:8px 10px;">
+            <div style="display:flex; justify-content:space-between; font-size:11px; font-weight:800;">
+              <span>#${p.num} ${escapeHtml(p.name)}</span>
+              <span id="slider-val-${p.num}" style="color:var(--red-3); font-size:11px;">5.0</span>
+            </div>
+            <input type="range" name="player-${p.num}" min="1" max="10" step="0.5" value="5" style="width:100%; accent-color:var(--red-3); cursor:pointer;" 
+              oninput="document.getElementById('slider-val-${p.num}').textContent = parseFloat(this.value).toFixed(1)" />
+          </div>
+        `).join('');
+      };
+
+      const showRatingsTab = (tabName) => {
+        const viewTab = document.getElementById('ratings-view-tab');
+        const submitTab = document.getElementById('ratings-submit-tab');
+        const viewBtn = document.getElementById('view-ratings-tab-btn');
+        const submitBtn = document.getElementById('submit-ratings-tab-btn');
+
+        if (viewTab && submitTab && viewBtn && submitBtn) {
+          if (tabName === 'view') {
+            viewTab.style.display = 'block';
+            submitTab.style.display = 'none';
+            viewBtn.classList.add('active');
+            submitBtn.classList.remove('active');
+          } else {
+            viewTab.style.display = 'none';
+            submitTab.style.display = 'flex';
+            submitBtn.classList.add('active');
+            viewBtn.classList.remove('active');
+          }
+        }
+      };
+
+      const viewRatingsBtn = document.getElementById('view-ratings-tab-btn');
+      const submitRatingsBtn = document.getElementById('submit-ratings-tab-btn');
+      if (viewRatingsBtn) viewRatingsBtn.addEventListener('click', () => showRatingsTab('view'));
+      if (submitRatingsBtn) submitRatingsBtn.addEventListener('click', () => showRatingsTab('submit'));
+
+      const ratingsForm = document.getElementById('ratings-submit-tab');
+      if (ratingsForm) {
+        ratingsForm.addEventListener('submit', async (event) => {
+          event.preventDefault();
+          const ratingsPayload = {};
+          matchRoster.forEach(p => {
+            const val = parseFloat(ratingsForm.elements[`player-${p.num}`].value);
+            ratingsPayload[p.num] = val;
+          });
+
+          try {
+            const response = await fetch('/api/player-ratings', {
+              method: 'POST',
+              headers: { 'content-type': 'application/json' },
+              body: JSON.stringify({
+                opponent: currentRatingsOpponent,
+                matchDate: currentRatingsMatchDate,
+                ratings: ratingsPayload
+              })
+            });
+            const data = await response.json();
+            if (response.ok) {
+              renderRatingsView(data.ratings, data.potmNumber, data.maxAvg);
+              showRatingsTab('view');
+            }
+          } catch (err) {
+            console.error('Failed to submit ratings:', err);
+          }
+        });
+      }
+
+      // 6. Supporter Away Day Journey Planner
+      const journeyPlannerData = {
+        swansea_city: {
+          stoke: {
+            time: 'Approx. 3h 35m (182 miles)',
+            route: 'Take A500 south, M6, M5, M50, A40, then M4 corridor to Junction 46.',
+            service: 'Stop at Monmouth Services (A40) or Cardiff Gate Services (M4) for fuel & refreshments.',
+            recommendation: 'Leave by 10:30 AM to account for M4 congestion around Newport.'
+          },
+          london: {
+            time: 'Approx. 3h Rail (Direct or change at Cardiff)',
+            route: 'Great Western Railway direct from London Paddington to Swansea railway station.',
+            service: 'Central Swansea pubs (Wind Street Wetherspoons) are central options for rail arrivals.',
+            recommendation: 'Check return departures; last direct train back to Paddington leaves at 20:45.'
+          },
+          birmingham: {
+            time: 'Approx. 2h 45m Driving (Car) / Coach',
+            route: 'M5 south, M50, A40 to Monmouth, A449 to Newport, then M4 west.',
+            service: 'Stop at Ross Spur Services (M50) or Sarn Park Services (M4 Junction 36).',
+            recommendation: 'Use Felindre Park & Ride at Swansea Junction 46; avoid central parking.'
+          }
+        },
+        west_brom: {
+          stoke: {
+            time: 'Approx. 55 mins (46 miles)',
+            route: 'Simple southbound run. A500, M6 south, exit at Junction 1 for West Bromwich.',
+            service: 'Hilton Park Services (M6 northbound/southbound) or local dining at Sandwell.',
+            recommendation: 'Very short hop! Watch out for M6/M5 junction bottleneck. Leave around 1:00 PM.'
+          },
+          london: {
+            time: 'Approx. 2h Rail (Change at Birmingham New Street)',
+            route: 'Avanti West Coast to Birmingham New Street, then local train to The Hawthorns station.',
+            service: 'Central Birmingham pubs are perfect. Direct rail link from New Street to Hawthorns is 10 mins.',
+            recommendation: 'Buy a network railcard. Plenty of late returns to Euston available post-match.'
+          },
+          birmingham: {
+            time: 'Approx. 15 mins Rail / Driving',
+            route: 'Follow A34 north from city center or take local West Midlands metro directly to Hawthorns.',
+            service: 'Use Birmingham Jewellery Quarter pubs for a relaxed, colors-safe drink before boarding.',
+            recommendation: 'Metrolink is by far the fastest and cheapest option. Avoid driving within Birmingham city center.'
+          }
+        }
+      };
+
+      const updateJourneyPlanner = () => {
+        const oppSelect = document.getElementById('away-opponent-select');
+        const fromSelect = document.getElementById('journey-from');
+        const methodSelect = document.getElementById('journey-method');
+        const resultsBox = document.getElementById('journey-results');
+
+        if (!oppSelect || !fromSelect || !methodSelect || !resultsBox) return;
+
+        const opp = oppSelect.value;
+        const from = fromSelect.value;
+        const method = methodSelect.value;
+
+        const oppData = journeyPlannerData[opp];
+        if (!oppData) return;
+
+        const data = oppData[from];
+        if (!data) return;
+
+        let transitTip = '';
+        if (method === 'car') {
+          transitTip = `🚘 <strong>Driving Info</strong>: ${data.route}<br>⛽ <strong>Service Stations</strong>: ${data.service}`;
+        } else if (method === 'train') {
+          transitTip = `🚊 <strong>Rail Route</strong>: Great option! ${data.route.replace('Drive', 'Board')} Check weekend engineering works.<br>ℹ️ <strong>Tips</strong>: ${data.service}`;
+        } else {
+          transitTip = `🚌 <strong>Official Coach</strong>: Departs Stoke from the Bet365 Stadium coach park.<br>⏱️ <strong>Timings</strong>: Departs exactly 4.5 hours before kick-off. No alcohol permitted onboard.`;
+        }
+
+        resultsBox.innerHTML = `
+          <strong>⏱️ Travel Time</strong>: ${data.time}<br>
+          ${transitTip}<br>
+          📌 <strong>Verdict</strong>: ${data.recommendation}
+        `;
+      };
+
+      const oppSelect = document.getElementById('away-opponent-select');
+      const fromSelect = document.getElementById('journey-from');
+      const methodSelect = document.getElementById('journey-method');
+
+      if (oppSelect) oppSelect.addEventListener('change', updateJourneyPlanner);
+      if (fromSelect) fromSelect.addEventListener('change', updateJourneyPlanner);
+      if (methodSelect) methodSelect.addEventListener('change', updateJourneyPlanner);
+
+      // Initial run of the page loaders
+      updateJourneyPlanner();
+      updatePollChart();
     </script>
   </body>
 </html>

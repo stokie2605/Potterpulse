@@ -259,6 +259,27 @@ const ensureSchema = (db) => {
     seedComment.run("swansea_city_2026-08-15_15:00", "PotterPride", "Blind optimism as always! Let's get the 3 points.");
     seedComment.run("swansea_city_2026-08-15_15:00", "ST4_Lager", "Scarred regular here. Happy with a hard-fought draw to be honest.");
   }
+
+  // 4. Player ratings table for completed matches
+  db.exec(
+    'CREATE TABLE IF NOT EXISTS player_ratings (' +
+      'opponent TEXT NOT NULL,' +
+      'match_date TEXT NOT NULL,' +
+      'player_number TEXT NOT NULL,' +
+      'rating_sum REAL NOT NULL,' +
+      'rating_count INTEGER NOT NULL,' +
+      'PRIMARY KEY (opponent, match_date, player_number)' +
+    ')'
+  );
+
+  const ratingsCount = db.prepare('SELECT count(*) as count FROM player_ratings').get().count;
+  if (ratingsCount === 0) {
+    const seedRating = db.prepare('INSERT INTO player_ratings (opponent, match_date, player_number, rating_sum, rating_count) VALUES (?, ?, ?, ?, ?)');
+    seedRating.run("Oldham Athletic", "2026-08-08", "1", 82.0, 10);
+    seedRating.run("Oldham Athletic", "2026-08-08", "10", 135.0, 15);
+    seedRating.run("Oldham Athletic", "2026-08-08", "22", 70.0, 10);
+    seedRating.run("Oldham Athletic", "2026-08-08", "42", 119.0, 14);
+  }
 };
 
 const getPollResults = (db) => {
@@ -291,7 +312,7 @@ const renderPollOptions = (rows) =>
   serializePollResults(rows)
     .map((option) =>
       [
-        '<button class="poll-option" type="button" data-vote-option="' + escapeHtml(option.key) + '">',
+        '<button class="poll-option" type="button" data-vote-option="' + escapeHtml(option.key) + '" data-votes="' + escapeHtml(option.votes) + '">',
         '<div class="vote-progress-fill" style="width: ' + escapeHtml(option.percent) + '%;"></div>',
         '<div class="radio-indicator"></div>',
         '<div class="option-content">',
@@ -895,6 +916,104 @@ const handleGetMatchStats = (request, response) => {
   }
 };
 
+const handleGetPlayerRatings = (request, response) => {
+  const { query } = parse(request.url, true);
+  const opponent = query.opponent;
+  const matchDate = query.matchDate;
+
+  if (!opponent || !matchDate) {
+    response.writeHead(400, { 'content-type': 'application/json; charset=utf-8' });
+    response.end(JSON.stringify({ error: 'Opponent and matchDate are required' }));
+    return;
+  }
+
+  const db = new DatabaseSync(dbPath);
+  try {
+    ensureSchema(db);
+    const rows = db.prepare('SELECT player_number, rating_sum, rating_count FROM player_ratings WHERE opponent = ? AND match_date = ?').all();
+    let potmNumber = null;
+    let maxAvg = 0;
+    const ratings = {};
+
+    rows.forEach(r => {
+      const avg = r.rating_count > 0 ? Number((r.rating_sum / r.rating_count).toFixed(1)) : 0;
+      ratings[r.player_number] = { avg, count: r.rating_count };
+      if (avg > maxAvg) {
+        maxAvg = avg;
+        potmNumber = r.player_number;
+      }
+    });
+
+    response.writeHead(200, { 'content-type': 'application/json; charset=utf-8' });
+    response.end(JSON.stringify({ ok: true, ratings, potmNumber, maxAvg }));
+  } finally {
+    db.close();
+  }
+};
+
+const handlePostPlayerRatings = async (request, response) => {
+  try {
+    const body = await readJsonBody(request);
+    const opponent = String(body.opponent ?? '');
+    const matchDate = String(body.matchDate ?? '');
+    const ratingsMap = body.ratings ?? {};
+
+    if (!opponent || !matchDate) {
+      response.writeHead(400, { 'content-type': 'application/json; charset=utf-8' });
+      response.end(JSON.stringify({ error: 'Opponent and matchDate are required' }));
+      return;
+    }
+
+    const db = new DatabaseSync(dbPath);
+    try {
+      ensureSchema(db);
+      const insertOrUpdate = db.prepare(
+        'INSERT INTO player_ratings (opponent, match_date, player_number, rating_sum, rating_count) ' +
+        'VALUES (?, ?, ?, ?, 1) ' +
+        'ON CONFLICT(opponent, match_date, player_number) DO UPDATE SET ' +
+        'rating_sum = rating_sum + excluded.rating_sum, ' +
+        'rating_count = rating_count + 1'
+      );
+
+      db.exec('BEGIN');
+      try {
+        Object.entries(ratingsMap).forEach(([num, val]) => {
+          const ratingVal = Number(val);
+          if (ratingVal >= 1 && ratingVal <= 10) {
+            insertOrUpdate.run(opponent, matchDate, num, ratingVal);
+          }
+        });
+        db.exec('COMMIT');
+      } catch (err) {
+        db.exec('ROLLBACK');
+        throw err;
+      }
+
+      const rows = db.prepare('SELECT player_number, rating_sum, rating_count FROM player_ratings WHERE opponent = ? AND match_date = ?').all();
+      let potmNumber = null;
+      let maxAvg = 0;
+      const ratings = {};
+
+      rows.forEach(r => {
+        const avg = r.rating_count > 0 ? Number((r.rating_sum / r.rating_count).toFixed(1)) : 0;
+        ratings[r.player_number] = { avg, count: r.rating_count };
+        if (avg > maxAvg) {
+          maxAvg = avg;
+          potmNumber = r.player_number;
+        }
+      });
+
+      response.writeHead(200, { 'content-type': 'application/json; charset=utf-8' });
+      response.end(JSON.stringify({ ok: true, ratings, potmNumber, maxAvg }));
+    } finally {
+      db.close();
+    }
+  } catch (error) {
+    response.writeHead(400, { 'content-type': 'application/json; charset=utf-8' });
+    response.end(JSON.stringify({ error: error.message }));
+  }
+};
+
 const server = createServer(async (request, response) => {
   const { pathname } = parse(request.url);
 
@@ -926,6 +1045,14 @@ const server = createServer(async (request, response) => {
   }
   if (request.method === 'GET' && pathname === '/api/match-stats') {
     handleGetMatchStats(request, response);
+    return;
+  }
+  if (request.method === 'GET' && pathname === '/api/player-ratings') {
+    handleGetPlayerRatings(request, response);
+    return;
+  }
+  if (request.method === 'POST' && pathname === '/api/player-ratings') {
+    await handlePostPlayerRatings(request, response);
     return;
   }
 
