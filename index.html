@@ -513,8 +513,8 @@
         justify-items: center;
         gap: 5px;
         text-align: center;
-        pointer-events: none;
-        cursor: default;
+        pointer-events: auto;
+        cursor: pointer;
         background: transparent;
         box-shadow: none;
         color: #fff;
@@ -522,6 +522,11 @@
         transform-origin: bottom center;
         transform-style: preserve-3d;
         filter: drop-shadow(0 8px 12px rgba(0, 0, 0, 0.5));
+        transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease;
+      }
+      .pitch .player-strip-card:hover {
+        transform: rotateX(-15deg) translateY(-14px) scale(1.08);
+        filter: drop-shadow(0 12px 18px rgba(226, 14, 25, 0.35));
       }
       .mini-kit {
         position: relative;
@@ -594,6 +599,153 @@
       .home-pitch[data-formation="433"] .player-strip-card[data-role-433="lw"] { grid-column: 1; grid-row: 1; }
       .home-pitch[data-formation="433"] .player-strip-card[data-role-433="st"] { grid-column: 4; grid-row: 1; }
       .home-pitch[data-formation="433"] .player-strip-card[data-role-433="rw"] { grid-column: 7; grid-row: 1; }
+
+      /* 5-3-2 Solid Formation Grid Positions */
+      .home-pitch[data-formation="532"] .player-strip-card[data-role-532="gk"] { grid-column: 4; grid-row: 6; }
+      .home-pitch[data-formation="532"] .player-strip-card[data-role-532="lwb"] { grid-column: 1; grid-row: 4; }
+      .home-pitch[data-formation="532"] .player-strip-card[data-role-532="lcb"] { grid-column: 3; grid-row: 5; }
+      .home-pitch[data-formation="532"] .player-strip-card[data-role-532="cb"] { grid-column: 4; grid-row: 5; }
+      .home-pitch[data-formation="532"] .player-strip-card[data-role-532="rcb"] { grid-column: 5; grid-row: 5; }
+      .home-pitch[data-formation="532"] .player-strip-card[data-role-532="rwb"] { grid-column: 7; grid-row: 4; }
+      .home-pitch[data-formation="532"] .player-strip-card[data-role-532="lcm"] { grid-column: 3; grid-row: 3; }
+      .home-pitch[data-formation="532"] .player-strip-card[data-role-532="cm"] { grid-column: 4; grid-row: 3; }
+      .home-pitch[data-formation="532"] .player-strip-card[data-role-532="rcm"] { grid-column: 5; grid-row: 3; }
+      .home-pitch[data-formation="532"] .player-strip-card[data-role-532="stl"] { grid-column: 3; grid-row: 1; }
+      .home-pitch[data-formation="532"] .player-strip-card[data-role-532="str"] { grid-column: 5; grid-row: 1; }
+
+      /* Interactive Player Stat Card */
+      .tactical-pitch-card {
+        position: relative;
+      }
+      .player-stat-card {
+        position: absolute;
+        bottom: 20px;
+        left: 20px;
+        right: 20px;
+        z-index: 2000;
+        background: rgba(18, 20, 28, 0.95);
+        backdrop-filter: blur(16px);
+        border: 1px solid rgba(226, 14, 25, 0.25);
+        border-radius: 16px;
+        padding: 16px;
+        box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+        display: none;
+        animation: cardFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        pointer-events: auto;
+      }
+      @keyframes cardFadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      .player-stat-card .stat-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 12px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        padding-bottom: 10px;
+      }
+      .player-stat-card .stat-number {
+        font-size: 1.6rem;
+        font-weight: 1000;
+        color: var(--red-3);
+        line-height: 1;
+      }
+      .player-stat-card .stat-name {
+        margin: 0;
+        font-size: 1.05rem;
+        font-weight: 900;
+        color: #fff;
+        text-transform: uppercase;
+      }
+      .player-stat-card .stat-role {
+        font-size: 0.7rem;
+        color: var(--muted);
+        text-transform: uppercase;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+      }
+      .player-stat-card .stat-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 8px;
+        margin-bottom: 12px;
+      }
+      .player-stat-card .stat-item {
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 8px;
+        padding: 8px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+        text-align: center;
+      }
+      .player-stat-card .stat-item .label,
+      .player-stat-card .form-trend .label {
+        font-size: 0.58rem;
+        color: var(--muted);
+        text-transform: uppercase;
+        font-weight: 900;
+        letter-spacing: 0.05em;
+      }
+      .player-stat-card .stat-item .value {
+        font-size: 0.95rem;
+        font-weight: 900;
+        color: #fff;
+      }
+      .player-stat-card .stat-item .value.highlight {
+        color: var(--red-3);
+      }
+      .player-stat-card .form-trend {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .player-stat-card .trend-dots {
+        display: flex;
+        gap: 8px;
+      }
+      .player-stat-card .trend-dot {
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: #fff;
+        font-size: 0.65rem;
+        font-weight: 900;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+      }
+      .player-stat-card .close-btn {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        background: transparent;
+        border: 0;
+        color: var(--muted);
+        font-size: 1.5rem;
+        cursor: pointer;
+        line-height: 0.5;
+        padding: 4px;
+      }
+      .player-stat-card .close-btn:hover {
+        color: #fff;
+      }
+
+      /* Clickable fixture rows */
+      .fixture-row {
+        cursor: pointer;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+      .fixture-row:hover {
+        border-color: rgba(226, 14, 25, 0.4);
+        background: linear-gradient(145deg, rgba(226, 14, 25, 0.12), rgba(255, 255, 255, 0.025)), var(--card);
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(226, 14, 25, 0.15);
+      }
       .forum-board-feed {
         display: grid;
         gap: 12px;
@@ -1018,9 +1170,13 @@
               <div class="fixture-summary"><span class="chip">Showing 5 of {{fixtureCount}}</span><button class="chip fixture-toggle" type="button" data-fixture-toggle aria-expanded="false">Show All</button></div>
             </div>
             <article class="matchday-briefing-card" aria-label="Matchday briefing summary">
-              <span class="section-kicker">Matchday Briefing</span>
-              <h3>{{matchdayBriefingHeadline}}</h3>
-              <p>{{matchdayBriefingSummary}}</p>
+              <span class="section-kicker" id="briefing-kicker">Matchday Briefing</span>
+              <h3 id="briefing-headline">{{matchdayBriefingHeadline}}</h3>
+              <p id="briefing-summary">{{matchdayBriefingSummary}}</p>
+              <div id="briefing-specs" style="display: none; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 12px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 10px;">
+                <div><span class="micro-label">Referee</span><strong id="briefing-ref" style="display:block; font-size:12px; margin-top:2px; color: #fff;"></strong></div>
+                <div><span class="micro-label">Weather</span><strong id="briefing-weather" style="display:block; font-size:12px; margin-top:2px; color: #fff;"></strong></div>
+              </div>
             </article>
             <div class="fixture-list" data-fixture-list>{{fixtureTimeline}}</div>
           </section>
@@ -1040,9 +1196,33 @@
                 <article class="tactical-pitch-card" aria-label="The Potters Starting XI">
                   <div class="pitch-card-head">
                     <h3>The Potters Starting XI</h3>
-                    <span>11-player shape</span>
+                    <div style="display: flex; gap: 6px;">
+                      <button class="chip active" type="button" data-set-formation="433" style="cursor:pointer;">4-3-3</button>
+                      <button class="chip" type="button" data-set-formation="532" style="cursor:pointer;">5-3-2</button>
+                    </div>
                   </div>
                   <div class="player-strip pitch home-pitch" data-formation="433">{{squadCards}}</div>
+                  <!-- Interactive Player Stat Popover Overlay -->
+                  <div id="player-stat-card" class="player-stat-card">
+                    <button class="close-btn" type="button" aria-label="Close">&times;</button>
+                    <div class="stat-header">
+                      <span class="stat-number" id="player-stat-number">#10</span>
+                      <div>
+                        <h4 class="stat-name" id="player-stat-name">Bae Jun-ho</h4>
+                        <span class="stat-role" id="player-stat-role">Attacking Midfielder</span>
+                      </div>
+                    </div>
+                    <div class="stat-grid">
+                      <div class="stat-item"><span class="label">Rating</span><strong class="value highlight" id="player-stat-rating">7.4</strong></div>
+                      <div class="stat-item"><span class="label">Goals</span><strong class="value" id="player-stat-goals">7</strong></div>
+                      <div class="stat-item"><span class="label">Assists</span><strong class="value" id="player-stat-assists">9</strong></div>
+                      <div class="stat-item"><span class="label">Cards</span><strong class="value" id="player-stat-cards">3Y, 0R</strong></div>
+                    </div>
+                    <div class="form-trend">
+                      <span class="label">Last 5 Matches Form</span>
+                      <div class="trend-dots" id="player-stat-trend"></div>
+                    </div>
+                  </div>
                 </article>
                 <aside class="forum-board-feed" aria-label="Oatcake message board trending supporter threads">
                   <div class="forum-feed-header">
@@ -1075,9 +1255,15 @@
               <div class="section-head">
                 <div>
                   <span class="section-kicker">Supporter Survival Guide</span>
-                  <h2>Away Day: {{awayOpponentDisplay}} (A)</h2>
+                  <h2>Away Day: <span id="away-title-opponent">{{awayOpponentDisplay}}</span> (A)</h2>
                 </div>
-                <span class="chip" style="color: #ffb703; border-color: rgba(255,183,3,0.4);">WIP - {{awayTag}}</span>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <select id="away-opponent-select" class="chip" style="background: rgba(13, 14, 18, 0.85); border: 1px solid var(--line); color: #fff; cursor: pointer; padding: 6px 12px; border-radius: 8px; font-weight: 800; font-size: 11px;">
+                    <option value="swansea_city" selected>Swansea City (A)</option>
+                    <option value="west_brom">West Bromwich Albion (A)</option>
+                  </select>
+                  <span id="away-tag-chip" class="chip" style="color: #ffb703; border-color: rgba(255,183,3,0.4);">WIP - {{awayTag}}</span>
+                </div>
               </div>
 
               <div class="away-master-grid">
@@ -1085,37 +1271,37 @@
                   <div class="away-guide-grid">
                     <div class="away-guide-tile">
                       <span>The Ground Info</span>
-                      <strong>{{awayStadium}}</strong>
-                      <small>{{awayDistance}} from the Potteries - {{awayTravelTime}}</small>
+                      <strong id="away-stadium">{{awayStadium}}</strong>
+                      <small id="away-travel">{{awayDistance}} from the Potteries - {{awayTravelTime}}</small>
                     </div>
                   </div>
 
                   <div class="pie-card">
                     <span>The Match-Day Pie Index</span>
-                    <p>{{awayPieIndex}} - <em>{{awayPieTip}}</em></p>
+                    <p id="away-pie">{{awayPieIndex}} - <em id="away-pie-tip">{{awayPieTip}}</em></p>
                   </div>
 
                   <div class="briefing-grid" aria-label="Pre-Match Briefing">
                     <div class="briefing-card">
                       <span>Referee Watch</span>
-                      <strong>{{briefingReferee}}</strong>
-                      <small>{{briefingOfficialsNote}}</small>
+                      <strong id="away-referee">{{briefingReferee}}</strong>
+                      <small id="away-referee-note">{{briefingOfficialsNote}}</small>
                     </div>
                     <div class="briefing-card">
                       <span>Weather</span>
-                      <strong>{{briefingForecastTemp}} - {{briefingForecastCond}}</strong>
-                      <small>{{briefingKitTip}}</small>
+                      <strong id="away-weather">{{briefingForecastTemp}} - {{briefingForecastCond}}</strong>
+                      <small id="away-weather-tip">{{briefingKitTip}}</small>
                     </div>
                     <div class="briefing-card full">
                       <span>Form Guide</span>
                       <div class="form-stack">
                         <div class="form-row">
                           <span>Stoke</span>
-                          <div class="form-strip">{{briefingHomeForm}}</div>
+                          <div class="form-strip" id="away-form-home">{{briefingHomeForm}}</div>
                         </div>
                         <div class="form-row">
-                          <span>{{awayOpponentDisplay}}</span>
-                          <div class="form-strip">{{briefingAwayForm}}</div>
+                          <span id="away-form-opponent-label">{{awayOpponentDisplay}}</span>
+                          <div class="form-strip" id="away-form-away">{{briefingAwayForm}}</div>
                         </div>
                       </div>
                     </div>
@@ -1126,7 +1312,7 @@
                   <article class="travel-guide-card" aria-label="Travel Guide Blocks">
                     <span>Supporter Travel Stack</span>
                     <h3>Pubs, Hotels & Logistics</h3>
-                    <div class="supporter-guide-grid">{{awaySupporterCards}}</div>
+                    <div class="supporter-guide-grid" id="away-supporter-cards">{{awaySupporterCards}}</div>
                   </article>
                 </div>
               </div>
@@ -1250,6 +1436,190 @@
       applyVoteLockState();
       addEventListener('hashchange', () => activateView(location.hash.slice(1), false));
       activateView(location.hash.slice(1) || 'matches', false);
+
+      // Injected Data
+      const awayGuidesData = {{awayGuidesJson}};
+      const briefingsData = {{briefingsJson}};
+
+      // 1. Formation Controls
+      document.querySelectorAll('[data-set-formation]').forEach((button) => {
+        button.addEventListener('click', () => {
+          const formation = button.dataset.setFormation;
+          const pitch = document.querySelector('.pitch');
+          if (pitch) {
+            pitch.setAttribute('data-formation', formation);
+          }
+          document.querySelectorAll('[data-set-formation]').forEach((b) => {
+            b.classList.toggle('active', b === button);
+          });
+        });
+      });
+
+      // Helper to escape HTML on client side
+      const escapeHtml = (text) => {
+        return String(text ?? '')
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+      };
+
+      // 2. Away Day Guide Selector
+      const awaySelect = document.getElementById('away-opponent-select');
+      if (awaySelect) {
+        awaySelect.addEventListener('change', () => {
+          const key = awaySelect.value;
+          const guide = awayGuidesData[key];
+          if (!guide) return;
+
+          // Update titles
+          document.getElementById('away-title-opponent').textContent = guide.opponent;
+          document.getElementById('away-tag-chip').textContent = 'WIP - ' + guide.tag;
+
+          // Update basic details
+          document.getElementById('away-stadium').textContent = guide.stadium;
+          document.getElementById('away-travel').textContent = guide.distance + ' from the Potteries - ' + guide.travelTime;
+          document.getElementById('away-pie').innerHTML = escapeHtml(guide.pieIndex) + ' - <em>' + escapeHtml(guide.pieTip) + '</em>';
+
+          // Update Briefings (weather/referee/form)
+          const briefing = briefingsData[key];
+          if (briefing) {
+            document.getElementById('away-referee').textContent = briefing.referee;
+            document.getElementById('away-referee-note').textContent = briefing.officialsNote;
+            document.getElementById('away-weather').textContent = briefing.forecastTemp + ' - ' + briefing.forecastCond;
+            document.getElementById('away-weather-tip').textContent = briefing.kitTip;
+
+            // Update Form
+            document.getElementById('away-form-opponent-label').textContent = guide.opponent;
+            
+            const formatDots = (formArr) => formArr.map(result => 
+              '<span class="form-dot ' + result.toLowerCase() + '">' + result + '</span>'
+            ).join('');
+
+            document.getElementById('away-form-home').innerHTML = formatDots(briefing.formHome);
+            document.getElementById('away-form-away').innerHTML = formatDots(briefing.formAway);
+          }
+
+          // Update Modules
+          const container = document.getElementById('away-supporter-cards');
+          if (container && guide.modules) {
+            container.innerHTML = guide.modules.map(module => `
+              <article class="supporter-guide-card">
+                <span>${escapeHtml(module.kicker)}</span>
+                <h3>${escapeHtml(module.title)}</h3>
+                <ul>
+                  ${(module.items || []).map(item => `<li>${escapeHtml(item)}</li>`).join('')}
+                </ul>
+              </article>
+            `).join('');
+          }
+        });
+      }
+
+      // 3. Clickable Fixture Centre details
+      document.querySelectorAll('.fixture-row').forEach((row) => {
+        row.addEventListener('click', () => {
+          const opponentName = row.querySelector('h3').textContent;
+          // Normalize opponent key
+          let key = opponentName.toLowerCase()
+            .replace(/&/g, 'and')
+            .replace(/[^a-z0-9]+/g, '_')
+            .replace(/^_+|_+$/g, '');
+          
+          if (key === 'west_bromwich_albion') key = 'west_brom';
+
+          const briefing = briefingsData[key];
+          if (!briefing) return;
+
+          // Update main day briefing card
+          const kicker = document.getElementById('briefing-kicker');
+          const headline = document.getElementById('briefing-headline');
+          const summary = document.getElementById('briefing-summary');
+          const specs = document.getElementById('briefing-specs');
+          const ref = document.getElementById('briefing-ref');
+          const weather = document.getElementById('briefing-weather');
+
+          if (kicker && headline && summary && specs && ref && weather) {
+            // Smooth highlight fade
+            const card = kicker.closest('.matchday-briefing-card');
+            card.style.opacity = '0.3';
+            
+            setTimeout(() => {
+              kicker.textContent = 'Matchday Briefing - vs ' + opponentName;
+              
+              // Generate briefing summary dynamically similar to server logic
+              const venue = row.querySelector('.fixture-meta').lastElementChild.textContent.trim();
+              const surfaceCue = briefing.forecastCond.toLowerCase().includes('rain')
+                ? 'a slick surface and faster second balls'
+                : 'a cleaner surface and sharper passing windows';
+              const cardsCue = briefing.officialsNote.toLowerCase().includes('card') || briefing.officialsNote.toLowerCase().includes('yellow')
+                ? 'discipline around transitions matters because the referee profile points toward regular cards'
+                : 'the referee profile should still reward clean timing in midfield duels';
+
+              headline.textContent = 'Stoke City briefing: ' + opponentName + ' under ' + briefing.forecastCond.toLowerCase();
+              summary.textContent = venue + ' conditions point to ' + surfaceCue + ', with ' + briefing.forecastTemp + ' and ' + briefing.forecastCond.toLowerCase() + ' shaping the tempo. ' + briefing.referee + ' takes charge, and ' + cardsCue + '. ' + briefing.kitTip;
+
+              ref.textContent = briefing.referee + ' (' + briefing.officialsNote + ')';
+              weather.textContent = briefing.forecastTemp + ' - ' + briefing.forecastCond;
+              
+              specs.style.display = 'grid';
+              card.style.opacity = '1';
+            }, 200);
+          }
+        });
+      });
+
+      // 4. Player Stats Tooltips
+      const statCard = document.getElementById('player-stat-card');
+      if (statCard) {
+        // Kit clicks
+        document.querySelectorAll('.player-strip-card').forEach((card) => {
+          card.addEventListener('click', (event) => {
+            event.stopPropagation();
+            
+            const number = card.getAttribute('data-number');
+            const name = card.getAttribute('data-player-name');
+            const role = card.getAttribute('data-player-role');
+            const goals = card.getAttribute('data-goals');
+            const assists = card.getAttribute('data-assists');
+            const yellows = card.getAttribute('data-yellows');
+            const reds = card.getAttribute('data-reds');
+            const rating = card.getAttribute('data-rating');
+            const form = card.getAttribute('data-form').split(',');
+
+            document.getElementById('player-stat-number').textContent = number;
+            document.getElementById('player-stat-name').textContent = name;
+            document.getElementById('player-stat-role').textContent = role;
+            document.getElementById('player-stat-rating').textContent = rating;
+            document.getElementById('player-stat-goals').textContent = goals;
+            document.getElementById('player-stat-assists').textContent = assists;
+            document.getElementById('player-stat-cards').textContent = `${yellows}Y, ${reds}R`;
+
+            // Render form trend dots
+            const trendContainer = document.getElementById('player-stat-trend');
+            trendContainer.innerHTML = form.map(f => `<span class="trend-dot" title="Rating: ${f}">${f}</span>`).join('');
+
+            statCard.style.display = 'block';
+          });
+        });
+
+        // Close button
+        const closeBtn = statCard.querySelector('.close-btn');
+        if (closeBtn) {
+          closeBtn.addEventListener('click', (event) => {
+            event.stopPropagation();
+            statCard.style.display = 'none';
+          });
+        }
+
+        // Click outside closes
+        document.addEventListener('click', (event) => {
+          if (!statCard.contains(event.target)) {
+            statCard.style.display = 'none';
+          }
+        });
+      }
     </script>
   </body>
 </html>

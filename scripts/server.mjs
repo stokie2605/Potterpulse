@@ -571,6 +571,8 @@ const render = () => {
       squadCards,
       fixtureTimeline,
       fanPollOptions,
+      awayGuidesJson: JSON.stringify(awayGuides),
+      briefingsJson: JSON.stringify(nextMatchBriefing),
       matchdayBriefingHeadline: matchdayBriefing.headline,
       matchdayBriefingSummary: matchdayBriefing.summary,
       awayOpponent: awayGuide.opponent,
