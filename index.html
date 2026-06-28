@@ -7,20 +7,21 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <style>
+      @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&display=swap');
       :root {
         color-scheme: dark;
         --bg: #050608;
-        --surface: #111217;
-        --card: rgba(24, 25, 31, 0.92);
-        --line: rgba(255, 255, 255, 0.11);
+        --surface: #0a0b0e;
+        --card: rgba(18, 19, 26, 0.75);
+        --line: rgba(255, 255, 255, 0.08);
         --ink: #f8f8fa;
-        --muted: #a2a6b2;
-        --quiet: #676d79;
+        --muted: #8e929f;
+        --quiet: #565a65;
         --red: #e20e19;
         --red-2: #a80712;
         --red-3: #ff3344;
-        --shadow: 0 28px 80px rgba(0, 0, 0, 0.6);
-        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        --shadow: 0 36px 110px rgba(0, 0, 0, 0.72);
+        font-family: 'Outfit', sans-serif;
       }
 
       * { box-sizing: border-box; }
@@ -1019,9 +1020,9 @@
       .fixture-pill.home { color: #fff; border-color: rgba(226, 14, 25, 0.5); background: rgba(226, 14, 25, 0.16); }
       .fixture-arrow { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 999px; background: rgba(255, 255, 255, 0.07); color: var(--red-3); font-weight: 1000; }
 
-      .bottom-nav { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; border-top: 1px solid var(--line); padding: 10px 16px 14px; background: rgba(13, 14, 18, 0.94); }
+      .bottom-nav { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; border-top: 1px solid var(--line); padding: 10px 16px 14px; background: rgba(13, 14, 18, 0.94); }
       .bottom-nav button { display: grid; justify-items: center; gap: 5px; min-width: 0; border: 0; background: transparent; color: var(--quiet); font: inherit; cursor: pointer; }
-      .nav-icon { width: 22px; height: 22px; border: 2px solid currentColor; border-radius: 8px; }
+      .nav-icon { width: 22px; height: 22px; border: 2px solid currentColor; border-radius: 8px; display: inline-block; position: relative; }
       .bottom-nav button.active { color: var(--red-3); }
 
       @media (max-width: 992px) {
@@ -1096,219 +1097,332 @@
   <body>
     <main class="stage">
       <section class="app-frame" aria-label="Potter Pulse app">
-        <header class="app-topbar">
-          <div class="brand-lockup">
-            <button class="menu-button" type="button" aria-label="Open menu"><span class="menu-lines"></span></button>
-            <div class="brand-title">
-              <strong>Potter<em>Pulse</em></strong>
-              <span>{{generatedAt}}</span>
-            </div>
+        <header class="app-topbar" style="border-bottom: 1px solid var(--line); background: var(--surface); padding: 14px 20px;">
+          <div class="brand-lockup" style="display:flex; align-items:center; gap:8px;">
+            <span style="font-weight: 900; font-size: 1.1rem; letter-spacing: 0.1em; color: var(--red-3); text-transform: uppercase;">POTTERPULSE</span>
           </div>
-          <div class="live-pill"><span class="live-dot"></span><span class="micro-label">Live DB</span></div>
+          <div class="live-pill" style="display:flex; align-items:center; gap:6px; color: var(--red-3); font-size:12px; font-weight:900; animation: blink 1.5s infinite;">
+            <span>((•))</span>
+          </div>
         </header>
 
-        <nav class="sport-tabs" aria-label="Sections">
+        <nav class="sport-tabs" aria-label="Sections" style="display:none;">
           <button class="tab active" type="button" data-view="matches">Matches</button>
           <button class="tab" type="button" data-view="squad">Squad</button>
+          <button class="tab" type="button" data-view="stats">Stats</button>
           <button class="tab" type="button" data-view="away-days">Away Days</button>
         </nav>
 
         <section class="content-grid">
           <div id="view-matches" class="tab-view active-view" data-tab-view="matches">
-          <section id="next-match" class="next-match-grid" aria-label="Next match header">
-          <article class="match-card" aria-label="Next match against Swansea City">
-            <div class="match-header">
-              <span class="section-kicker">Next Match</span>
-              <span class="fixture-pill home">{{heroCompetition}}</span>
-            </div>
-            <div class="scoreline">
-              <div class="club">
-                <div class="crest"><img src="{{homeCrestSrc}}" alt="{{homeDisplayName}} crest" /></div>
-                <div class="club-name">{{homeDisplayName}}</div>
+            <!-- 1. MATCH SENTIMENT -->
+            <section class="panel single-view" aria-label="Match Sentiment">
+              <div class="section-head" style="margin-bottom:12px;">
+                <div>
+                  <span class="section-kicker" style="color:var(--muted); font-size:10px;">Fan Real-Time Data</span>
+                  <h2 style="font-weight:900; font-size:1.35rem; margin:4px 0 0;">MATCH SENTIMENT</h2>
+                </div>
               </div>
-              <div class="versus-block">
-                <span class="micro-label">{{heroVenue}}</span>
-                <div class="score-chip">V</div>
-                <span class="micro-label">{{heroDateShort}}</span>
+              <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; position:relative; padding:16px 0;">
+                <div id="poll-chart-container" style="position:relative; width:130px; height:130px; display:flex; justify-content:center; align-items:center;">
+                  <svg width="130" height="130" viewBox="0 0 150 150" style="transform: rotate(-90deg);">
+                    <circle cx="75" cy="75" r="55" fill="transparent" stroke="rgba(255,255,255,0.05)" stroke-width="14"></circle>
+                    <circle id="chart-segment-optimism" cx="75" cy="75" r="55" fill="transparent" stroke="var(--red-3)" stroke-width="14" stroke-dasharray="345.5" stroke-dashoffset="345.5" style="transition: stroke-dashoffset 0.6s ease;"></circle>
+                    <circle id="chart-segment-regular" cx="75" cy="75" r="55" fill="transparent" stroke="#565a65" stroke-width="14" stroke-dasharray="345.5" stroke-dashoffset="345.5" style="transition: stroke-dashoffset 0.6s ease;"></circle>
+                    <circle id="chart-segment-pessimism" cx="75" cy="75" r="55" fill="transparent" stroke="#ffd700" stroke-width="14" stroke-dasharray="345.5" stroke-dashoffset="345.5" style="transition: stroke-dashoffset 0.6s ease;"></circle>
+                  </svg>
+                  <!-- Heart center badge overlay -->
+                  <div style="position:absolute; width:38px; height:38px; border-radius:50%; background:rgba(226,14,25,0.12); border:1px solid rgba(226,14,25,0.4); display:flex; justify-content:center; align-items:center; box-shadow: 0 0 12px rgba(226,14,25,0.25);">
+                    <span style="font-size: 1.15rem; color:var(--red-3);">♡</span>
+                  </div>
+                  <!-- Hidden total votes overlay needed for JS checks -->
+                  <span id="chart-total-votes" style="display:none;">0</span>
+                </div>
+                <!-- Sentiment Stats Row -->
+                <div style="display:grid; grid-template-columns: repeat(3, 1fr); width:100%; text-align:center; margin-top:20px; border-top:1px solid var(--line); padding-top:16px;">
+                  <div>
+                    <span class="micro-label" style="font-size:9px; color:var(--muted);">Optimism</span>
+                    <strong id="sentiment-val-optimism" style="display:block; font-size:1.4rem; font-weight:900; color:#fff; margin-top:4px;">64%</strong>
+                  </div>
+                  <div>
+                    <span class="micro-label" style="font-size:9px; color:var(--muted);">Neutral</span>
+                    <strong id="sentiment-val-neutral" style="display:block; font-size:1.4rem; font-weight:900; color:#fff; margin-top:4px;">21%</strong>
+                  </div>
+                  <div>
+                    <span class="micro-label" style="font-size:9px; color:var(--muted);">Pessimism</span>
+                    <strong id="sentiment-val-pessimism" style="display:block; font-size:1.4rem; font-weight:900; color:#fff; margin-top:4px;">15%</strong>
+                  </div>
+                </div>
               </div>
-              <div class="club">
-                <div class="crest away"><img src="{{awayCrestSrc}}" alt="{{heroOpponentDisplay}} crest" /></div>
-                <div class="club-name">{{heroOpponentDisplay}}</div>
-              </div>
-            </div>
-            <h1 class="match-title">{{homeDisplayName}} <span>vs</span><br />{{heroOpponentDisplay}}</h1>
-            <div class="match-actions">
-              <div class="action-card"><span class="micro-label">Kickoff</span><strong>{{heroDateShort}}</strong></div>
-              <div class="action-card"><span class="micro-label">Venue</span><strong>{{heroVenue}}</strong></div>
-              <div class="action-card"><span class="micro-label">Culture</span><strong>{{cultureProfileName}}</strong></div>
-            </div>
-          </article>
-            <aside class="next-match-briefing-card" aria-label="The Boothen Debrief">
-              <span class="section-kicker">Tactical Outlook</span>
-              <h2>THE BOOTHEN DEBRIEF</h2>
-              <p>The Mark Robins era kicks off at a packed ST4, and let's be honest, the pressure is on from day one. With Soumaré signed to finally give us some steel in the engine room and the overpaid deadwood cleared out, there are zero places to hide. The Swans are always a stubborn, annoying outfit to break down, but the Boothen End needs to make itself heard from the first whistle. No quiet main-stand muttering—let's make sure we start the campaign with an actual statement.</p>
-            </aside>
-          </section>
-          <section class="panel fanzine-column-card single-view" aria-label="The Digital Fanzine">
-            <div class="section-head">
-              <div>
-                <span class="section-kicker">Independent Fan Voice</span>
-                <h2>The Boothen Verdict</h2>
-              </div>
-              <span class="chip" style="color: var(--red-3); border-color: rgba(226,14,25,0.4);">100% Free Zine</span>
-            </div>
-            <div class="zine-article-snippet">
-              <p>"PotterPulse channels the energy of independent Stoke supporter discussion into a modern dashboard format: fixtures, away days, player ratings, live polls, and matchday debate in one place. Looking at the squad canvas today, we've got the blistering transition pace with Manhoef and Jun-ho to carve through open channels, as long as our midfield engine actually tracks back on the counter..."</p>
-              <div class="zine-meta">
-                <span class="author">BoothenEnder92</span>
-                <span class="date">Just Now</span>
-              </div>
-            </div>
-          </section>
-          <section class="panel single-view" aria-label="Terrace Temperature Check">
-            <div class="section-head">
-              <div>
-                <span class="section-kicker">The Pre-Match Verdict</span>
-                <h2>TERRACE TEMPERATURE CHECK</h2>
-              </div>
-              <span class="chip">Live Poll</span>
-            </div>
-            <div class="poll-split-layout" style="display: grid; grid-template-columns: 1fr; gap: 20px; align-items: center; margin-top: 10px; width: 100%;">
-              <!-- Left: Poll Options -->
-              <div class="fan-poll-grid" data-poll-grid data-vote-lock-key="{{voteLockKey}}" style="display:grid; grid-template-columns: 1fr; gap: 8px; width: 100%;">{{fanPollOptions}}</div>
               
-              <!-- Right: SVG Analytics Chart -->
-              <div id="poll-chart-container" style="display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(0,0,0,0.15); border: 1px solid var(--line); border-radius: 12px; padding: 16px; position: relative; width: 100%;">
-                <svg width="130" height="130" viewBox="0 0 150 150" style="transform: rotate(-90deg);">
-                  <circle cx="75" cy="75" r="55" fill="transparent" stroke="rgba(255,255,255,0.06)" stroke-width="14"></circle>
-                  <circle id="chart-segment-optimism" cx="75" cy="75" r="55" fill="transparent" stroke="var(--red-3)" stroke-width="14" stroke-dasharray="345.5" stroke-dashoffset="345.5" style="transition: stroke-dashoffset 0.6s ease;"></circle>
-                  <circle id="chart-segment-regular" cx="75" cy="75" r="55" fill="transparent" stroke="#f4a261" stroke-width="14" stroke-dasharray="345.5" stroke-dashoffset="345.5" style="transition: stroke-dashoffset 0.6s ease;"></circle>
-                  <circle id="chart-segment-pessimism" cx="75" cy="75" r="55" fill="transparent" stroke="#e76f51" stroke-width="14" stroke-dasharray="345.5" stroke-dashoffset="345.5" style="transition: stroke-dashoffset 0.6s ease;"></circle>
-                </svg>
-                <!-- Central stats overlay -->
-                <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -60%); text-align: center; pointer-events: none;">
-                  <span class="micro-label" style="display:block; font-size:8px;">Total Votes</span>
-                  <strong id="chart-total-votes" style="font-size: 1.4rem; font-weight: 1000; color: #fff; line-height: 1;">0</strong>
+              <!-- Hidden vote selectors for logic updates -->
+              <div class="fan-poll-grid" data-poll-grid data-vote-lock-key="{{voteLockKey}}" style="display:none;">{{fanPollOptions}}</div>
+
+              <!-- Terrace Debates Poll Comments -->
+              <div class="poll-comments-section" style="margin-top: 18px; border-top: 1px solid var(--line); padding-top: 16px;">
+                <span class="section-kicker" style="margin-bottom: 8px; display: block; font-size:10px; color:var(--muted);">Terrace Debates</span>
+                <form id="poll-comment-form" style="display: flex; gap: 8px; margin-bottom: 14px; pointer-events: auto;">
+                  <input type="text" id="poll-comment-user" placeholder="Name" required style="background: rgba(13, 14, 18, 0.9); border: 1px solid var(--line); color: #fff; padding: 6px 10px; border-radius: 6px; font-size: 11px; width: 80px; font-family: inherit;" />
+                  <input type="text" id="poll-comment-text" placeholder="Add to the debate..." required style="background: rgba(13, 14, 18, 0.9); border: 1px solid var(--line); color: #fff; padding: 6px 10px; border-radius: 6px; font-size: 11px; flex: 1; font-family: inherit;" />
+                  <button type="submit" class="chip" style="cursor: pointer; background: var(--red); border: 0; color: #fff; padding: 6px 12px; border-radius: 6px; font-weight: 800; font-size: 10px;">Post</button>
+                </form>
+                <div id="poll-comments-list" style="display: grid; gap: 8px; max-height: 200px; overflow-y: auto; padding-right: 4px;"></div>
+              </div>
+            </section>
+
+            <!-- 2. LIVE FORMATION -->
+            <section class="panel single-view" aria-label="Live Formation">
+              <div class="section-head" style="display:flex; justify-content:space-between; align-items:start; margin-bottom:12px;">
+                <div>
+                  <span class="section-kicker" style="color:var(--muted); font-size:10px;">Tactical Telemetry</span>
+                  <h2 style="font-weight:900; font-size:1.35rem; margin:4px 0 0;">LIVE FORMATION</h2>
                 </div>
-                <div style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 10px; font-size: 9px; font-weight: 800;">
-                  <span style="display:flex; align-items:center; gap:4px; color:#fff;"><span style="width:8px; height:8px; border-radius:50%; background:var(--red-3); display:inline-block;"></span>Optimism</span>
-                  <span style="display:flex; align-items:center; gap:4px; color:#fff;"><span style="width:8px; height:8px; border-radius:50%; background:#f4a261; display:inline-block;"></span>Regular</span>
-                  <span style="display:flex; align-items:center; gap:4px; color:#fff;"><span style="width:8px; height:8px; border-radius:50%; background:#e76f51; display:inline-block;"></span>Pessimism</span>
+                <div style="display:flex; gap:6px;">
+                  <span class="chip" style="font-size:8px; padding:3px 8px; border-color:var(--line); background:rgba(255,255,255,0.02); color:#fff; font-weight:800;">4-3-3 Attacking</span>
+                  <span class="chip" style="font-size:8px; padding:3px 8px; border-color:rgba(226,14,25,0.3); background:rgba(226,14,25,0.1); color:var(--red-3); font-weight:800;">Active Session</span>
                 </div>
               </div>
-            </div>
-            
-            <!-- Terrace Debates Poll Comments -->
-            <div class="poll-comments-section" style="margin-top: 18px; border-top: 1px solid var(--line); padding-top: 16px;">
-              <span class="section-kicker" style="margin-bottom: 8px; display: block;">Terrace Debates</span>
-              <form id="poll-comment-form" style="display: flex; gap: 8px; margin-bottom: 14px; pointer-events: auto;">
-                <input type="text" id="poll-comment-user" placeholder="Name" required style="background: rgba(13, 14, 18, 0.9); border: 1px solid var(--line); color: #fff; padding: 6px 10px; border-radius: 6px; font-size: 11px; width: 80px; font-family: inherit;" />
-                <input type="text" id="poll-comment-text" placeholder="Add to the debate..." required style="background: rgba(13, 14, 18, 0.9); border: 1px solid var(--line); color: #fff; padding: 6px 10px; border-radius: 6px; font-size: 11px; flex: 1; font-family: inherit;" />
-                <button type="submit" class="chip" style="cursor: pointer; background: var(--red-3); border: 0; color: #fff; padding: 6px 12px; border-radius: 6px; font-weight: 800; font-size: 10px;">Post</button>
+              <div style="display:flex; justify-content:center; align-items:center; padding:16px 0;">
+                <div class="mock-formation-pitch" style="position:relative; width:100%; max-width:320px; height:280px; background: rgba(255,255,255,0.01); border:1px solid var(--line); border-radius:12px; display:grid; grid-template-rows: repeat(5, 1fr); padding:20px; justify-items:center; align-items:center; transform: perspective(800px) rotateX(25deg); transform-style:preserve-3d;">
+                  <!-- Row 1: Forward -->
+                  <div style="display:flex; gap:40px; grid-row: 1;">
+                    <span class="node" style="width:26px; height:26px; border-radius:50%; border:1px solid rgba(255,255,255,0.3); display:grid; place-items:center; font-size:9px; font-weight:900; color:#fff; background:rgba(0,0,0,0.4);">7</span>
+                    <span class="node active-glow" style="width:28px; height:28px; border-radius:50%; border:2px solid var(--red-3); display:grid; place-items:center; font-size:9px; font-weight:900; color:#fff; background:rgba(226,14,25,0.25); box-shadow: 0 0 12px var(--red-3);">9</span>
+                    <span class="node" style="width:26px; height:26px; border-radius:50%; border:1px solid rgba(255,255,255,0.3); display:grid; place-items:center; font-size:9px; font-weight:900; color:#fff; background:rgba(0,0,0,0.4);">11</span>
+                  </div>
+                  <!-- Row 2: Midfield -->
+                  <div style="display:flex; gap:36px; grid-row: 2;">
+                    <span class="node" style="width:26px; height:26px; border-radius:50%; border:1px solid rgba(255,255,255,0.3); display:grid; place-items:center; font-size:9px; font-weight:900; color:#fff; background:rgba(0,0,0,0.4);">8</span>
+                    <span class="node" style="width:26px; height:26px; border-radius:50%; border:1px solid rgba(255,255,255,0.3); display:grid; place-items:center; font-size:9px; font-weight:900; color:#fff; background:rgba(0,0,0,0.4);">22</span>
+                  </div>
+                  <!-- Row 3: Defense -->
+                  <div style="display:flex; gap:28px; grid-row: 3;">
+                    <span class="node" style="width:26px; height:26px; border-radius:50%; border:1px solid rgba(255,255,255,0.3); display:grid; place-items:center; font-size:9px; font-weight:900; color:#fff; background:rgba(0,0,0,0.4);">23</span>
+                    <span class="node" style="width:26px; height:26px; border-radius:50%; border:1px solid rgba(255,255,255,0.3); display:grid; place-items:center; font-size:9px; font-weight:900; color:#fff; background:rgba(0,0,0,0.4);">5</span>
+                    <span class="node" style="width:26px; height:26px; border-radius:50%; border:1px solid rgba(255,255,255,0.3); display:grid; place-items:center; font-size:9px; font-weight:900; color:#fff; background:rgba(0,0,0,0.4);">16</span>
+                  </div>
+                  <!-- Row 4: Goalkeeper -->
+                  <div style="grid-row: 4;">
+                    <span class="node keeper" style="width:26px; height:26px; border-radius:50%; border:1px solid #ffd700; display:grid; place-items:center; font-size:9px; font-weight:900; color:#fff; background:rgba(255,215,0,0.15);">1</span>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- 3. RATE THE PERFORMANCE -->
+            <section class="panel single-view" aria-label="Rate the Performance">
+              <div class="section-head" style="margin-bottom:12px;">
+                <h2>RATE THE PERFORMANCE</h2>
+              </div>
+              <form id="telemetry-rating-form" style="display:flex; flex-direction:column; gap:16px; width:100%; pointer-events:auto;">
+                <!-- Slider 1 -->
+                <div style="display:flex; flex-direction:column; gap:6px;">
+                  <div style="display:flex; justify-content:space-between; font-size:10px; font-weight:800; text-transform:uppercase; color:var(--muted);">
+                    <span>Attacking Intensity</span>
+                    <span id="telemetry-val-atk" style="color:var(--red-3); font-weight:900;">8.4</span>
+                  </div>
+                  <input type="range" id="telemetry-slider-atk" min="1" max="10" step="0.1" value="8.4" style="width:100%; accent-color:var(--red-3); cursor:pointer;"
+                    oninput="document.getElementById('telemetry-val-atk').textContent = parseFloat(this.value).toFixed(1)" />
+                </div>
+                <!-- Slider 2 -->
+                <div style="display:flex; flex-direction:column; gap:6px;">
+                  <div style="display:flex; justify-content:space-between; font-size:10px; font-weight:800; text-transform:uppercase; color:var(--muted);">
+                    <span>Defensive Solidity</span>
+                    <span id="telemetry-val-def" style="color:var(--red-3); font-weight:900;">6.2</span>
+                  </div>
+                  <input type="range" id="telemetry-slider-def" min="1" max="10" step="0.1" value="6.2" style="width:100%; accent-color:var(--red-3); cursor:pointer;"
+                    oninput="document.getElementById('telemetry-val-def').textContent = parseFloat(this.value).toFixed(1)" />
+                </div>
+                <!-- Slider 3 -->
+                <div style="display:flex; flex-direction:column; gap:6px;">
+                  <div style="display:flex; justify-content:space-between; font-size:10px; font-weight:800; text-transform:uppercase; color:var(--muted);">
+                    <span>Manager Tactics</span>
+                    <span id="telemetry-val-tac" style="color:var(--red-3); font-weight:900;">7.5</span>
+                  </div>
+                  <input type="range" id="telemetry-slider-tac" min="1" max="10" step="0.1" value="7.5" style="width:100%; accent-color:var(--red-3); cursor:pointer;"
+                    oninput="document.getElementById('telemetry-val-tac').textContent = parseFloat(this.value).toFixed(1)" />
+                </div>
+                <button type="submit" class="chip" style="cursor:pointer; background:var(--red); border:0; color:#fff; padding:12px; border-radius:6px; font-weight:900; font-size:12px; letter-spacing:0.1em; width:100%; text-transform:uppercase; margin-top:8px;">SUBMIT TELEMETRY</button>
               </form>
-              <div id="poll-comments-list" style="display: grid; gap: 8px; max-height: 200px; overflow-y: auto; padding-right: 4px;"></div>
-            </div>
-          </section>
-          <section class="panel fixtures-panel" aria-label="Fixture list" style="position: relative;">
-            <div class="section-head">
-              <div>
-                <span class="section-kicker">Schedule</span>
-                <h2>Fixture Centre</h2>
-              </div>
-              <div class="fixture-summary"><span class="chip">Showing 5 of {{fixtureCount}}</span><button class="chip fixture-toggle" type="button" data-fixture-toggle aria-expanded="false">Show All</button></div>
-            </div>
-            <article class="matchday-briefing-card" aria-label="Matchday briefing summary">
-              <span class="section-kicker" id="briefing-kicker">Matchday Briefing</span>
-              <h3 id="briefing-headline">{{matchdayBriefingHeadline}}</h3>
-              <p id="briefing-summary">{{matchdayBriefingSummary}}</p>
-              <div id="briefing-specs" style="display: none; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 12px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 10px;">
-                <div><span class="micro-label">Referee</span><strong id="briefing-ref" style="display:block; font-size:12px; margin-top:2px; color: #fff;"></strong></div>
-                <div><span class="micro-label">Weather</span><strong id="briefing-weather" style="display:block; font-size:12px; margin-top:2px; color: #fff;"></strong></div>
-              </div>
-            </article>
-            <div class="fixture-list" data-fixture-list>{{fixtureTimeline}}</div>
+            </section>
 
-            <!-- Dynamic Match Stats Card overlay -->
-            <div id="match-stats-card" class="player-stat-card" style="display: none; bottom: 20px; left: 20px; right: 20px;">
-              <button class="close-btn" type="button" aria-label="Close">&times;</button>
-              <div class="stat-header">
-                <span class="stat-number" id="stats-match-score">2-1</span>
+            <!-- 4. POTM VOTE -->
+            <section class="panel single-view" aria-label="POTM Vote">
+              <div class="section-head" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                <h2>POTM VOTE</h2>
+                <span style="font-size:1.3rem;">👑</span>
+              </div>
+              <div style="display:flex; align-items:center; gap:12px; background:rgba(255,255,255,0.02); border:1px solid var(--line); border-radius:10px; padding:12px; width:100%;">
+                <div style="width:58px; height:58px; border-radius:8px; overflow:hidden; background:rgba(0,0,0,0.3); border:1px solid var(--line); display:flex; justify-content:center; align-items:center;">
+                  <img src="/assets/potm_leader.png" alt="Lewis Koumas photo" style="width:100%; height:100%; object-fit:cover;" />
+                </div>
                 <div>
-                  <h4 class="stat-name">Stoke City vs <span id="stats-opponent-name">Coventry City</span></h4>
-                  <span class="stat-role" id="stats-match-date">2026-08-08</span>
+                  <span class="micro-label" style="font-size:8px; color:var(--red-3); font-weight:900;">Current Leader</span>
+                  <h4 style="margin:4px 0 2px; font-size:0.95rem; font-weight:900; color:#fff;">Lewis Koumas</h4>
+                  <span style="font-size:10px; color:var(--muted); font-weight:800; text-transform:uppercase;">78% Match Rating</span>
                 </div>
               </div>
-              <div style="margin-bottom: 12px; font-size: 11px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 8px;">
-                <span class="micro-label">Goalscorers</span>
-                <div id="stats-scorers" style="color: #fff; font-weight: 800; margin-top: 2px;"></div>
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-top:14px; padding-top:12px; border-top:1px solid var(--line); font-size:11px; font-weight:800;">
+                <span style="color:var(--muted);">TOTAL VOTES:</span>
+                <span style="color:#fff; font-weight:900; font-size:12px;">12,482</span>
               </div>
-              <div style="display: grid; gap: 10px;">
-                <!-- Possession Bar -->
-                <div>
-                  <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:4px;">
-                    <span>Possession</span>
-                    <span><strong id="stats-poss-home">52%</strong> - <strong id="stats-poss-away">48%</strong></span>
-                  </div>
-                  <div style="display:flex; height:6px; border-radius:3px; overflow:hidden; background:rgba(255,255,255,0.1);">
-                    <div id="stats-poss-bar" style="width: 52%; background: var(--red-3);"></div>
-                  </div>
-                </div>
-                <!-- Shots -->
-                <div style="display:flex; justify-content:space-between; font-size:11px;">
-                  <span>Total Shots</span>
-                  <span style="color:#fff; font-weight:800;"><span id="stats-shots-home">14</span> - <span id="stats-shots-away">11</span></span>
-                </div>
-                <!-- Shots on Target -->
-                <div style="display:flex; justify-content:space-between; font-size:11px;">
-                  <span>Shots on Target</span>
-                  <span style="color:#fff; font-weight:800;"><span id="stats-sot-home">6</span> - <span id="stats-sot-away">4</span></span>
-                </div>
-                <!-- Corners -->
-                <div style="display:flex; justify-content:space-between; font-size:11px;">
-                  <span>Corners</span>
-                  <span style="color:#fff; font-weight:800;"><span id="stats-corners-home">7</span> - <span id="stats-corners-away">5</span></span>
-                </div>
-                <!-- Fouls -->
-                <div style="display:flex; justify-content:space-between; font-size:11px;">
-                  <span>Fouls</span>
-                  <span style="color:#fff; font-weight:800;"><span id="stats-fouls-home">12</span> - <span id="stats-fouls-away">10</span></span>
-                </div>
-              </div>
-              
-              <!-- Rate the Players Section -->
-              <div id="ratings-section" style="margin-top: 14px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 12px; pointer-events: auto;">
-                <span class="section-kicker" style="margin-bottom: 6px; display: block;">Terrace Player Ratings</span>
-                
-                <div style="display: flex; gap: 8px; margin-bottom: 10px;">
-                  <button id="view-ratings-tab-btn" class="chip active" type="button" style="cursor: pointer; font-size: 10px; font-weight: 800;">View Averages</button>
-                  <button id="submit-ratings-tab-btn" class="chip" type="button" style="cursor: pointer; font-size: 10px; font-weight: 800;">Rate Players</button>
-                </div>
+            </section>
+          </div>
 
-                <!-- View averages list & POTM -->
-                <div id="ratings-view-tab" style="display: block;">
-                  <div style="display: flex; align-items: center; gap: 10px; background: rgba(226, 14, 25, 0.08); border: 1px solid rgba(226, 14, 25, 0.2); border-radius: 8px; padding: 8px 12px; margin-bottom: 10px;">
-                    <span style="font-size: 1.5rem; line-height: 1;">👑</span>
-                    <div>
-                      <div class="micro-label">Terrace POTM</div>
-                      <strong id="potm-display-name" style="color: #fff; font-size: 12px; text-transform: uppercase;">None yet</strong>
-                      <span id="potm-display-rating" style="background: var(--red-3); color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 900; margin-left: 6px;">0.0</span>
+          <div id="view-stats" class="tab-view" data-tab-view="stats">
+            <!-- Next Match Hero grid -->
+            <section id="next-match" class="next-match-grid" aria-label="Next match header" style="width:100%;">
+              <article class="match-card" aria-label="Next match against Swansea City">
+                <div class="match-header">
+                  <span class="section-kicker">Next Match</span>
+                  <span class="fixture-pill home">{{heroCompetition}}</span>
+                </div>
+                <div class="scoreline">
+                  <div class="club">
+                    <div class="crest"><img src="{{homeCrestSrc}}" alt="{{homeDisplayName}} crest" /></div>
+                    <div class="club-name">{{homeDisplayName}}</div>
+                  </div>
+                  <div class="versus-block">
+                    <span class="micro-label">{{heroVenue}}</span>
+                    <div class="score-chip">V</div>
+                    <span class="micro-label">{{heroDateShort}}</span>
+                  </div>
+                  <div class="club">
+                    <div class="crest away"><img src="{{awayCrestSrc}}" alt="{{heroOpponentDisplay}} crest" /></div>
+                    <div class="club-name">{{heroOpponentDisplay}}</div>
+                  </div>
+                </div>
+                <h1 class="match-title">{{homeDisplayName}} <span>vs</span><br />{{heroOpponentDisplay}}</h1>
+                <div class="match-actions">
+                  <div class="action-card"><span class="micro-label">Kickoff</span><strong>{{heroDateShort}}</strong></div>
+                  <div class="action-card"><span class="micro-label">Venue</span><strong>{{heroVenue}}</strong></div>
+                  <div class="action-card"><span class="micro-label">Culture</span><strong>{{cultureProfileName}}</strong></div>
+                </div>
+              </article>
+              <aside class="next-match-briefing-card" aria-label="The Boothen Debrief">
+                <span class="section-kicker">Tactical Outlook</span>
+                <h2>THE BOOTHEN DEBRIEF</h2>
+                <p>The Mark Robins era kicks off at a packed ST4, and let's be honest, the pressure is on from day one. With Soumaré signed to finally give us some steel in the engine room and the overpaid deadwood cleared out, there are zero places to hide. The Swans are always a stubborn, annoying outfit to break down, but the Boothen End needs to make itself heard from the first whistle. No quiet main-stand muttering—let's make sure we start the campaign with an actual statement.</p>
+              </aside>
+            </section>
+
+            <!-- Fanzine Editorial card -->
+            <section class="panel fanzine-column-card single-view" aria-label="The Digital Fanzine" style="width:100%;">
+              <div class="section-head">
+                <div>
+                  <span class="section-kicker">Independent Fan Voice</span>
+                  <h2>The Boothen Verdict</h2>
+                </div>
+                <span class="chip" style="color: var(--red-3); border-color: rgba(226,14,25,0.4);">100% Free Zine</span>
+              </div>
+              <div class="zine-article-snippet">
+                <p>"PotterPulse channels the energy of independent Stoke supporter discussion into a modern dashboard format: fixtures, away days, player ratings, live polls, and matchday debate in one place. Looking at the squad canvas today, we've got the blistering transition pace with Manhoef and Jun-ho to carve through open channels, as long as our midfield engine actually tracks back on the counter..."</p>
+                <div class="zine-meta">
+                  <span class="author">BoothenEnder92</span>
+                  <span class="date">Just Now</span>
+                </div>
+              </div>
+            </section>
+
+            <!-- Fixture Centre Timeline -->
+            <section class="panel fixtures-panel" aria-label="Fixture list" style="position: relative; width:100%; margin-top:14px;">
+              <div class="section-head">
+                <div>
+                  <span class="section-kicker">Schedule</span>
+                  <h2>Fixture Centre</h2>
+                </div>
+                <div class="fixture-summary"><span class="chip">Showing 5 of {{fixtureCount}}</span><button class="chip fixture-toggle" type="button" data-fixture-toggle aria-expanded="false">Show All</button></div>
+              </div>
+              <div class="fixture-list" data-fixture-list>{{fixtureTimeline}}</div>
+
+              <!-- Dynamic Match Stats Card overlay -->
+              <div id="match-stats-card" class="player-stat-card" style="display: none; bottom: 20px; left: 20px; right: 20px; z-index:100;">
+                <button class="close-btn" type="button" aria-label="Close">&times;</button>
+                <div class="stat-header">
+                  <span class="stat-number" id="stats-match-score">2-1</span>
+                  <div>
+                    <h4 class="stat-name">Stoke City vs <span id="stats-opponent-name">Coventry City</span></h4>
+                    <span class="stat-role" id="stats-match-date">2026-08-08</span>
+                  </div>
+                </div>
+                <div style="margin-bottom: 12px; font-size: 11px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 8px;">
+                  <span class="micro-label">Goalscorers</span>
+                  <div id="stats-scorers" style="color: #fff; font-weight: 800; margin-top: 2px;"></div>
+                </div>
+                <div style="display: grid; gap: 10px;">
+                  <!-- Possession Bar -->
+                  <div>
+                    <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:4px;">
+                      <span>Possession</span>
+                      <span><strong id="stats-poss-home">52%</strong> - <strong id="stats-poss-away">48%</strong></span>
+                    </div>
+                    <div style="display:flex; height:6px; border-radius:3px; overflow:hidden; background:rgba(255,255,255,0.1);">
+                      <div id="stats-poss-bar" style="width: 52%; background: var(--red-3);"></div>
                     </div>
                   </div>
-                  <div id="ratings-averages-list" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; max-height: 150px; overflow-y: auto; padding-right: 4px;">
-                    <!-- Rendered dynamically -->
+                  <!-- Metrics Grid -->
+                  <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap: 10px; border-top:1px solid rgba(255,255,255,0.08); padding-top:10px;">
+                    <div>
+                      <span class="micro-label">Total Shots</span>
+                      <div style="color:#fff; font-size:12px; font-weight:800; margin-top:2px;">
+                        <span id="stats-shots-home">14</span> - <span id="stats-shots-away">11</span>
+                      </div>
+                    </div>
+                    <div>
+                      <span class="micro-label">Shots on Target</span>
+                      <div style="color:#fff; font-size:12px; font-weight:800; margin-top:2px;">
+                        <span id="stats-sot-home">6</span> - <span id="stats-sot-away">4</span>
+                      </div>
+                    </div>
+                    <div>
+                      <span class="micro-label">Corners</span>
+                      <div style="color:#fff; font-size:12px; font-weight:800; margin-top:2px;">
+                        <span id="stats-corners-home">7</span> - <span id="stats-corners-away">5</span>
+                      </div>
+                    </div>
+                    <div>
+                      <span class="micro-label">Fouls</span>
+                      <div style="color:#fff; font-size:12px; font-weight:800; margin-top:2px;">
+                        <span id="stats-fouls-home">12</span> - <span id="stats-fouls-away">10</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <!-- Terrace Player Ratings Section inside stats popup -->
+                  <div id="ratings-section" style="margin-top: 14px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 12px; pointer-events: auto;">
+                    <span class="section-kicker" style="margin-bottom: 6px; display: block;">Terrace Player Ratings</span>
+                    
+                    <div style="display: flex; gap: 8px; margin-bottom: 10px;">
+                      <button id="view-ratings-tab-btn" class="chip active" type="button" style="cursor: pointer; font-size: 10px; font-weight: 800;">View Averages</button>
+                      <button id="submit-ratings-tab-btn" class="chip" type="button" style="cursor: pointer; font-size: 10px; font-weight: 800;">Rate Players</button>
+                    </div>
+
+                    <!-- View averages list & POTM -->
+                    <div id="ratings-view-tab" style="display: block;">
+                      <div style="display: flex; align-items: center; gap: 10px; background: rgba(226, 14, 25, 0.08); border: 1px solid rgba(226, 14, 25, 0.2); border-radius: 8px; padding: 8px 12px; margin-bottom: 10px;">
+                        <span style="font-size: 1.5rem; line-height: 1;">👑</span>
+                        <div>
+                          <div class="micro-label">Terrace POTM</div>
+                          <strong id="potm-display-name" style="color: #fff; font-size: 12px; text-transform: uppercase;">None yet</strong>
+                          <span id="potm-display-rating" style="background: var(--red-3); color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 900; margin-left: 6px;">0.0</span>
+                        </div>
+                      </div>
+                      <div id="ratings-averages-list" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; max-height: 150px; overflow-y: auto; padding-right: 4px;">
+                        <!-- Rendered dynamically -->
+                      </div>
+                    </div>
+
+                    <!-- Rate players form -->
+                    <form id="ratings-submit-tab" style="display: none; flex-direction: column; gap: 10px;">
+                      <div id="ratings-sliders-list" style="display: grid; gap: 8px; max-height: 180px; overflow-y: auto; padding-right: 4px;">
+                        <!-- Sliders rendered dynamically -->
+                      </div>
+                      <button type="submit" class="chip" style="cursor: pointer; background: var(--red-3); border: 0; color: #fff; padding: 8px; border-radius: 6px; font-weight: 800; align-self: flex-end; font-size: 11px; width: 100%;">Submit Supporter Ratings</button>
+                    </form>
                   </div>
                 </div>
-
-                <!-- Rate players form -->
-                <form id="ratings-submit-tab" style="display: none; flex-direction: column; gap: 10px;">
-                  <div id="ratings-sliders-list" style="display: grid; gap: 8px; max-height: 180px; overflow-y: auto; padding-right: 4px;">
-                    <!-- Sliders rendered dynamically -->
-                  </div>
-                  <button type="submit" class="chip" style="cursor: pointer; background: var(--red-3); border: 0; color: #fff; padding: 8px; border-radius: 6px; font-weight: 800; align-self: flex-end; font-size: 11px; width: 100%;">Submit Supporter Ratings</button>
-                </form>
               </div>
-            </div>
-          </section>
+            </section>
           </div>
 
           <div id="view-squad" class="tab-view" data-tab-view="squad">
@@ -1394,18 +1508,41 @@
           </div>
 
           <div id="view-away-days" class="tab-view" data-tab-view="away-days">
-            <section class="panel fanzine-column-card single-view" aria-label="Away Day Guide">
-              <div class="section-head">
+            <section class="panel single-view" aria-label="Away Planner Dashboard" style="width:100%;">
+              <div class="section-head" style="margin-bottom:12px;">
+                <h2 style="font-weight:900; font-size:1.35rem; margin:0;">AWAY PLANNER</h2>
+              </div>
+              <div style="display:flex; flex-direction:column; gap:12px; width:100%;">
                 <div>
-                  <span class="section-kicker">Supporter Survival Guide</span>
-                  <h2>Away Day: <span id="away-title-opponent">{{awayOpponentDisplay}}</span> (A)</h2>
-                </div>
-                <div style="display: flex; align-items: center; gap: 8px;">
-                  <select id="away-opponent-select" class="chip" style="background: rgba(13, 14, 18, 0.85); border: 1px solid var(--line); color: #fff; cursor: pointer; padding: 6px 12px; border-radius: 8px; font-weight: 800; font-size: 11px;">
+                  <span class="micro-label" style="font-size:8px; color:var(--muted); display:block; margin-bottom:4px; font-weight:900;">Next Destination</span>
+                  <select id="away-opponent-select" class="chip" style="background: rgba(13, 14, 18, 0.85); border: 1px solid var(--line); color: #fff; cursor: pointer; padding: 10px 14px; border-radius: 8px; font-weight: 800; font-size: 13px; width: 100%; font-family:inherit; pointer-events:auto;">
                     <option value="swansea_city" selected>Swansea City (A)</option>
                     <option value="west_brom">West Bromwich Albion (A)</option>
                   </select>
-                  <span id="away-tag-chip" class="chip" style="color: #ffb703; border-color: rgba(255,183,3,0.4);">WIP - {{awayTag}}</span>
+                </div>
+                <!-- Allocation & Distance cards grid -->
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; width:100%;">
+                  <div style="background:rgba(255,255,255,0.02); border:1px solid var(--line); border-radius:10px; padding:12px;">
+                    <span class="micro-label" style="font-size:8px; color:var(--muted); font-weight:900;">Distance</span>
+                    <strong id="away-display-distance" style="display:block; font-size:1.15rem; font-weight:900; color:#fff; margin-top:4px;">182 mi</strong>
+                  </div>
+                  <div style="background:rgba(255,255,255,0.02); border:1px solid var(--line); border-radius:10px; padding:12px;">
+                    <span class="micro-label" style="font-size:8px; color:var(--muted); font-weight:900;">Allocated</span>
+                    <strong id="away-display-allocated" style="display:block; font-size:1.15rem; font-weight:900; color:#fff; margin-top:4px;">1,970</strong>
+                  </div>
+                </div>
+                <!-- Grayscale route map image -->
+                <div style="width:100%; border-radius:10px; overflow:hidden; border:1px solid var(--line); height:110px; background:rgba(0,0,0,0.3);">
+                  <img src="/assets/hull_map.png" alt="Grayscale route map to next destination" style="width:100%; height:100%; object-fit:cover; filter: grayscale(100%) contrast(1.1);" />
+                </div>
+              </div>
+            </section>
+
+            <section class="panel fanzine-column-card single-view" aria-label="Away Day Guide Details" style="width:100%; margin-top:14px;">
+              <div class="section-head">
+                <div>
+                  <span class="section-kicker">Supporter Survival Guide</span>
+                  <h2>Away Day Details</h2>
                 </div>
               </div>
 
@@ -1490,9 +1627,31 @@
         </section>
 
         <nav class="bottom-nav" aria-label="Primary app navigation">
-          <button class="active" type="button" data-view="matches"><span class="nav-icon"></span><span>Matches</span></button>
-          <button type="button" data-view="squad"><span class="nav-icon"></span><span>Squad</span></button>
-          <button type="button" data-view="away-days"><span class="nav-icon"></span><span>Away Days</span></button>
+          <button class="active" type="button" data-view="matches">
+            <svg style="width:18px; height:18px; fill:none; stroke:currentColor; stroke-width:2.5;" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+            </svg>
+            <span style="font-size:9px; font-weight:900; margin-top:2px;">Live</span>
+          </button>
+          <button type="button" data-view="squad">
+            <svg style="width:18px; height:18px; fill:none; stroke:currentColor; stroke-width:2.5;" viewBox="0 0 24 24">
+              <rect x="3" y="3" width="18" height="18" rx="2" stroke-linecap="round" stroke-linejoin="round" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 3v18M15 3v18M3 9h18M3 15h18" />
+            </svg>
+            <span style="font-size:9px; font-weight:900; margin-top:2px;">Squad</span>
+          </button>
+          <button type="button" data-view="stats">
+            <svg style="width:18px; height:18px; fill:none; stroke:currentColor; stroke-width:2.5;" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+            <span style="font-size:9px; font-weight:900; margin-top:2px;">Stats</span>
+          </button>
+          <button type="button" data-view="away-days">
+            <svg style="width:18px; height:18px; fill:none; stroke:currentColor; stroke-width:2.5;" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+            </svg>
+            <span style="font-size:9px; font-weight:900; margin-top:2px;">Away</span>
+          </button>
         </nav>
       </section>
     </main>
@@ -1522,7 +1681,7 @@
         console.log("Running in offline fallback mode using local SQLite endpoints.");
       }
 
-      const validViews = new Set(['matches', 'squad', 'away-days']);
+      const validViews = new Set(['matches', 'squad', 'stats', 'away-days']);
 
       const activateView = (viewName, updateHash = true) => {
         const nextView = validViews.has(viewName) ? viewName : 'matches';
@@ -1624,6 +1783,13 @@
           const pesOffset = circumference - ((optimismPct + regularPct + pessimismPct) / 100) * circumference;
           pesElem.setAttribute('stroke-dashoffset', String(pesOffset));
         }
+
+        const sOpt = document.getElementById('sentiment-val-optimism');
+        const sNeu = document.getElementById('sentiment-val-neutral');
+        const sPes = document.getElementById('sentiment-val-pessimism');
+        if (sOpt) sOpt.textContent = Math.round(optimismPct) + '%';
+        if (sNeu) sNeu.textContent = Math.round(regularPct) + '%';
+        if (sPes) sPes.textContent = Math.round(pessimismPct) + '%';
       };
 
       const renderPollResults = (results) => {
@@ -2574,6 +2740,19 @@
         const from = fromSelect.value;
         const method = methodSelect.value;
 
+        // Update mock metrics row
+        const distElem = document.getElementById('away-display-distance');
+        const allocElem = document.getElementById('away-display-allocated');
+        if (distElem && allocElem) {
+          if (opp === 'swansea_city') {
+            distElem.textContent = '182 mi';
+            allocElem.textContent = '1,970';
+          } else {
+            distElem.textContent = '46 mi';
+            allocElem.textContent = '2,600';
+          }
+        }
+
         const oppData = journeyPlannerData[opp];
         if (!oppData) return;
 
@@ -2603,6 +2782,73 @@
       if (oppSelect) oppSelect.addEventListener('change', updateJourneyPlanner);
       if (fromSelect) fromSelect.addEventListener('change', updateJourneyPlanner);
       if (methodSelect) methodSelect.addEventListener('change', updateJourneyPlanner);
+
+      // Telemetry Rating Form Submit Handler & Persisted Values Loader
+      const telemetryForm = document.getElementById('telemetry-rating-form');
+      if (telemetryForm) {
+        telemetryForm.addEventListener('submit', async (event) => {
+          event.preventDefault();
+          const atkVal = parseFloat(document.getElementById('telemetry-slider-atk').value);
+          const defVal = parseFloat(document.getElementById('telemetry-slider-def').value);
+          const tacVal = parseFloat(document.getElementById('telemetry-slider-tac').value);
+
+          if (firestore) {
+            try {
+              const docRef = firestore.collection('potterpulse_telemetry').doc('live_state');
+              await docRef.set({
+                attacking_intensity: atkVal,
+                defensive_solidity: defVal,
+                manager_tactics: tacVal,
+                updated_at: new Date().toISOString()
+              }, { merge: true });
+              alert("Telemetry metrics synced in real-time!");
+            } catch (err) {
+              console.error("Firestore post telemetry error:", err);
+            }
+          } else {
+            localStorage.setItem('potterpulse_telemetry_atk', String(atkVal));
+            localStorage.setItem('potterpulse_telemetry_def', String(defVal));
+            localStorage.setItem('potterpulse_telemetry_tac', String(tacVal));
+            alert("Telemetry saved locally! (Offline fallback mode)");
+          }
+        });
+
+        if (firestore) {
+          firestore.collection('potterpulse_telemetry').doc('live_state').onSnapshot((doc) => {
+            if (doc.exists) {
+              const data = doc.data();
+              if (data.attacking_intensity !== undefined) {
+                document.getElementById('telemetry-slider-atk').value = data.attacking_intensity;
+                document.getElementById('telemetry-val-atk').textContent = parseFloat(data.attacking_intensity).toFixed(1);
+              }
+              if (data.defensive_solidity !== undefined) {
+                document.getElementById('telemetry-slider-def').value = data.defensive_solidity;
+                document.getElementById('telemetry-val-def').textContent = parseFloat(data.defensive_solidity).toFixed(1);
+              }
+              if (data.manager_tactics !== undefined) {
+                document.getElementById('telemetry-slider-tac').value = data.manager_tactics;
+                document.getElementById('telemetry-val-tac').textContent = parseFloat(data.manager_tactics).toFixed(1);
+              }
+            }
+          });
+        } else {
+          const atk = localStorage.getItem('potterpulse_telemetry_atk');
+          const def = localStorage.getItem('potterpulse_telemetry_def');
+          const tac = localStorage.getItem('potterpulse_telemetry_tac');
+          if (atk) {
+            document.getElementById('telemetry-slider-atk').value = atk;
+            document.getElementById('telemetry-val-atk').textContent = parseFloat(atk).toFixed(1);
+          }
+          if (def) {
+            document.getElementById('telemetry-slider-def').value = def;
+            document.getElementById('telemetry-val-def').textContent = parseFloat(def).toFixed(1);
+          }
+          if (tac) {
+            document.getElementById('telemetry-slider-tac').value = tac;
+            document.getElementById('telemetry-val-tac').textContent = parseFloat(tac).toFixed(1);
+          }
+        }
+      }
 
       // Initial run of the page loaders
       updateJourneyPlanner();
