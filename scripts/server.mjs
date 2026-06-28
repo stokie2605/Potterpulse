@@ -317,7 +317,28 @@ const ensureSchema = (db) => {
     seedRating.run("Oldham Athletic", "2026-08-08", "1", 82.0, 10);
     seedRating.run("Oldham Athletic", "2026-08-08", "10", 135.0, 15);
     seedRating.run("Oldham Athletic", "2026-08-08", "22", 70.0, 10);
-    seedRating.run("Oldham Athletic", "2026-08-08", "42", 119.0, 14);
+  }
+
+  // 5. Stoke Transfers table
+  db.exec(
+    'CREATE TABLE IF NOT EXISTS stoke_transfers (' +
+      'id INTEGER PRIMARY KEY AUTOINCREMENT,' +
+      'player_name TEXT NOT NULL,' +
+      'direction TEXT NOT NULL CHECK(direction IN (\'IN\', \'OUT\')),' +
+      'details TEXT NOT NULL,' +
+      'created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP' +
+    ')'
+  );
+
+  const transferCount = db.prepare('SELECT count(*) as count FROM stoke_transfers').get().count;
+  if (transferCount === 0) {
+    const seedTransfer = db.prepare('INSERT INTO stoke_transfers (player_name, direction, details) VALUES (?, ?, ?)');
+    seedTransfer.run('Boubakary Soumaré', 'IN', 'Leicester City - Loan');
+    seedTransfer.run('Ki-Jana Hoever', 'IN', 'Wolves - Season Loan');
+    seedTransfer.run('Viktor Johansson', 'IN', 'Rotherham - Perm');
+    seedTransfer.run('Tyrese Campbell', 'OUT', 'Released - Perm');
+    seedTransfer.run('Wesley', 'OUT', 'Released - Perm');
+    seedTransfer.run('Luke Cundle', 'OUT', 'End of Loan');
   }
 };
 
@@ -632,7 +653,16 @@ const render = () => {
         'SELECT opponent, match_date, competition, venue, status, stoke_score, opponent_score FROM efl_fixtures ORDER BY match_date',
       )
       .all();
-
+    const transfers = db.prepare('SELECT player_name, direction, details FROM stoke_transfers ORDER BY id DESC').all();
+    const transfersInList = transfers
+      .filter((t) => t.direction === 'IN')
+      .map((t) => `<li style="color:#fff; font-weight:800;">• ${escapeHtml(t.player_name)} <span style="color:var(--muted); font-size:9px; font-weight:400;">(${escapeHtml(t.details)})</span></li>`)
+      .join('') || '<li style="color:var(--muted); font-size:11px;">No arrivals yet.</li>';
+      
+    const transfersOutList = transfers
+      .filter((t) => t.direction === 'OUT')
+      .map((t) => `<li style="color:#fff; font-weight:800;">• ${escapeHtml(t.player_name)} <span style="color:var(--muted); font-size:9px; font-weight:400;">(${escapeHtml(t.details)})</span></li>`)
+      .join('') || '<li style="color:var(--muted); font-size:11px;">No departures yet.</li>';
     const hero =
       fixtures.find((fixture) => fixture.opponent === 'Swansea City' && fixture.venue === 'home') ??
       fixtures[0] ?? {
@@ -693,6 +723,8 @@ const render = () => {
       .join('');
 
     const replacements = {
+      transfersInList,
+      transfersOutList,
       generatedAt: `Updated ${new Date().toLocaleTimeString('en-GB', {
         hour: '2-digit',
         minute: '2-digit',
