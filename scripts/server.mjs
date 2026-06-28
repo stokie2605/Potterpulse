@@ -446,7 +446,7 @@ const renderTacticalNodes = ({ players, squadByNumber = new Map(), variant = 'ho
           data-reds="${escapeHtml(stats.redCards)}"
           data-rating="${escapeHtml(stats.rating)}"
           data-form="${escapeHtml(stats.form.join(','))}">
-          <span class="mini-kit" aria-hidden="true"></span>
+          <span class="mini-kit" aria-hidden="true"><span class="kit-number">${escapeHtml(slot.squadNumber)}</span></span>
           <h3 title="${escapeHtml(fullName)}">${escapeHtml(displayName)}</h3>
         </span>
       `;

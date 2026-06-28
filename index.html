@@ -456,15 +456,15 @@
         min-height: clamp(390px, 42vw, 480px);
         margin: 18px auto 44px;
         overflow: visible;
-        border: 2px solid rgba(255, 255, 255, 0.72);
-        border-bottom: 12px solid #5c4033;
-        border-radius: 18px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-bottom: 8px solid #1c2620;
+        border-radius: 20px;
         padding: 22px 20px;
         background:
-          linear-gradient(90deg, rgba(255, 255, 255, 0.05) 50%, transparent 50%) 0 0 / 88px 100%,
-          linear-gradient(180deg, #20a34f 0%, #0f7837 58%, #09602c 100%);
-        box-shadow: 0 56px 78px rgba(0, 0, 0, 0.58), 0 22px 30px rgba(0, 0, 0, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.28);
-        transform: perspective(1400px) rotateX(54deg) rotateZ(-2deg);
+          repeating-linear-gradient(180deg, rgba(255, 255, 255, 0.015) 0 40px, transparent 40px 80px),
+          radial-gradient(circle at 50% 35%, #1e3b2b 0%, #0a140f 100%);
+        box-shadow: 0 40px 80px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        transform: perspective(1000px) rotateX(15deg);
         transform-origin: 50% 70%;
         transform-style: preserve-3d;
       }
@@ -476,28 +476,28 @@
         pointer-events: none;
       }
       .home-pitch::before {
-        border: 3px solid rgba(255, 255, 255, 0.9);
-        border-radius: 14px;
-        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.28);
+        border: 2px solid rgba(255, 255, 255, 0.25);
+        border-radius: 16px;
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1);
         background:
-          linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)) center center / 100% 3px no-repeat,
-          radial-gradient(circle at 50% 50%, transparent 46px, rgba(255, 255, 255, 0.9) 47px, rgba(255, 255, 255, 0.9) 50px, transparent 51px),
-          radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.95) 0 4px, transparent 5px);
+          linear-gradient(rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0.25)) center center / 100% 2px no-repeat,
+          radial-gradient(circle at 50% 50%, transparent 46px, rgba(255, 255, 255, 0.25) 47px, rgba(255, 255, 255, 0.25) 50px, transparent 51px),
+          radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.3) 0 3px, transparent 4px);
       }
       .home-pitch::after {
         background:
-          linear-gradient(to top, rgba(255, 255, 255, 0.9) 3px, transparent 3px) bottom center / 50% 82px no-repeat,
-          linear-gradient(to right, rgba(255, 255, 255, 0.9) 3px, transparent 3px) bottom left 25% / 3px 82px no-repeat,
-          linear-gradient(to left, rgba(255, 255, 255, 0.9) 3px, transparent 3px) bottom right 25% / 3px 82px no-repeat,
-          linear-gradient(to top, rgba(255, 255, 255, 0.9) 3px, transparent 3px) bottom center / 24% 38px no-repeat,
-          linear-gradient(to right, rgba(255, 255, 255, 0.9) 3px, transparent 3px) bottom left 38% / 3px 38px no-repeat,
-          linear-gradient(to left, rgba(255, 255, 255, 0.9) 3px, transparent 3px) bottom right 38% / 3px 38px no-repeat,
-          linear-gradient(to bottom, rgba(255, 255, 255, 0.9) 3px, transparent 3px) top center / 50% 82px no-repeat,
-          linear-gradient(to right, rgba(255, 255, 255, 0.9) 3px, transparent 3px) top left 25% / 3px 82px no-repeat,
-          linear-gradient(to left, rgba(255, 255, 255, 0.9) 3px, transparent 3px) top right 25% / 3px 82px no-repeat,
-          linear-gradient(to bottom, rgba(255, 255, 255, 0.9) 3px, transparent 3px) top center / 24% 38px no-repeat,
-          linear-gradient(to right, rgba(255, 255, 255, 0.9) 3px, transparent 3px) top left 38% / 3px 38px no-repeat,
-          linear-gradient(to left, rgba(255, 255, 255, 0.9) 3px, transparent 3px) top right 38% / 3px 38px no-repeat;
+          linear-gradient(to top, rgba(255, 255, 255, 0.25) 2px, transparent 2px) bottom center / 50% 82px no-repeat,
+          linear-gradient(to right, rgba(255, 255, 255, 0.25) 2px, transparent 2px) bottom left 25% / 2px 82px no-repeat,
+          linear-gradient(to left, rgba(255, 255, 255, 0.25) 2px, transparent 2px) bottom right 25% / 2px 82px no-repeat,
+          linear-gradient(to top, rgba(255, 255, 255, 0.25) 2px, transparent 2px) bottom center / 24% 38px no-repeat,
+          linear-gradient(to right, rgba(255, 255, 255, 0.25) 2px, transparent 2px) bottom left 38% / 2px 38px no-repeat,
+          linear-gradient(to left, rgba(255, 255, 255, 0.25) 2px, transparent 2px) bottom right 38% / 2px 38px no-repeat,
+          linear-gradient(to bottom, rgba(255, 255, 255, 0.25) 2px, transparent 2px) top center / 50% 82px no-repeat,
+          linear-gradient(to right, rgba(255, 255, 255, 0.25) 2px, transparent 2px) top left 25% / 2px 82px no-repeat,
+          linear-gradient(to left, rgba(255, 255, 255, 0.25) 2px, transparent 2px) top right 25% / 2px 82px no-repeat,
+          linear-gradient(to bottom, rgba(255, 255, 255, 0.25) 2px, transparent 2px) top center / 24% 38px no-repeat,
+          linear-gradient(to right, rgba(255, 255, 255, 0.25) 2px, transparent 2px) top left 38% / 2px 38px no-repeat,
+          linear-gradient(to left, rgba(255, 255, 255, 0.25) 2px, transparent 2px) top right 38% / 2px 38px no-repeat;
       }
       .pitch .player-strip-card {
         position: relative;
@@ -518,10 +518,10 @@
         background: transparent;
         box-shadow: none;
         color: #fff;
-        transform: rotateZ(2deg) rotateX(-54deg) translateY(-10px);
+        transform: rotateX(-15deg) translateY(-8px);
         transform-origin: bottom center;
-        transform-style: flat;
-        filter: drop-shadow(0 12px 12px rgba(0, 0, 0, 0.46));
+        transform-style: preserve-3d;
+        filter: drop-shadow(0 8px 12px rgba(0, 0, 0, 0.5));
       }
       .mini-kit {
         position: relative;
@@ -548,8 +548,19 @@
         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.42);
       }
       .player-strip-card[data-role-433="gk"] .mini-kit {
-        background: #39ff88;
-        box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.72), 0 0 18px rgba(57, 255, 136, 0.46), 0 8px 14px rgba(0, 0, 0, 0.42);
+        background: #fcc419;
+        box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.5), 0 8px 14px rgba(0, 0, 0, 0.3);
+      }
+      .kit-number {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 10px;
+        font-weight: 900;
+        color: #050608;
+        text-shadow: 0 1px 0 rgba(255, 255, 255, 0.3);
+        pointer-events: none;
       }
       .pitch .player-strip-card h3 {
         position: relative;
@@ -560,16 +571,17 @@
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
-        border: 1px solid rgba(255, 255, 255, 0.18);
-        border-radius: 999px;
-        padding: 4px 7px;
-        background: rgba(5, 6, 8, 0.9);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 6px;
+        padding: 4px 8px;
+        background: rgba(13, 15, 22, 0.85);
+        backdrop-filter: blur(4px);
         color: #fff;
         font-size: clamp(0.5rem, 0.9vw, 0.64rem);
-        font-weight: 1000;
+        font-weight: 800;
         line-height: 1;
         text-transform: uppercase;
-        box-shadow: 0 5px 12px rgba(0, 0, 0, 0.35);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
       }
       .home-pitch .player-strip-card[data-role-433="gk"] { grid-column: 4; grid-row: 6; }
       .home-pitch[data-formation="433"] .player-strip-card[data-role-433="lb"] { grid-column: 1; grid-row: 5; }
@@ -908,7 +920,7 @@
         .away-guide-tile strong { white-space: normal; }
         .squad-hub-grid { grid-template-columns: 1fr; }
         .pitch { width: min(94%, 360px); min-height: 342px; margin: 14px auto 34px; padding: 18px 10px; gap: 8px; }
-        .pitch .player-strip-card { width: 58px; transform: rotateZ(2deg) rotateX(-54deg) translateY(-10px); transform-style: flat; }
+        .pitch .player-strip-card { width: 58px; transform: rotateX(-15deg) translateY(-5px); transform-style: preserve-3d; }
         .mini-kit { width: 32px; height: 32px; border-bottom-width: 6px; }
         .mini-kit::before { bottom: -10px; width: 30px; height: 7px; }
         .pitch .player-strip-card h3 { max-width: 68px; font-size: 0.45rem; }
