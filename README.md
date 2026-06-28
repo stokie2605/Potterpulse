@@ -619,6 +619,18 @@ Verification notes:
 - Old noticeboard, opposition pitch, formation controls, and ledger UI remain absent.
 - Desktop grid resolves to 548px / 548px; mobile collapses to a 332px single column with 390px document width.
 
+### 23. Balanced next-match briefing header
+
+Problem: the top next-match hero was visually strong but did not yet follow the same balanced dual-column card language used by the Squad and Away Days layouts.
+
+Solution: wrapped the existing match display in `#next-match.next-match-grid`, preserved the left visual card exactly, and added a right-hand `.next-match-briefing-card` for THE BOOTHEN DEBRIEF with matching dark card padding, borders, radius, and responsive collapse behavior.
+
+Verification notes:
+
+- Rendered desktop grid resolves to 561px / 561px with 20px card radius and 16px briefing padding.
+- Mobile collapses to one 362px column with 390px document width and no horizontal overflow.
+- Briefing copy renders with the Soumare accent and em dash intact, and no template markers leak.
+
 ## GitHub Linking Steps
 
 After `git init` and staging are complete, link this local project to a GitHub repository with these commands.
