@@ -4,6 +4,8 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Potter Pulse</title>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <style>
       :root {
         color-scheme: dark;
@@ -1495,6 +1497,31 @@
       </section>
     </main>
     <script>
+      // Standalone PotterPulse Firebase Configuration and Initialization
+      const firebaseConfig = {
+        apiKey: "YOUR_POTTERPULSE_API_KEY",
+        authDomain: "potterpulse-fanzine.firebaseapp.com",
+        projectId: "potterpulse-fanzine",
+        storageBucket: "potterpulse-fanzine.firebasestorage.app",
+        messagingSenderId: "YOUR_SENDER_ID",
+        appId: "YOUR_APP_ID"
+      };
+
+      const isFirebaseConfigured = firebaseConfig.apiKey && firebaseConfig.apiKey !== "YOUR_POTTERPULSE_API_KEY";
+      let firestore = null;
+
+      if (isFirebaseConfigured) {
+        try {
+          firebase.initializeApp(firebaseConfig);
+          firestore = firebase.firestore();
+          console.log("Firebase initialized successfully in real-time mode.");
+        } catch (err) {
+          console.error("Firebase failed to initialize:", err);
+        }
+      } else {
+        console.log("Running in offline fallback mode using local SQLite endpoints.");
+      }
+
       const validViews = new Set(['matches', 'squad', 'away-days']);
 
       const activateView = (viewName, updateHash = true) => {
@@ -1617,6 +1644,52 @@
         updatePollChart();
       };
 
+      // Real-time Poll Votes Listener
+      if (firestore) {
+        firestore.collection('potterpulse_votes').onSnapshot((snapshot) => {
+          const votesMap = {};
+          snapshot.forEach(doc => {
+            votesMap[doc.id] = doc.data().vote_count || 0;
+          });
+
+          const pollGrid = document.querySelector('[data-poll-grid]');
+          if (pollGrid) {
+            let totalSeeded = 0;
+            pollGrid.querySelectorAll('[data-vote-option]').forEach(button => {
+              const key = button.getAttribute('data-vote-option');
+              if (votesMap[key] !== undefined) {
+                button.setAttribute('data-votes', votesMap[key]);
+                totalSeeded++;
+              }
+            });
+
+            if (totalSeeded === 0) {
+              // Seed default votes to Firebase
+              pollGrid.querySelectorAll('[data-vote-option]').forEach(button => {
+                const key = button.getAttribute('data-vote-option');
+                const initialVotes = parseInt(button.getAttribute('data-votes')) || 0;
+                firestore.collection('potterpulse_votes').doc(key).set({ vote_count: initialVotes });
+              });
+            } else {
+              // Re-calculate percentages
+              let total = 0;
+              pollGrid.querySelectorAll('[data-vote-option]').forEach(button => {
+                total += parseInt(button.getAttribute('data-votes')) || 0;
+              });
+              pollGrid.querySelectorAll('[data-vote-option]').forEach(button => {
+                const v = parseInt(button.getAttribute('data-votes')) || 0;
+                const percent = total > 0 ? Math.round((v / total) * 100) : 0;
+                const pctElem = button.querySelector('.poll-percentage');
+                if (pctElem) pctElem.textContent = percent + '%';
+                const fill = button.querySelector('.vote-progress-fill');
+                if (fill) fill.style.width = percent + '%';
+              });
+              updatePollChart();
+            }
+          }
+        });
+      }
+
       document.addEventListener('click', async (event) => {
         const voteButton = event.target.closest('[data-vote-option]');
         if (!voteButton) return;
@@ -1628,6 +1701,24 @@
         }
         localStorage.setItem(localKey, voteButton.dataset.voteOption);
         applyVoteLockState();
+
+        if (firestore) {
+          try {
+            const key = voteButton.dataset.voteOption;
+            const docRef = firestore.collection('potterpulse_votes').doc(key);
+            await firestore.runTransaction(async (transaction) => {
+              const doc = await transaction.get(docRef);
+              const currentVotes = doc.exists ? (doc.data().vote_count || 0) : 0;
+              transaction.set(docRef, { vote_count: currentVotes + 1 }, { merge: true });
+            });
+          } catch (err) {
+            console.error("Firebase vote failed:", err);
+            localStorage.removeItem(localKey);
+            applyVoteLockState();
+          }
+          return;
+        }
+
         try {
           const response = await fetch('/api/vote', {
             method: 'POST',
@@ -1856,7 +1947,78 @@
       const toggleForumBtn = document.getElementById('toggle-forum-form');
       let activeForumCategory = 'All';
 
+      let unsubscribeThreads = null;
+
+      const seedDefaultThreadsFirebase = async () => {
+        const defaults = [
+          {
+            title: "Pearson back in training - how long till his first booking?", 
+            username: "Boothen_Ender92", 
+            content: "Good to see him sweating it out at Clayton Wood, but let's be real - he'll be walking a suspension tightrope by October anyway. Glad to have his bite back in the engine room though, we need someone to stop us leaking soft goals on Tuesday nights.",
+            category: "Matchday",
+            reply_count: 14,
+            created_at: new Date(Date.now() - 3600000).toISOString()
+          },
+          {
+            title: "Walters cooking? Retained list cleared & new winger links", 
+            username: "Trentham_Potter", 
+            content: "With Baker and Nzonzi off the wage bill, rumours are flying about a domestic winger. Let's just hope we don't panic-buy another flashy squad-filler who goes completely missing the second the winter wind whips off the bay.",
+            category: "Transfers",
+            reply_count: 37,
+            created_at: new Date(Date.now() - 7200000).toISOString()
+          },
+          {
+            title: "Coordinated 'We'll Be With You' for the opener", 
+            username: "Delilah_Roar", 
+            content: "Big push from the independent lads to make the home opener deafening the second they walk out of the tunnel. Bring your scarves and leave your lungs on the terraces - none of that quiet main-stand whispering!",
+            category: "Trending",
+            reply_count: 22,
+            created_at: new Date(Date.now() - 10800000).toISOString()
+          },
+          {
+            title: "Swansea Away - parking at Felindre or Landore?", 
+            username: "ST4_Oli", 
+            content: "Swansea away travel advice needed. Leaving early Saturday morning from the Potteries. Heard Felindre park and ride is best, but want to make sure it leaves enough time to get back to the shuttle coaches after the whistle.",
+            category: "Away Days",
+            reply_count: 9,
+            created_at: new Date(Date.now() - 14400000).toISOString()
+          }
+        ];
+        for (const t of defaults) {
+          try {
+            await firestore.collection('potterpulse_threads').add(t);
+          } catch (e) {
+            console.error("Auto seeding thread failed:", e);
+          }
+        }
+      };
+
       const loadForumThreads = async (category = 'All') => {
+        if (firestore) {
+          if (unsubscribeThreads) unsubscribeThreads();
+
+          let query = firestore.collection('potterpulse_threads').orderBy('created_at', 'desc');
+          if (category && category !== 'All') {
+            query = query.where('category', '==', category);
+          }
+
+          unsubscribeThreads = query.onSnapshot((snapshot) => {
+            const threads = [];
+            snapshot.forEach(doc => {
+              threads.push({ id: doc.id, ...doc.data() });
+            });
+
+            if (threads.length === 0 && category === 'All') {
+              seedDefaultThreadsFirebase();
+            } else {
+              renderForumThreads(threads);
+            }
+          }, (err) => {
+            console.error("Firestore threads subscribe error:", err);
+          });
+          return;
+        }
+
         try {
           const response = await fetch(`/api/forum-threads?category=${encodeURIComponent(category)}`);
           const data = await response.json();
@@ -1923,11 +2085,48 @@
       if (forumPostForm) {
         forumPostForm.addEventListener('submit', async (event) => {
           event.preventDefault();
-          const username = document.getElementById('forum-username-input').value;
-          const title = document.getElementById('forum-title-input').value;
-          const content = document.getElementById('forum-content-input').value;
+          const username = document.getElementById('forum-username-input').value.trim() || 'Anonymous';
+          const title = document.getElementById('forum-title-input').value.trim();
+          const content = document.getElementById('forum-content-input').value.trim();
           const category = document.getElementById('forum-category-input').value;
-          
+
+          if (!title || !content) return;
+          if (title.length > 100 || content.length > 500 || username.length > 30) {
+            alert("Input exceeds character limits (Title: 100, Content: 500, Username: 30).");
+            return;
+          }
+
+          // Cooldown check
+          const localCooldownKey = 'last_thread_post_time';
+          const lastPost = parseInt(localStorage.getItem(localCooldownKey)) || 0;
+          const now = Date.now();
+          if (now - lastPost < 15000) {
+            alert('Please wait 15 seconds between posts.');
+            return;
+          }
+
+          localStorage.setItem(localCooldownKey, String(now));
+
+          if (firestore) {
+            try {
+              await firestore.collection('potterpulse_threads').add({
+                title,
+                username,
+                content,
+                category,
+                reply_count: 0,
+                created_at: new Date().toISOString()
+              });
+              forumPostForm.reset();
+              forumPostForm.style.display = 'none';
+              if (toggleForumBtn) toggleForumBtn.textContent = '+ New Thread';
+            } catch (err) {
+              console.error("Firestore post thread error:", err);
+              alert("Failed to submit thread to real-time feed.");
+            }
+            return;
+          }
+
           try {
             const response = await fetch('/api/forum-threads', {
               method: 'POST',
@@ -1942,7 +2141,6 @@
             });
             const data = await response.json();
             if (response.ok && data.threads) {
-              // Reload active category view
               loadForumThreads(activeForumCategory);
               forumPostForm.reset();
               forumPostForm.style.display = 'none';
@@ -1962,10 +2160,31 @@
       const pollCommentsList = document.getElementById('poll-comments-list');
       const pollCommentForm = document.getElementById('poll-comment-form');
 
+      let unsubscribeComments = null;
+
       const loadPollComments = async () => {
         const pollGrid = document.querySelector('[data-poll-grid]');
         if (!pollGrid) return;
         const lockKey = pollGrid.dataset.voteLockKey;
+
+        if (firestore) {
+          if (unsubscribeComments) unsubscribeComments();
+
+          unsubscribeComments = firestore.collection('potterpulse_comments')
+            .where('vote_lock_key', '==', lockKey)
+            .orderBy('created_at', 'desc')
+            .onSnapshot((snapshot) => {
+              const comments = [];
+              snapshot.forEach(doc => {
+                comments.push(doc.data());
+              });
+              renderPollComments(comments);
+            }, (err) => {
+              console.error("Firestore comments subscribe error:", err);
+            });
+          return;
+        }
+
         try {
           const response = await fetch(`/api/poll-comments?voteLockKey=${encodeURIComponent(lockKey)}`);
           const data = await response.json();
@@ -2000,8 +2219,26 @@
           const pollGrid = document.querySelector('[data-poll-grid]');
           if (!pollGrid) return;
           const voteLockKey = pollGrid.dataset.voteLockKey;
-          const username = document.getElementById('poll-comment-user').value;
-          const commentText = document.getElementById('poll-comment-text').value;
+          const username = document.getElementById('poll-comment-user').value.trim() || 'Anonymous';
+          const commentText = document.getElementById('poll-comment-text').value.trim();
+
+          if (!commentText) return;
+
+          if (firestore) {
+            try {
+              await firestore.collection('potterpulse_comments').add({
+                vote_lock_key: voteLockKey,
+                username: username,
+                comment_text: commentText,
+                created_at: new Date().toISOString()
+              });
+              document.getElementById('poll-comment-text').value = '';
+            } catch (err) {
+              console.error("Firestore post comment error:", err);
+              alert("Failed to submit comment to real-time feed.");
+            }
+            return;
+          }
 
           try {
             const response = await fetch('/api/poll-comments', {
@@ -2088,19 +2325,65 @@
 
       let currentRatingsOpponent = '';
       let currentRatingsMatchDate = '';
+      let unsubscribeRatings = null;
 
       const loadCompletedMatchRatings = async (opponent, matchDate) => {
         currentRatingsOpponent = opponent;
         currentRatingsMatchDate = matchDate;
         
         showRatingsTab('view');
+        renderRatingsSubmitSliders();
+
+        if (firestore) {
+          if (unsubscribeRatings) unsubscribeRatings();
+
+          const docRef = firestore.collection('potterpulse_ratings').doc(`${matchDate}_${opponent}`);
+          unsubscribeRatings = docRef.onSnapshot((doc) => {
+            if (!doc.exists && opponent === 'Oldham Athletic') {
+              // Seed initial ratings for Oldham Athletic
+              const seedData = {
+                ratings: {
+                  "1": { sum: 42, count: 5 },
+                  "10": { sum: 41, count: 5 },
+                  "22": { sum: 32, count: 5 },
+                  "42": { sum: 37.5, count: 5 }
+                }
+              };
+              docRef.set(seedData);
+              return;
+            }
+
+            const ratings = {};
+            let potmNumber = '';
+            let maxAvg = 0;
+            const data = doc.exists ? (doc.data().ratings || {}) : {};
+
+            matchRoster.forEach(p => {
+              const item = data[p.num];
+              if (item) {
+                const avg = item.count > 0 ? (item.sum / item.count) : 0;
+                ratings[p.num] = { avg, count: item.count };
+                if (avg > maxAvg) {
+                  maxAvg = avg;
+                  potmNumber = p.num;
+                }
+              } else {
+                ratings[p.num] = { avg: 0, count: 0 };
+              }
+            });
+
+            renderRatingsView(ratings, potmNumber, maxAvg);
+          }, (err) => {
+            console.error("Firestore ratings subscribe error:", err);
+          });
+          return;
+        }
 
         try {
           const response = await fetch(`/api/player-ratings?opponent=${encodeURIComponent(opponent)}&matchDate=${encodeURIComponent(matchDate)}`);
           const data = await response.json();
           if (response.ok) {
             renderRatingsView(data.ratings, data.potmNumber, data.maxAvg);
-            renderRatingsSubmitSliders();
           }
         } catch (err) {
           console.error('Failed to load completed match ratings:', err);
@@ -2189,6 +2472,30 @@
             const val = parseFloat(ratingsForm.elements[`player-${p.num}`].value);
             ratingsPayload[p.num] = val;
           });
+
+          if (firestore) {
+            try {
+              const docRef = firestore.collection('potterpulse_ratings').doc(`${currentRatingsMatchDate}_${currentRatingsOpponent}`);
+              await firestore.runTransaction(async (transaction) => {
+                const doc = await transaction.get(docRef);
+                const data = doc.exists ? (doc.data().ratings || {}) : {};
+                matchRoster.forEach(p => {
+                  const val = ratingsPayload[p.num];
+                  const current = data[p.num] || { sum: 0, count: 0 };
+                  data[p.num] = {
+                    sum: current.sum + val,
+                    count: current.count + 1
+                  };
+                });
+                transaction.set(docRef, { ratings: data }, { merge: true });
+              });
+              showRatingsTab('view');
+            } catch (err) {
+              console.error("Firestore submit ratings error:", err);
+              alert("Failed to submit player ratings.");
+            }
+            return;
+          }
 
           try {
             const response = await fetch('/api/player-ratings', {
