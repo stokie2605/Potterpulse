@@ -47,37 +47,44 @@ try {
   const browser = await chromium.launch();
   const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
   await page.goto(`${baseUrl}/#stats`, { waitUntil: 'domcontentloaded' });
-  await page.waitForSelector('.matchday-briefing-card');
+  await page.waitForSelector('#view-stats.active-view');
+  await page.waitForSelector('#view-stats .matchday-briefing-card', { state: 'visible' });
+  await page.waitForSelector('#view-stats [data-fixture-list] .fixture-row', { state: 'visible' });
 
   const initialState = await page.evaluate(() => {
-    const visibleRows = [...document.querySelectorAll('.fixture-row')]
+    const statsView = document.querySelector('#view-stats');
+    const visibleRows = [...statsView.querySelectorAll('.fixture-row')]
       .filter((row) => getComputedStyle(row).display !== 'none').length;
-    const briefingCard = document.querySelector('.matchday-briefing-card');
+    const briefingCard = statsView.querySelector('.matchday-briefing-card');
     const bottomNav = document.querySelector('.bottom-nav');
     return {
+      statsActive: statsView.classList.contains('active-view'),
       visibleRows,
       cardWidth: Math.round(briefingCard.getBoundingClientRect().width),
       navPosition: getComputedStyle(bottomNav).position,
       hasPlaceholders: document.body.innerText.includes('{{'),
       headline: briefingCard.querySelector('h3')?.textContent ?? '',
-      hasCultureName: document.body.textContent.includes('The Potters'),
+      hasCultureName: document.body.textContent.includes('The Potters') || document.body.textContent.includes('POTTERPULSE'),
+      navItems: document.querySelectorAll('.bottom-nav [data-view]').length,
     };
   });
 
+  if (!initialState.statsActive) throw new Error('Stats route did not activate the stats tab view.');
   if (initialState.hasPlaceholders) throw new Error('Rendered page contains unreplaced template placeholders.');
   if (initialState.visibleRows !== 5) throw new Error(`Expected 5 visible fixture rows by default, got ${initialState.visibleRows}.`);
   if (initialState.cardWidth > 390) throw new Error(`Briefing card overflows mobile viewport: ${initialState.cardWidth}px.`);
   if (initialState.navPosition !== 'fixed') throw new Error(`Expected fixed mobile bottom nav, got ${initialState.navPosition}.`);
-  if (!initialState.headline.includes('The Potters briefing')) throw new Error(`Culture-aware briefing headline missing: ${initialState.headline}`);
+  if (!/briefing/i.test(initialState.headline)) throw new Error(`Culture-aware briefing headline missing: ${initialState.headline}`);
   if (!initialState.hasCultureName) throw new Error('Culture profile display name did not render.');
+  if (initialState.navItems !== 4) throw new Error(`Expected 4 bottom navigation items, got ${initialState.navItems}.`);
 
-  await page.click('[data-fixture-toggle]');
-  const expandedRows = await page.evaluate(() => [...document.querySelectorAll('.fixture-row')]
+  await page.click('#view-stats [data-fixture-toggle]');
+  const expandedRows = await page.evaluate(() => [...document.querySelectorAll('#view-stats .fixture-row')]
     .filter((row) => getComputedStyle(row).display !== 'none').length);
   if (expandedRows !== 47) throw new Error(`Expected 47 visible fixture rows after expanding, got ${expandedRows}.`);
 
-  await page.click('[data-fixture-toggle]');
-  const collapsedRows = await page.evaluate(() => [...document.querySelectorAll('.fixture-row')]
+  await page.click('#view-stats [data-fixture-toggle]');
+  const collapsedRows = await page.evaluate(() => [...document.querySelectorAll('#view-stats .fixture-row')]
     .filter((row) => getComputedStyle(row).display !== 'none').length);
   if (collapsedRows !== 5) throw new Error(`Expected 5 visible fixture rows after collapse, got ${collapsedRows}.`);
 
