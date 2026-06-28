@@ -643,6 +643,19 @@ Verification notes:
 - Viktor Johansson (#1) resolves to grid row 6 / column 4, keeping the goalkeeper firmly bottom center.
 - Pitch transform, 6px turf edge, drop shadow, dark badges, and mobile 390px no-overflow check passed.
 
+### 25. Thick isometric turf sub-board
+
+Problem: the first isometric pass gave the Squad pitch depth, but the board still needed a crisper sub-board feel with thicker turf construction, stronger white markings, and more figurine-like standing kits.
+
+Solution: rebuilt the `.home-pitch` styling around `transform: perspective(1400px) rotateX(54deg) rotateZ(-2deg)`, a 12px dirt-brown board edge, deeper ambient shadow, full pitch markings, upright inverse-transformed kit tokens, a neon-green goalkeeper kit, and black name badges under every player.
+
+Verification notes:
+
+- Fresh rendered check shows 11 static span nodes, 0 pitch buttons, and `pointer-events: none` on the player nodes.
+- Viktor Johansson remains grid row 6 / column 4 with a neon-green keeper kit.
+- Outfield kits render as red/white striped CSS figurines; label badges do not overlap.
+- Mobile check stays within 390px viewport with a 370px rendered pitch width.
+
 ## GitHub Linking Steps
 
 After `git init` and staging are complete, link this local project to a GitHub repository with these commands.
