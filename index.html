@@ -1154,20 +1154,8 @@
                   </div>
                 </div>
               </div>
-              
-              <!-- Hidden vote selectors for logic updates -->
+                          <!-- Hidden vote selectors for logic updates -->
               <div class="fan-poll-grid" data-poll-grid data-vote-lock-key="{{voteLockKey}}" style="display:none;">{{fanPollOptions}}</div>
-
-              <!-- Terrace Debates Poll Comments -->
-              <div class="poll-comments-section" style="margin-top: 18px; border-top: 1px solid var(--line); padding-top: 16px;">
-                <span class="section-kicker" style="margin-bottom: 8px; display: block; font-size:10px; color:var(--muted);">Terrace Debates</span>
-                <form id="poll-comment-form" style="display: flex; gap: 8px; margin-bottom: 14px; pointer-events: auto;">
-                  <input type="text" id="poll-comment-user" placeholder="Name" required style="background: rgba(13, 14, 18, 0.9); border: 1px solid var(--line); color: #fff; padding: 6px 10px; border-radius: 6px; font-size: 11px; width: 80px; font-family: inherit;" />
-                  <input type="text" id="poll-comment-text" placeholder="Add to the debate..." required style="background: rgba(13, 14, 18, 0.9); border: 1px solid var(--line); color: #fff; padding: 6px 10px; border-radius: 6px; font-size: 11px; flex: 1; font-family: inherit;" />
-                  <button type="submit" class="chip" style="cursor: pointer; background: var(--red); border: 0; color: #fff; padding: 6px 12px; border-radius: 6px; font-weight: 800; font-size: 10px;">Post</button>
-                </form>
-                <div id="poll-comments-list" style="display: grid; gap: 8px; max-height: 200px; overflow-y: auto; padding-right: 4px;"></div>
-              </div>
             </section>
 
             <!-- 2. LIVE FORMATION -->
@@ -1333,6 +1321,15 @@
                 </div>
                 <div class="fixture-summary"><span class="chip">Showing 5 of {{fixtureCount}}</span><button class="chip fixture-toggle" type="button" data-fixture-toggle aria-expanded="false">Show All</button></div>
               </div>
+              <article class="matchday-briefing-card" aria-label="Matchday briefing summary" style="background: rgba(255,255,255,0.02); border: 1px solid var(--line); border-radius: 12px; padding: 16px; margin-bottom: 12px;">
+                <span class="section-kicker" id="briefing-kicker">Matchday Briefing</span>
+                <h3 id="briefing-headline" style="margin: 6px 0 8px; font-size: 1.05rem; font-weight: 900; color:#fff;">{{matchdayBriefingHeadline}}</h3>
+                <p id="briefing-summary" style="margin: 0; font-size: 0.8rem; line-height: 1.45; color: #ccc;">{{matchdayBriefingSummary}}</p>
+                <div id="briefing-specs" style="display: none; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 12px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 10px;">
+                  <div><span class="micro-label">Referee</span><strong id="briefing-ref" style="display:block; font-size:12px; margin-top:2px; color: #fff;"></strong></div>
+                  <div><span class="micro-label">Weather</span><strong id="briefing-weather" style="display:block; font-size:12px; margin-top:2px; color: #fff;"></strong></div>
+                </div>
+              </article>
               <div class="fixture-list" data-fixture-list>{{fixtureTimeline}}</div>
 
               <!-- Dynamic Match Stats Card overlay -->
@@ -1501,6 +1498,17 @@
                   </div>
 
                   <div id="forum-threads-list" style="display:grid; gap:12px; width:100%;"></div>
+
+                  <!-- Terrace Debates Poll Comments -->
+                  <div class="poll-comments-section" style="margin-top: 24px; border-top: 1px solid var(--line); padding-top: 20px; width: 100%;">
+                    <span class="section-kicker" style="margin-bottom: 8px; display: block; font-size:10px; color:var(--muted); font-weight: 900;">Terrace Debates</span>
+                    <form id="poll-comment-form" style="display: flex; gap: 8px; margin-bottom: 14px; pointer-events: auto;">
+                      <input type="text" id="poll-comment-user" placeholder="Name" required style="background: rgba(13, 14, 18, 0.9); border: 1px solid var(--line); color: #fff; padding: 6px 10px; border-radius: 6px; font-size: 11px; width: 80px; font-family: inherit;" />
+                      <input type="text" id="poll-comment-text" placeholder="Add to the debate..." required style="background: rgba(13, 14, 18, 0.9); border: 1px solid var(--line); color: #fff; padding: 6px 10px; border-radius: 6px; font-size: 11px; flex: 1; font-family: inherit;" />
+                      <button type="submit" class="chip" style="cursor: pointer; background: var(--red); border: 0; color: #fff; padding: 6px 12px; border-radius: 6px; font-weight: 800; font-size: 10px;">Post</button>
+                    </form>
+                    <div id="poll-comments-list" style="display: grid; gap: 8px; max-height: 200px; overflow-y: auto; padding-right: 4px;"></div>
+                  </div>
                 </aside>
               </div>
             </section>
