@@ -656,6 +656,19 @@ Verification notes:
 - Outfield kits render as red/white striped CSS figurines; label badges do not overlap.
 - Mobile check stays within 390px viewport with a 370px rendered pitch width.
 
+### 26. Single-shape player kit cleanup
+
+Problem: the isometric pitch kits used nested sleeve/body spans plus pseudo-elements, which made some player tokens look duplicated and messy under the 3D inverse transform.
+
+Solution: reduced each player token to exactly one `.mini-kit` container with a simple striped CSS jersey shape, black lower edge/base, and a solid green keeper variant. Player nodes now use `rotateZ(2deg) rotateX(-54deg) translateY(-10px)` with `transform-style: flat` so the badges stand upright and stay tucked underneath.
+
+Verification notes:
+
+- Fresh rendered check shows 11 player nodes, 11 `.mini-kit` elements, 0 `.kit-body`, 0 `.kit-sleeve`, and 0 player number pills.
+- Player nodes remain non-clickable with `pointer-events: none`; transform style resolves to `flat`.
+- Keeper kit renders solid green, outfield kits render red/white stripes, badges sit beneath kits, and labels do not overlap.
+- Mobile remains contained at 390px viewport with a 342px rendered pitch width.
+
 ## GitHub Linking Steps
 
 After `git init` and staging are complete, link this local project to a GitHub repository with these commands.
