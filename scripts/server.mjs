@@ -414,7 +414,7 @@ const renderTacticalNodes = ({ players, squadByNumber = new Map(), variant = 'ho
         form: slot.stats?.form ?? getFormRatings(slot.stats?.rating),
       };
       return `
-        <button class="player-strip-card kit-node home-kit${slot.tracked ? ' is-tracked' : ''}" type="button"
+        <span class="player-strip-card kit-node home-kit${slot.tracked ? ' is-tracked' : ''}"
           data-number="#${escapeHtml(slot.squadNumber)}"
           data-role-433="${escapeHtml(slot.role433)}"
           data-role-532="${escapeHtml(slot.role532)}"
@@ -429,7 +429,7 @@ const renderTacticalNodes = ({ players, squadByNumber = new Map(), variant = 'ho
           <span class="mini-kit" aria-hidden="true"><span class="kit-sleeve left"></span><span class="kit-body"></span><span class="kit-sleeve right"></span></span>
           <span class="position-pill">#${escapeHtml(slot.squadNumber).replace(/^O/, '')}</span>
           <h3 title="${escapeHtml(fullName)}">${escapeHtml(displayName)}</h3>
-        </button>
+        </span>
       `;
     })
     .join('');

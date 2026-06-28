@@ -631,6 +631,18 @@ Verification notes:
 - Mobile collapses to one 362px column with 390px document width and no horizontal overflow.
 - Briefing copy renders with the Soumare accent and em dash intact, and no template markers leak.
 
+### 24. Isometric static home pitch board
+
+Problem: the Starting XI pitch still read as a flat tactical grid and the player nodes retained button semantics even though the current Squad view is meant to be a static fanzine graphic.
+
+Solution: converted the home pitch into a 3D isometric board with perspective, rotateX/rotateZ tilt, a thick turf edge, and drop shadow. Player nodes are rendered as static spans with pointer events disabled, counter-rotated upright above the pitch, and given dark high-contrast name badges.
+
+Verification notes:
+
+- Fresh rendered check shows 11 static span nodes, 0 player buttons, and `pointer-events: none` on the player nodes.
+- Viktor Johansson (#1) resolves to grid row 6 / column 4, keeping the goalkeeper firmly bottom center.
+- Pitch transform, 6px turf edge, drop shadow, dark badges, and mobile 390px no-overflow check passed.
+
 ## GitHub Linking Steps
 
 After `git init` and staging are complete, link this local project to a GitHub repository with these commands.
