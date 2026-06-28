@@ -1160,8 +1160,19 @@
               <span class="chip">Live Poll</span>
             </div>
             <div class="fan-poll-grid" data-poll-grid data-vote-lock-key="{{voteLockKey}}">{{fanPollOptions}}</div>
+            
+            <!-- Terrace Debates Poll Comments -->
+            <div class="poll-comments-section" style="margin-top: 18px; border-top: 1px solid var(--line); padding-top: 16px;">
+              <span class="section-kicker" style="margin-bottom: 8px; display: block;">Terrace Debates</span>
+              <form id="poll-comment-form" style="display: flex; gap: 8px; margin-bottom: 14px; pointer-events: auto;">
+                <input type="text" id="poll-comment-user" placeholder="Name" required style="background: rgba(13, 14, 18, 0.9); border: 1px solid var(--line); color: #fff; padding: 6px 10px; border-radius: 6px; font-size: 11px; width: 80px; font-family: inherit;" />
+                <input type="text" id="poll-comment-text" placeholder="Add to the debate..." required style="background: rgba(13, 14, 18, 0.9); border: 1px solid var(--line); color: #fff; padding: 6px 10px; border-radius: 6px; font-size: 11px; flex: 1; font-family: inherit;" />
+                <button type="submit" class="chip" style="cursor: pointer; background: var(--red-3); border: 0; color: #fff; padding: 6px 12px; border-radius: 6px; font-weight: 800; font-size: 10px;">Post</button>
+              </form>
+              <div id="poll-comments-list" style="display: grid; gap: 8px; max-height: 200px; overflow-y: auto; padding-right: 4px;"></div>
+            </div>
           </section>
-          <section class="panel fixtures-panel" aria-label="Fixture list">
+          <section class="panel fixtures-panel" aria-label="Fixture list" style="position: relative;">
             <div class="section-head">
               <div>
                 <span class="section-kicker">Schedule</span>
@@ -1179,6 +1190,54 @@
               </div>
             </article>
             <div class="fixture-list" data-fixture-list>{{fixtureTimeline}}</div>
+
+            <!-- Dynamic Match Stats Card overlay -->
+            <div id="match-stats-card" class="player-stat-card" style="display: none; bottom: 20px; left: 20px; right: 20px;">
+              <button class="close-btn" type="button" aria-label="Close">&times;</button>
+              <div class="stat-header">
+                <span class="stat-number" id="stats-match-score">2-1</span>
+                <div>
+                  <h4 class="stat-name">Stoke City vs <span id="stats-opponent-name">Coventry City</span></h4>
+                  <span class="stat-role" id="stats-match-date">2026-08-08</span>
+                </div>
+              </div>
+              <div style="margin-bottom: 12px; font-size: 11px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 8px;">
+                <span class="micro-label">Goalscorers</span>
+                <div id="stats-scorers" style="color: #fff; font-weight: 800; margin-top: 2px;"></div>
+              </div>
+              <div style="display: grid; gap: 10px;">
+                <!-- Possession Bar -->
+                <div>
+                  <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:4px;">
+                    <span>Possession</span>
+                    <span><strong id="stats-poss-home">52%</strong> - <strong id="stats-poss-away">48%</strong></span>
+                  </div>
+                  <div style="display:flex; height:6px; border-radius:3px; overflow:hidden; background:rgba(255,255,255,0.1);">
+                    <div id="stats-poss-bar" style="width: 52%; background: var(--red-3);"></div>
+                  </div>
+                </div>
+                <!-- Shots -->
+                <div style="display:flex; justify-content:space-between; font-size:11px;">
+                  <span>Total Shots</span>
+                  <span style="color:#fff; font-weight:800;"><span id="stats-shots-home">14</span> - <span id="stats-shots-away">11</span></span>
+                </div>
+                <!-- Shots on Target -->
+                <div style="display:flex; justify-content:space-between; font-size:11px;">
+                  <span>Shots on Target</span>
+                  <span style="color:#fff; font-weight:800;"><span id="stats-sot-home">6</span> - <span id="stats-sot-away">4</span></span>
+                </div>
+                <!-- Corners -->
+                <div style="display:flex; justify-content:space-between; font-size:11px;">
+                  <span>Corners</span>
+                  <span style="color:#fff; font-weight:800;"><span id="stats-corners-home">7</span> - <span id="stats-corners-away">5</span></span>
+                </div>
+                <!-- Fouls -->
+                <div style="display:flex; justify-content:space-between; font-size:11px;">
+                  <span>Fouls</span>
+                  <span style="color:#fff; font-weight:800;"><span id="stats-fouls-home">12</span> - <span id="stats-fouls-away">10</span></span>
+                </div>
+              </div>
+            </div>
           </section>
           </div>
 
@@ -1225,25 +1284,22 @@
                   </div>
                 </article>
                 <aside class="forum-board-feed" aria-label="Oatcake message board trending supporter threads">
-                  <div class="forum-feed-header">
-                    <span class="section-kicker">Trending Supporter Threads</span>
-                    <h3>Oatcake Message Board</h3>
+                  <div class="forum-feed-header" style="display:flex; align-items:center; width:100%; gap:10px;">
+                    <div>
+                      <span class="section-kicker">Trending Supporter Threads</span>
+                      <h3>Oatcake Message Board</h3>
+                    </div>
+                    <button id="toggle-forum-form" class="chip" type="button" style="cursor:pointer; background:rgba(226,14,25,0.18); border-color:rgba(226,14,25,0.4); margin-left:auto; font-weight:800; font-size:10px;">+ New Thread</button>
                   </div>
-                  <article class="forum-thread-item">
-                    <h4>Pearson back in training - how long till his first booking?</h4>
-                    <span class="thread-user-tag">Boothen_Ender92 - Just Now</span>
-                    <p>Good to see him sweating it out at Clayton Wood, but let's be real - he'll be walking a suspension tightrope by October anyway. Glad to have his bite back in the engine room though, we need someone to stop us leaking soft goals on Tuesday nights.</p>
-                  </article>
-                  <article class="forum-thread-item">
-                    <h4>Walters cooking? Retained list cleared &amp; new winger links</h4>
-                    <span class="thread-user-tag">Trentham_Potter - 15m ago</span>
-                    <p>With Baker and Nzonzi off the wage bill, rumours are flying about a domestic winger. Let's just hope we don't panic-buy another flashy squad-filler who goes completely missing the second the winter wind whips off the bay.</p>
-                  </article>
-                  <article class="forum-thread-item">
-                    <h4>Coordinated 'We'll Be With You' for the opener</h4>
-                    <span class="thread-user-tag">Delilah_Roar - 1h ago</span>
-                    <p>Big push from the independent lads to make the home opener deafening the second they walk out of the tunnel. Bring your scarves and leave your lungs on the terraces - none of that quiet main-stand whispering!</p>
-                  </article>
+                  
+                  <form id="forum-post-form" style="display:none; flex-direction:column; gap:10px; padding:12px; border:1px solid rgba(226,14,25,0.25); border-radius:10px; background:rgba(255,255,255,0.02); margin-bottom:12px; pointer-events:auto;">
+                    <input type="text" id="forum-username-input" placeholder="Your Handle (e.g., BoothenEnder)" required style="background:rgba(13,14,18,0.9); border:1px solid var(--line); color:#fff; padding:8px 10px; border-radius:6px; font-size:12px; font-family:inherit;" />
+                    <input type="text" id="forum-title-input" placeholder="Thread Title" required style="background:rgba(13,14,18,0.9); border:1px solid var(--line); color:#fff; padding:8px 10px; border-radius:6px; font-size:12px; font-family:inherit;" />
+                    <textarea id="forum-content-input" placeholder="What's the debate?" required rows="3" style="background:rgba(13,14,18,0.9); border:1px solid var(--line); color:#fff; padding:8px 10px; border-radius:6px; font-size:12px; font-family:inherit; resize:none;"></textarea>
+                    <button type="submit" class="chip" style="cursor:pointer; background:var(--red-3); border:0; color:#fff; padding:8px 14px; border-radius:6px; font-weight:800; align-self:flex-end; font-size:11px;">Post Thread</button>
+                  </form>
+
+                  <div id="forum-threads-list" style="display:grid; gap:12px; width:100%;"></div>
                 </aside>
               </div>
             </section>
@@ -1517,58 +1573,264 @@
         });
       }
 
-      // 3. Clickable Fixture Centre details
+      // 3. Clickable Fixture Centre details (Briefing or Match Stats)
+      const matchStatsCard = document.getElementById('match-stats-card');
+      
       document.querySelectorAll('.fixture-row').forEach((row) => {
-        row.addEventListener('click', () => {
+        row.addEventListener('click', async () => {
           const opponentName = row.querySelector('h3').textContent;
-          // Normalize opponent key
-          let key = opponentName.toLowerCase()
-            .replace(/&/g, 'and')
-            .replace(/[^a-z0-9]+/g, '_')
-            .replace(/^_+|_+$/g, '');
-          
-          if (key === 'west_bromwich_albion') key = 'west_brom';
+          const isCompleted = row.getAttribute('data-completed') === 'true';
+          const matchDate = row.getAttribute('data-match-date');
 
-          const briefing = briefingsData[key];
-          if (!briefing) return;
+          if (isCompleted) {
+            // Completed Match Stats flow
+            try {
+              const response = await fetch(`/api/match-stats?opponent=${encodeURIComponent(opponentName)}&matchDate=${encodeURIComponent(matchDate)}`);
+              const data = await response.json();
+              if (response.ok && data.stats) {
+                const s = data.stats;
+                const scoreText = row.querySelector('.score-chip').textContent;
+                
+                document.getElementById('stats-match-score').textContent = scoreText;
+                document.getElementById('stats-opponent-name').textContent = opponentName;
+                document.getElementById('stats-match-date').textContent = row.querySelector('.date-tile').textContent.trim() + ' (Completed)';
+                document.getElementById('stats-scorers').textContent = s.scorers;
 
-          // Update main day briefing card
-          const kicker = document.getElementById('briefing-kicker');
-          const headline = document.getElementById('briefing-headline');
-          const summary = document.getElementById('briefing-summary');
-          const specs = document.getElementById('briefing-specs');
-          const ref = document.getElementById('briefing-ref');
-          const weather = document.getElementById('briefing-weather');
+                // Update Stats details
+                document.getElementById('stats-poss-home').textContent = s.poss_home + '%';
+                document.getElementById('stats-poss-away').textContent = s.poss_away + '%';
+                document.getElementById('stats-poss-bar').style.width = s.poss_home + '%';
 
-          if (kicker && headline && summary && specs && ref && weather) {
-            // Smooth highlight fade
-            const card = kicker.closest('.matchday-briefing-card');
-            card.style.opacity = '0.3';
+                document.getElementById('stats-shots-home').textContent = s.shots_home;
+                document.getElementById('stats-shots-away').textContent = s.shots_away;
+
+                document.getElementById('stats-sot-home').textContent = s.sot_home;
+                document.getElementById('stats-sot-away').textContent = s.sot_away;
+
+                document.getElementById('stats-corners-home').textContent = s.corners_home;
+                document.getElementById('stats-corners-away').textContent = s.corners_away;
+
+                document.getElementById('stats-fouls-home').textContent = s.fouls_home;
+                document.getElementById('stats-fouls-away').textContent = s.fouls_away;
+
+                if (matchStatsCard) {
+                  // Hide briefing, show stats card overlay
+                  const briefingCard = document.querySelector('.matchday-briefing-card');
+                  if (briefingCard) briefingCard.style.opacity = '0.15';
+                  matchStatsCard.style.display = 'block';
+                }
+              }
+            } catch (err) {
+              console.error('Failed to load match stats:', err);
+            }
+          } else {
+            // Upcoming Match Briefing flow
+            if (matchStatsCard) matchStatsCard.style.display = 'none';
+            const briefingCard = document.querySelector('.matchday-briefing-card');
+            if (briefingCard) briefingCard.style.opacity = '1';
+
+            // Normalize opponent key
+            let key = opponentName.toLowerCase()
+              .replace(/&/g, 'and')
+              .replace(/[^a-z0-9]+/g, '_')
+              .replace(/^_+|_+$/g, '');
             
-            setTimeout(() => {
-              kicker.textContent = 'Matchday Briefing - vs ' + opponentName;
-              
-              // Generate briefing summary dynamically similar to server logic
-              const venue = row.querySelector('.fixture-meta').lastElementChild.textContent.trim();
-              const surfaceCue = briefing.forecastCond.toLowerCase().includes('rain')
-                ? 'a slick surface and faster second balls'
-                : 'a cleaner surface and sharper passing windows';
-              const cardsCue = briefing.officialsNote.toLowerCase().includes('card') || briefing.officialsNote.toLowerCase().includes('yellow')
-                ? 'discipline around transitions matters because the referee profile points toward regular cards'
-                : 'the referee profile should still reward clean timing in midfield duels';
+            if (key === 'west_bromwich_albion') key = 'west_brom';
 
-              headline.textContent = 'Stoke City briefing: ' + opponentName + ' under ' + briefing.forecastCond.toLowerCase();
-              summary.textContent = venue + ' conditions point to ' + surfaceCue + ', with ' + briefing.forecastTemp + ' and ' + briefing.forecastCond.toLowerCase() + ' shaping the tempo. ' + briefing.referee + ' takes charge, and ' + cardsCue + '. ' + briefing.kitTip;
+            const briefing = briefingsData[key];
+            if (!briefing) return;
 
-              ref.textContent = briefing.referee + ' (' + briefing.officialsNote + ')';
-              weather.textContent = briefing.forecastTemp + ' - ' + briefing.forecastCond;
+            // Update main day briefing card
+            const kicker = document.getElementById('briefing-kicker');
+            const headline = document.getElementById('briefing-headline');
+            const summary = document.getElementById('briefing-summary');
+            const specs = document.getElementById('briefing-specs');
+            const ref = document.getElementById('briefing-ref');
+            const weather = document.getElementById('briefing-weather');
+
+            if (kicker && headline && summary && specs && ref && weather) {
+              // Smooth highlight fade
+              briefingCard.style.opacity = '0.3';
               
-              specs.style.display = 'grid';
-              card.style.opacity = '1';
-            }, 200);
+              setTimeout(() => {
+                kicker.textContent = 'Matchday Briefing - vs ' + opponentName;
+                
+                // Generate briefing summary dynamically similar to server logic
+                const venue = row.querySelector('.fixture-meta').lastElementChild.textContent.trim();
+                const surfaceCue = briefing.forecastCond.toLowerCase().includes('rain')
+                  ? 'a slick surface and faster second balls'
+                  : 'a cleaner surface and sharper passing windows';
+                const cardsCue = briefing.officialsNote.toLowerCase().includes('card') || briefing.officialsNote.toLowerCase().includes('yellow')
+                  ? 'discipline around transitions matters because the referee profile points toward regular cards'
+                  : 'the referee profile should still reward clean timing in midfield duels';
+
+                headline.textContent = 'Stoke City briefing: ' + opponentName + ' under ' + briefing.forecastCond.toLowerCase();
+                summary.textContent = venue + ' conditions point to ' + surfaceCue + ', with ' + briefing.forecastTemp + ' and ' + briefing.forecastCond.toLowerCase() + ' shaping the tempo. ' + briefing.referee + ' takes charge, and ' + cardsCue + '. ' + briefing.kitTip;
+
+                ref.textContent = briefing.referee + ' (' + briefing.officialsNote + ')';
+                weather.textContent = briefing.forecastTemp + ' - ' + briefing.forecastCond;
+                
+                specs.style.display = 'grid';
+                briefingCard.style.opacity = '1';
+              }, 200);
+            }
           }
         });
       });
+
+      if (matchStatsCard) {
+        const statsCloseBtn = matchStatsCard.querySelector('.close-btn');
+        if (statsCloseBtn) {
+          statsCloseBtn.addEventListener('click', (event) => {
+            event.stopPropagation();
+            matchStatsCard.style.display = 'none';
+            const briefingCard = document.querySelector('.matchday-briefing-card');
+            if (briefingCard) briefingCard.style.opacity = '1';
+          });
+        }
+      }
+
+      // 3b. Oatcake Message Board Dynamic Feed
+      const forumThreadsList = document.getElementById('forum-threads-list');
+      const forumPostForm = document.getElementById('forum-post-form');
+      const toggleForumBtn = document.getElementById('toggle-forum-form');
+
+      const loadForumThreads = async () => {
+        try {
+          const response = await fetch('/api/forum-threads');
+          const data = await response.json();
+          if (response.ok && data.threads) {
+            renderForumThreads(data.threads);
+          }
+        } catch (err) {
+          console.error('Failed to load forum threads:', err);
+        }
+      };
+
+      const renderForumThreads = (threads) => {
+        if (!forumThreadsList) return;
+        forumThreadsList.innerHTML = threads.map(t => {
+          const diffMs = Date.now() - new Date(t.created_at).getTime();
+          let timeText = 'Just Now';
+          if (diffMs > 60000) {
+            const mins = Math.floor(diffMs / 60000);
+            if (mins < 60) timeText = `${mins}m ago`;
+            else {
+              const hours = Math.floor(mins / 60);
+              if (hours < 24) timeText = `${hours}h ago`;
+              else timeText = new Date(t.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
+            }
+          }
+          return `
+            <article class="forum-thread-item">
+              <h4>${escapeHtml(t.title)}</h4>
+              <span class="thread-user-tag">${escapeHtml(t.username)} - ${timeText}</span>
+              <p>${escapeHtml(t.content)}</p>
+            </article>
+          `;
+        }).join('');
+      };
+
+      if (toggleForumBtn && forumPostForm) {
+        toggleForumBtn.addEventListener('click', (event) => {
+          event.stopPropagation();
+          const isHidden = forumPostForm.style.display === 'none';
+          forumPostForm.style.display = isHidden ? 'flex' : 'none';
+          toggleForumBtn.textContent = isHidden ? 'Cancel' : '+ New Thread';
+        });
+      }
+
+      if (forumPostForm) {
+        forumPostForm.addEventListener('submit', async (event) => {
+          event.preventDefault();
+          const username = document.getElementById('forum-username-input').value;
+          const title = document.getElementById('forum-title-input').value;
+          const content = document.getElementById('forum-content-input').value;
+          
+          try {
+            const response = await fetch('/api/forum-threads', {
+              method: 'POST',
+              headers: { 'content-type': 'application/json' },
+              body: JSON.stringify({ title, username, content })
+            });
+            const data = await response.json();
+            if (response.ok && data.threads) {
+              renderForumThreads(data.threads);
+              forumPostForm.reset();
+              forumPostForm.style.display = 'none';
+              if (toggleForumBtn) toggleForumBtn.textContent = '+ New Thread';
+            }
+          } catch (err) {
+            console.error('Failed to post forum thread:', err);
+          }
+        });
+      }
+
+      loadForumThreads();
+
+      // 3c. Terrace Temperature Check Poll Comments
+      const pollCommentsList = document.getElementById('poll-comments-list');
+      const pollCommentForm = document.getElementById('poll-comment-form');
+
+      const loadPollComments = async () => {
+        const pollGrid = document.querySelector('[data-poll-grid]');
+        if (!pollGrid) return;
+        const lockKey = pollGrid.dataset.voteLockKey;
+        try {
+          const response = await fetch(`/api/poll-comments?voteLockKey=${encodeURIComponent(lockKey)}`);
+          const data = await response.json();
+          if (response.ok && data.comments) {
+            renderPollComments(data.comments);
+          }
+        } catch (err) {
+          console.error('Failed to load poll comments:', err);
+        }
+      };
+
+      const renderPollComments = (comments) => {
+        if (!pollCommentsList) return;
+        if (comments.length === 0) {
+          pollCommentsList.innerHTML = '<div style="font-size:11px; color:var(--muted); font-style:italic; padding:6px 0;">No comments yet. Be the first to start the debate!</div>';
+          return;
+        }
+        pollCommentsList.innerHTML = comments.map(c => `
+          <div style="background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.04); border-radius: 8px; padding: 8px 10px; font-size: 11px; margin-bottom: 6px;">
+            <div style="display: flex; justify-content: space-between; font-weight: 800; color: var(--red-3); margin-bottom: 2px;">
+              <span>@${escapeHtml(c.username)}</span>
+              <span style="color: var(--quiet); font-size: 9px; font-weight: 400;">${new Date(c.created_at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}</span>
+            </div>
+            <p style="margin: 0; color: #fff; line-height: 1.3;">${escapeHtml(c.comment_text)}</p>
+          </div>
+        `).join('');
+      };
+
+      if (pollCommentForm) {
+        pollCommentForm.addEventListener('submit', async (event) => {
+          event.preventDefault();
+          const pollGrid = document.querySelector('[data-poll-grid]');
+          if (!pollGrid) return;
+          const voteLockKey = pollGrid.dataset.voteLockKey;
+          const username = document.getElementById('poll-comment-user').value;
+          const commentText = document.getElementById('poll-comment-text').value;
+
+          try {
+            const response = await fetch('/api/poll-comments', {
+              method: 'POST',
+              headers: { 'content-type': 'application/json' },
+              body: JSON.stringify({ voteLockKey, username, commentText })
+            });
+            const data = await response.json();
+            if (response.ok && data.comments) {
+              renderPollComments(data.comments);
+              document.getElementById('poll-comment-text').value = '';
+            }
+          } catch (err) {
+            console.error('Failed to post poll comment:', err);
+          }
+        });
+      }
+
+      loadPollComments();
 
       // 4. Player Stats Tooltips
       const statCard = document.getElementById('player-stat-card');

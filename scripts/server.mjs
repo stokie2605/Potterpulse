@@ -184,6 +184,81 @@ const ensureSchema = (db) => {
   for (const candidate of pollCandidates) {
     seedVote.run(candidate.key, candidate.label, candidate.note);
   }
+
+  // 1. Forum threads table
+  db.exec(
+    'CREATE TABLE IF NOT EXISTS forum_threads (' +
+      'id INTEGER PRIMARY KEY AUTOINCREMENT,' +
+      'title TEXT NOT NULL,' +
+      'username TEXT NOT NULL,' +
+      'content TEXT NOT NULL,' +
+      'created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP' +
+    ')'
+  );
+
+  const threadCount = db.prepare('SELECT count(*) as count FROM forum_threads').get().count;
+  if (threadCount === 0) {
+    const seedThread = db.prepare('INSERT INTO forum_threads (title, username, content) VALUES (?, ?, ?)');
+    seedThread.run("Pearson back in training - how long till his first booking?", "Boothen_Ender92", "Good to see him sweating it out at Clayton Wood, but let's be real - he'll be walking a suspension tightrope by October anyway. Glad to have his bite back in the engine room though, we need someone to stop us leaking soft goals on Tuesday nights.");
+    seedThread.run("Walters cooking? Retained list cleared & new winger links", "Trentham_Potter", "With Baker and Nzonzi off the wage bill, rumours are flying about a domestic winger. Let's just hope we don't panic-buy another flashy squad-filler who goes completely missing the second the winter wind whips off the bay.");
+    seedThread.run("Coordinated 'We'll Be With You' for the opener", "Delilah_Roar", "Big push from the independent lads to make the home opener deafening the second they walk out of the tunnel. Bring your scarves and leave your lungs on the terraces - none of that quiet main-stand whispering!");
+  }
+
+  // 2. Match stats table
+  db.exec(
+    'CREATE TABLE IF NOT EXISTS match_stats (' +
+      'opponent TEXT NOT NULL,' +
+      'match_date TEXT NOT NULL,' +
+      'poss_home INTEGER NOT NULL,' +
+      'poss_away INTEGER NOT NULL,' +
+      'shots_home INTEGER NOT NULL,' +
+      'shots_away INTEGER NOT NULL,' +
+      'sot_home INTEGER NOT NULL,' +
+      'sot_away INTEGER NOT NULL,' +
+      'corners_home INTEGER NOT NULL,' +
+      'corners_away INTEGER NOT NULL,' +
+      'fouls_home INTEGER NOT NULL,' +
+      'fouls_away INTEGER NOT NULL,' +
+      'scorers TEXT NOT NULL,' +
+      'PRIMARY KEY (opponent, match_date)' +
+    ')'
+  );
+
+  const statsCount = db.prepare('SELECT count(*) as count FROM match_stats').get().count;
+  if (statsCount === 0) {
+    const seedStats = db.prepare('INSERT OR IGNORE INTO match_stats (opponent, match_date, poss_home, poss_away, shots_home, shots_away, sot_home, sot_away, corners_home, corners_away, fouls_home, fouls_away, scorers) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+    seedStats.run("Oldham Athletic", "2026-08-08", 58, 42, 16, 8, 7, 2, 8, 3, 11, 14, "Manhoef 32', Jun-ho 71' | Smith 89'");
+  }
+
+  // Update Oldham Athletic fixture scores to show completed cup match
+  try {
+    db.prepare("UPDATE efl_fixtures SET status = 'completed', stoke_score = 2, opponent_score = 1 WHERE opponent = 'Oldham Athletic' AND match_date = '2026-08-08'").run();
+  } catch (e) {
+    console.error("Failed to update Oldham fixture:", e.message);
+  }
+
+  // 3. Poll comments table
+  db.exec(
+    'CREATE TABLE IF NOT EXISTS poll_comments (' +
+      'id INTEGER PRIMARY KEY AUTOINCREMENT,' +
+      'vote_lock_key TEXT NOT NULL,' +
+      'username TEXT NOT NULL,' +
+      'comment_text TEXT NOT NULL,' +
+      'created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP' +
+    ')'
+  );
+
+  const commentsCount = db.prepare('SELECT count(*) as count FROM poll_comments').get().count;
+  if (commentsCount === 0) {
+    const seedComment = db.prepare('INSERT INTO poll_comments (vote_lock_key, username, comment_text) VALUES (?, ?, ?)');
+    // Seed comments for Oldham Athletic match poll (past match)
+    seedComment.run("oldham_athletic_2026-08-08", "StokeFan1863", "Robins has got us playing some proper football. Bring on the Swans!");
+    seedComment.run("oldham_athletic_2026-08-08", "ST4_Lager", "Johansson is an absolute monster in net. That save at the end was class.");
+    seedComment.run("oldham_athletic_2026-08-08", "OatcakeOli", "Hope we sign one more winger before the window closes, but the starting XI looks solid.");
+    // Seed comments for Swansea City match poll (current match)
+    seedComment.run("swansea_city_2026-08-15_15:00", "PotterPride", "Blind optimism as always! Let's get the 3 points.");
+    seedComment.run("swansea_city_2026-08-15_15:00", "ST4_Lager", "Scarred regular here. Happy with a hard-fought draw to be honest.");
+  }
 };
 
 const getPollResults = (db) => {
@@ -494,7 +569,7 @@ const render = () => {
 
     const fixtures = db
       .prepare(
-        'SELECT opponent, match_date, competition, venue FROM efl_fixtures ORDER BY match_date',
+        'SELECT opponent, match_date, competition, venue, status, stoke_score, opponent_score FROM efl_fixtures ORDER BY match_date',
       )
       .all();
 
@@ -534,7 +609,10 @@ const render = () => {
     const fixtureTimeline = fixtures
       .map(
         (fixture, index) => `
-          <article class="fixture-row${index >= 5 ? ' is-collapsed' : ''}">
+          <article class="fixture-row${index >= 5 ? ' is-collapsed' : ''}"
+            data-opponent="${escapeHtml(fixture.opponent)}"
+            data-match-date="${escapeHtml(fixture.match_date)}"
+            data-completed="${fixture.stoke_score !== null ? 'true' : 'false'}">
             <time class="date-tile" datetime="${escapeHtml(fixture.match_date)}">
               ${escapeHtml(formatShortDate(fixture.match_date))}
             </time>
@@ -545,7 +623,10 @@ const render = () => {
                 <span>${escapeHtml(titleCase(fixture.venue))}</span>
               </div>
             </div>
-            <span class="fixture-arrow">&rsaquo;</span>
+            ${fixture.stoke_score !== null 
+              ? `<span class="score-chip" style="margin-left: auto; background: var(--red-3); color: #fff; padding: 4px 8px; border-radius: 6px; font-weight: 800; font-size: 11px; font-family: inherit;">${fixture.stoke_score}-${fixture.opponent_score}</span>` 
+              : `<span class="fixture-arrow">&rsaquo;</span>`
+            }
           </article>
         `,
       )
@@ -688,6 +769,132 @@ const handleVote = async (request, response) => {
   }
 };
 
+const handleGetForumThreads = (response) => {
+  const db = new DatabaseSync(dbPath);
+  try {
+    ensureSchema(db);
+    const threads = db.prepare('SELECT id, title, username, content, created_at FROM forum_threads ORDER BY id DESC').all();
+    response.writeHead(200, { 'content-type': 'application/json; charset=utf-8' });
+    response.end(JSON.stringify({ ok: true, threads }));
+  } finally {
+    db.close();
+  }
+};
+
+const handlePostForumThread = async (request, response) => {
+  try {
+    const body = await readJsonBody(request);
+    const title = String(body.title ?? '').trim();
+    const username = String(body.username ?? '').trim() || 'Anonymous';
+    const content = String(body.content ?? '').trim();
+
+    if (!title || !content) {
+      response.writeHead(400, { 'content-type': 'application/json; charset=utf-8' });
+      response.end(JSON.stringify({ error: 'Title and content are required' }));
+      return;
+    }
+
+    const db = new DatabaseSync(dbPath);
+    try {
+      db.prepare('INSERT INTO forum_threads (title, username, content) VALUES (?, ?, ?)').run(title, username, content);
+      const threads = db.prepare('SELECT id, title, username, content, created_at FROM forum_threads ORDER BY id DESC').all();
+      response.writeHead(200, { 'content-type': 'application/json; charset=utf-8' });
+      response.end(JSON.stringify({ ok: true, threads }));
+    } finally {
+      db.close();
+    }
+  } catch (error) {
+    response.writeHead(400, { 'content-type': 'application/json; charset=utf-8' });
+    response.end(JSON.stringify({ error: error.message }));
+  }
+};
+
+const handleGetPollComments = (request, response) => {
+  const { query } = parse(request.url, true);
+  const voteLockKey = query.voteLockKey ?? 'current_match';
+  const db = new DatabaseSync(dbPath);
+  try {
+    ensureSchema(db);
+    const comments = db.prepare('SELECT id, username, comment_text, created_at FROM poll_comments WHERE vote_lock_key = ? ORDER BY id DESC').all();
+    response.writeHead(200, { 'content-type': 'application/json; charset=utf-8' });
+    response.end(JSON.stringify({ ok: true, comments }));
+  } finally {
+    db.close();
+  }
+};
+
+const handlePostPollComment = async (request, response) => {
+  try {
+    const body = await readJsonBody(request);
+    const voteLockKey = String(body.voteLockKey ?? 'current_match');
+    const username = String(body.username ?? '').trim() || 'Anonymous';
+    const commentText = String(body.commentText ?? '').trim();
+
+    if (!commentText) {
+      response.writeHead(400, { 'content-type': 'application/json; charset=utf-8' });
+      response.end(JSON.stringify({ error: 'Comment text is required' }));
+      return;
+    }
+
+    const db = new DatabaseSync(dbPath);
+    try {
+      db.prepare('INSERT INTO poll_comments (vote_lock_key, username, comment_text) VALUES (?, ?, ?)').run(voteLockKey, username, commentText);
+      const comments = db.prepare('SELECT id, username, comment_text, created_at FROM poll_comments WHERE vote_lock_key = ? ORDER BY id DESC').all();
+      response.writeHead(200, { 'content-type': 'application/json; charset=utf-8' });
+      response.end(JSON.stringify({ ok: true, comments }));
+    } finally {
+      db.close();
+    }
+  } catch (error) {
+    response.writeHead(400, { 'content-type': 'application/json; charset=utf-8' });
+    response.end(JSON.stringify({ error: error.message }));
+  }
+};
+
+const handleGetMatchStats = (request, response) => {
+  const { query } = parse(request.url, true);
+  const opponent = query.opponent;
+  const matchDate = query.matchDate;
+
+  if (!opponent || !matchDate) {
+    response.writeHead(400, { 'content-type': 'application/json; charset=utf-8' });
+    response.end(JSON.stringify({ error: 'Opponent and matchDate are required' }));
+    return;
+  }
+
+  const db = new DatabaseSync(dbPath);
+  try {
+    ensureSchema(db);
+    const stats = db.prepare('SELECT * FROM match_stats WHERE opponent = ? AND match_date = ?').get(opponent, matchDate);
+    if (!stats) {
+      response.writeHead(200, { 'content-type': 'application/json; charset=utf-8' });
+      response.end(JSON.stringify({
+        ok: true,
+        stats: {
+          opponent,
+          match_date: matchDate,
+          poss_home: 50,
+          poss_away: 50,
+          shots_home: 10,
+          shots_away: 10,
+          sot_home: 4,
+          sot_away: 4,
+          corners_home: 5,
+          corners_away: 5,
+          fouls_home: 10,
+          fouls_away: 10,
+          scorers: 'No scorers data available'
+        }
+      }));
+      return;
+    }
+    response.writeHead(200, { 'content-type': 'application/json; charset=utf-8' });
+    response.end(JSON.stringify({ ok: true, stats }));
+  } finally {
+    db.close();
+  }
+};
+
 const server = createServer(async (request, response) => {
   const { pathname } = parse(request.url);
 
@@ -698,6 +905,27 @@ const server = createServer(async (request, response) => {
 
   if (request.method === 'POST' && pathname === '/api/vote') {
     await handleVote(request, response);
+    return;
+  }
+
+  if (request.method === 'GET' && pathname === '/api/forum-threads') {
+    handleGetForumThreads(response);
+    return;
+  }
+  if (request.method === 'POST' && pathname === '/api/forum-threads') {
+    await handlePostForumThread(request, response);
+    return;
+  }
+  if (request.method === 'GET' && pathname === '/api/poll-comments') {
+    handleGetPollComments(request, response);
+    return;
+  }
+  if (request.method === 'POST' && pathname === '/api/poll-comments') {
+    await handlePostPollComment(request, response);
+    return;
+  }
+  if (request.method === 'GET' && pathname === '/api/match-stats') {
+    handleGetMatchStats(request, response);
     return;
   }
 
