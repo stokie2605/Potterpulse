@@ -1360,12 +1360,29 @@
                     <button id="toggle-forum-form" class="chip" type="button" style="cursor:pointer; background:rgba(226,14,25,0.18); border-color:rgba(226,14,25,0.4); margin-left:auto; font-weight:800; font-size:10px;">+ New Thread</button>
                   </div>
                   
-                  <form id="forum-post-form" style="display:none; flex-direction:column; gap:10px; padding:12px; border:1px solid rgba(226,14,25,0.25); border-radius:10px; background:rgba(255,255,255,0.02); margin-bottom:12px; pointer-events:auto;">
-                    <input type="text" id="forum-username-input" placeholder="Your Handle (e.g., BoothenEnder)" required style="background:rgba(13,14,18,0.9); border:1px solid var(--line); color:#fff; padding:8px 10px; border-radius:6px; font-size:12px; font-family:inherit;" />
+                   <form id="forum-post-form" style="display:none; flex-direction:column; gap:10px; padding:12px; border:1px solid rgba(226,14,25,0.25); border-radius:10px; background:rgba(255,255,255,0.02); margin-bottom:12px; pointer-events:auto;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                      <input type="text" id="forum-username-input" placeholder="Your Handle (e.g., BoothenEnder)" required style="background:rgba(13,14,18,0.9); border:1px solid var(--line); color:#fff; padding:8px 10px; border-radius:6px; font-size:12px; font-family:inherit;" />
+                      <select id="forum-category-input" required style="background:rgba(13,14,18,0.9); border:1px solid var(--line); color:#fff; padding:8px 10px; border-radius:6px; font-size:12px; font-family:inherit; cursor:pointer; font-weight:800;">
+                        <option value="Trending">Category: Trending</option>
+                        <option value="Matchday">Category: Matchday</option>
+                        <option value="Transfers">Category: Transfers</option>
+                        <option value="Away Days">Category: Away Days</option>
+                      </select>
+                    </div>
                     <input type="text" id="forum-title-input" placeholder="Thread Title" required style="background:rgba(13,14,18,0.9); border:1px solid var(--line); color:#fff; padding:8px 10px; border-radius:6px; font-size:12px; font-family:inherit;" />
                     <textarea id="forum-content-input" placeholder="What's the debate?" required rows="3" style="background:rgba(13,14,18,0.9); border:1px solid var(--line); color:#fff; padding:8px 10px; border-radius:6px; font-size:12px; font-family:inherit; resize:none;"></textarea>
                     <button type="submit" class="chip" style="cursor:pointer; background:var(--red-3); border:0; color:#fff; padding:8px 14px; border-radius:6px; font-weight:800; align-self:flex-end; font-size:11px;">Post Thread</button>
                   </form>
+
+                  <!-- Category filter chips -->
+                  <div id="forum-category-filters" class="category-filters" style="display: flex; gap: 6px; margin-bottom: 12px; overflow-x: auto; padding-bottom: 4px; pointer-events: auto; scrollbar-width: none;">
+                    <button class="chip active" data-forum-category="All" style="font-size: 10px; cursor: pointer; padding: 4px 10px; font-weight: 800; border-radius: 6px;">All</button>
+                    <button class="chip" data-forum-category="Trending" style="font-size: 10px; cursor: pointer; padding: 4px 10px; font-weight: 800; border-radius: 6px;">Trending</button>
+                    <button class="chip" data-forum-category="Matchday" style="font-size: 10px; cursor: pointer; padding: 4px 10px; font-weight: 800; border-radius: 6px;">Matchday</button>
+                    <button class="chip" data-forum-category="Transfers" style="font-size: 10px; cursor: pointer; padding: 4px 10px; font-weight: 800; border-radius: 6px;">Transfers</button>
+                    <button class="chip" data-forum-category="Away Days" style="font-size: 10px; cursor: pointer; padding: 4px 10px; font-weight: 800; border-radius: 6px;">Away Days</button>
+                  </div>
 
                   <div id="forum-threads-list" style="display:grid; gap:12px; width:100%;"></div>
                 </aside>
@@ -1837,10 +1854,11 @@
       const forumThreadsList = document.getElementById('forum-threads-list');
       const forumPostForm = document.getElementById('forum-post-form');
       const toggleForumBtn = document.getElementById('toggle-forum-form');
+      let activeForumCategory = 'All';
 
-      const loadForumThreads = async () => {
+      const loadForumThreads = async (category = 'All') => {
         try {
-          const response = await fetch('/api/forum-threads');
+          const response = await fetch(`/api/forum-threads?category=${encodeURIComponent(category)}`);
           const data = await response.json();
           if (response.ok && data.threads) {
             renderForumThreads(data.threads);
@@ -1852,6 +1870,10 @@
 
       const renderForumThreads = (threads) => {
         if (!forumThreadsList) return;
+        if (threads.length === 0) {
+          forumThreadsList.innerHTML = '<div style="font-size:11px; color:var(--muted); font-style:italic; padding:12px; text-align:center;">No threads found in this category. Be the first to post!</div>';
+          return;
+        }
         forumThreadsList.innerHTML = threads.map(t => {
           const diffMs = Date.now() - new Date(t.created_at).getTime();
           let timeText = 'Just Now';
@@ -1865,10 +1887,14 @@
             }
           }
           return `
-            <article class="forum-thread-item">
-              <h4>${escapeHtml(t.title)}</h4>
-              <span class="thread-user-tag">${escapeHtml(t.username)} - ${timeText}</span>
-              <p>${escapeHtml(t.content)}</p>
+            <article class="forum-thread-item" style="pointer-events: auto;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <span class="chip" style="font-size: 8px; padding: 2px 6px; border-color: rgba(226,14,25,0.3); color: var(--red-3); font-weight:800; text-transform:uppercase; pointer-events:none;">${escapeHtml(t.category)}</span>
+                <span style="font-size: 10px; color: var(--quiet); font-weight:800;">💬 ${t.reply_count} replies</span>
+              </div>
+              <h4 style="margin:0 0 4px; font-size:0.85rem; font-weight:900; line-height:1.2; color:#fff;">${escapeHtml(t.title)}</h4>
+              <span class="thread-user-tag" style="font-size: 10px; color: var(--muted); font-weight:800; display:block; margin-bottom:6px;">@${escapeHtml(t.username)} - ${timeText}</span>
+              <p style="margin:0; font-size:0.78rem; line-height:1.4; color:#ccc;">${escapeHtml(t.content)}</p>
             </article>
           `;
         }).join('');
@@ -1883,25 +1909,46 @@
         });
       }
 
+      // Add Category Filters Listeners
+      document.querySelectorAll('#forum-category-filters [data-forum-category]').forEach(btn => {
+        btn.addEventListener('click', (event) => {
+          event.stopPropagation();
+          document.querySelectorAll('#forum-category-filters [data-forum-category]').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          activeForumCategory = btn.getAttribute('data-forum-category');
+          loadForumThreads(activeForumCategory);
+        });
+      });
+
       if (forumPostForm) {
         forumPostForm.addEventListener('submit', async (event) => {
           event.preventDefault();
           const username = document.getElementById('forum-username-input').value;
           const title = document.getElementById('forum-title-input').value;
           const content = document.getElementById('forum-content-input').value;
+          const category = document.getElementById('forum-category-input').value;
           
           try {
             const response = await fetch('/api/forum-threads', {
               method: 'POST',
               headers: { 'content-type': 'application/json' },
-              body: JSON.stringify({ title, username, content })
+              body: JSON.stringify({ 
+                title, 
+                username, 
+                content, 
+                category, 
+                sessionId: getClientSessionId() 
+              })
             });
             const data = await response.json();
             if (response.ok && data.threads) {
-              renderForumThreads(data.threads);
+              // Reload active category view
+              loadForumThreads(activeForumCategory);
               forumPostForm.reset();
               forumPostForm.style.display = 'none';
               if (toggleForumBtn) toggleForumBtn.textContent = '+ New Thread';
+            } else {
+              alert(data.error || 'Failed to post thread.');
             }
           } catch (err) {
             console.error('Failed to post forum thread:', err);

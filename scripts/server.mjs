@@ -186,22 +186,61 @@ const ensureSchema = (db) => {
   }
 
   // 1. Forum threads table
+  let needsThreadsMigration = false;
+  try {
+    db.prepare('SELECT category FROM forum_threads LIMIT 1').get();
+  } catch (err) {
+    needsThreadsMigration = true;
+  }
+
+  if (needsThreadsMigration) {
+    db.exec('DROP TABLE IF EXISTS forum_threads');
+  }
+
   db.exec(
     'CREATE TABLE IF NOT EXISTS forum_threads (' +
       'id INTEGER PRIMARY KEY AUTOINCREMENT,' +
       'title TEXT NOT NULL,' +
       'username TEXT NOT NULL,' +
       'content TEXT NOT NULL,' +
-      'created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP' +
+      'category TEXT NOT NULL DEFAULT "Trending",' +
+      'reply_count INTEGER NOT NULL DEFAULT 0,' +
+      'created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,' +
+      'updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP' +
     ')'
   );
 
   const threadCount = db.prepare('SELECT count(*) as count FROM forum_threads').get().count;
   if (threadCount === 0) {
-    const seedThread = db.prepare('INSERT INTO forum_threads (title, username, content) VALUES (?, ?, ?)');
-    seedThread.run("Pearson back in training - how long till his first booking?", "Boothen_Ender92", "Good to see him sweating it out at Clayton Wood, but let's be real - he'll be walking a suspension tightrope by October anyway. Glad to have his bite back in the engine room though, we need someone to stop us leaking soft goals on Tuesday nights.");
-    seedThread.run("Walters cooking? Retained list cleared & new winger links", "Trentham_Potter", "With Baker and Nzonzi off the wage bill, rumours are flying about a domestic winger. Let's just hope we don't panic-buy another flashy squad-filler who goes completely missing the second the winter wind whips off the bay.");
-    seedThread.run("Coordinated 'We'll Be With You' for the opener", "Delilah_Roar", "Big push from the independent lads to make the home opener deafening the second they walk out of the tunnel. Bring your scarves and leave your lungs on the terraces - none of that quiet main-stand whispering!");
+    const seedThread = db.prepare('INSERT INTO forum_threads (title, username, content, category, reply_count) VALUES (?, ?, ?, ?, ?)');
+    seedThread.run(
+      "Pearson back in training - how long till his first booking?", 
+      "Boothen_Ender92", 
+      "Good to see him sweating it out at Clayton Wood, but let's be real - he'll be walking a suspension tightrope by October anyway. Glad to have his bite back in the engine room though, we need someone to stop us leaking soft goals on Tuesday nights.",
+      "Matchday",
+      14
+    );
+    seedThread.run(
+      "Walters cooking? Retained list cleared & new winger links", 
+      "Trentham_Potter", 
+      "With Baker and Nzonzi off the wage bill, rumours are flying about a domestic winger. Let's just hope we don't panic-buy another flashy squad-filler who goes completely missing the second the winter wind whips off the bay.",
+      "Transfers",
+      37
+    );
+    seedThread.run(
+      "Coordinated 'We'll Be With You' for the opener", 
+      "Delilah_Roar", 
+      "Big push from the independent lads to make the home opener deafening the second they walk out of the tunnel. Bring your scarves and leave your lungs on the terraces - none of that quiet main-stand whispering!",
+      "Trending",
+      22
+    );
+    seedThread.run(
+      "Swansea Away - parking at Felindre or Landore?", 
+      "ST4_Oli", 
+      "Swansea away travel advice needed. Leaving early Saturday morning from the Potteries. Heard Felindre park and ride is best, but want to make sure it leaves enough time to get back to the shuttle coaches after the whistle.",
+      "Away Days",
+      9
+    );
   }
 
   // 2. Match stats table
@@ -790,11 +829,20 @@ const handleVote = async (request, response) => {
   }
 };
 
-const handleGetForumThreads = (response) => {
+const forumCooldowns = new Map();
+
+const handleGetForumThreads = (request, response) => {
+  const { query } = parse(request.url, true);
+  const category = query.category;
   const db = new DatabaseSync(dbPath);
   try {
     ensureSchema(db);
-    const threads = db.prepare('SELECT id, title, username, content, created_at FROM forum_threads ORDER BY id DESC').all();
+    let threads;
+    if (category && category !== 'All') {
+      threads = db.prepare('SELECT id, title, username, content, category, reply_count, created_at FROM forum_threads WHERE category = ? ORDER BY id DESC').all(category);
+    } else {
+      threads = db.prepare('SELECT id, title, username, content, category, reply_count, created_at FROM forum_threads ORDER BY id DESC').all();
+    }
     response.writeHead(200, { 'content-type': 'application/json; charset=utf-8' });
     response.end(JSON.stringify({ ok: true, threads }));
   } finally {
@@ -808,17 +856,51 @@ const handlePostForumThread = async (request, response) => {
     const title = String(body.title ?? '').trim();
     const username = String(body.username ?? '').trim() || 'Anonymous';
     const content = String(body.content ?? '').trim();
+    let category = String(body.category ?? 'Trending').trim();
+    const sessionId = String(body.sessionId ?? request.socket.remoteAddress);
 
+    const validCategories = ['Trending', 'Matchday', 'Transfers', 'Away Days'];
+    if (!validCategories.includes(category)) {
+      category = 'Trending';
+    }
+
+    // Cooldown Validation (15 seconds)
+    const now = Date.now();
+    const lastPost = forumCooldowns.get(sessionId) ?? 0;
+    if (now - lastPost < 15000) {
+      response.writeHead(429, { 'content-type': 'application/json; charset=utf-8' });
+      response.end(JSON.stringify({ error: 'Please wait 15 seconds between posts.' }));
+      return;
+    }
+
+    // Length Validations
     if (!title || !content) {
       response.writeHead(400, { 'content-type': 'application/json; charset=utf-8' });
       response.end(JSON.stringify({ error: 'Title and content are required' }));
       return;
     }
+    if (title.length > 100) {
+      response.writeHead(400, { 'content-type': 'application/json; charset=utf-8' });
+      response.end(JSON.stringify({ error: 'Title cannot exceed 100 characters.' }));
+      return;
+    }
+    if (content.length > 500) {
+      response.writeHead(400, { 'content-type': 'application/json; charset=utf-8' });
+      response.end(JSON.stringify({ error: 'Content cannot exceed 500 characters.' }));
+      return;
+    }
+    if (username.length > 30) {
+      response.writeHead(400, { 'content-type': 'application/json; charset=utf-8' });
+      response.end(JSON.stringify({ error: 'Username cannot exceed 30 characters.' }));
+      return;
+    }
+
+    forumCooldowns.set(sessionId, now);
 
     const db = new DatabaseSync(dbPath);
     try {
-      db.prepare('INSERT INTO forum_threads (title, username, content) VALUES (?, ?, ?)').run(title, username, content);
-      const threads = db.prepare('SELECT id, title, username, content, created_at FROM forum_threads ORDER BY id DESC').all();
+      db.prepare('INSERT INTO forum_threads (title, username, content, category, reply_count) VALUES (?, ?, ?, ?, 0)').run(title, username, content, category);
+      const threads = db.prepare('SELECT id, title, username, content, category, reply_count, created_at FROM forum_threads ORDER BY id DESC').all();
       response.writeHead(200, { 'content-type': 'application/json; charset=utf-8' });
       response.end(JSON.stringify({ ok: true, threads }));
     } finally {
@@ -1028,7 +1110,7 @@ const server = createServer(async (request, response) => {
   }
 
   if (request.method === 'GET' && pathname === '/api/forum-threads') {
-    handleGetForumThreads(response);
+    handleGetForumThreads(request, response);
     return;
   }
   if (request.method === 'POST' && pathname === '/api/forum-threads') {
