@@ -1,230 +1,99 @@
-# Potter Pulse
+# PotterPulse - Stoke City Supporter Dashboard
+
+PotterPulse is an interactive, premium supporter fanzine and fan portal concept designed for Stoke City FC fans. It gathers fixtures, away travel guides, player performance ratings, live mood polls, and matchday forums into a single, high-density dashboard.
 
 <img src="docs/screenshots/dashboard_latest.png" alt="PotterPulse three-tab dashboard" width="760" />
 
 > [!NOTE]
-> **Disclaimer**: PotterPulse is an independent fan-dashboard concept. It is not affiliated with, endorsed by, or replacing The Oatcake, Stoke City FC, or any existing supporter forum.
+> **Disclaimer**: PotterPulse is an independent fan-dashboard portfolio concept. It is not affiliated with, endorsed by, or replacing *The Oatcake*, *Stoke City FC*, or any existing supporter forum.
 
-Potter Pulse is a work-in-progress local Stoke City tracker app built around a small SQLite database and a lightweight Node renderer. It presents the squad and fixture run as a premium black-and-red high-density sports data dashboard, drawing on patterns from real-time telemetry interfaces while keeping the look recognisably Stoke-focused. This is not a finished production app yet; it is an actively evolving prototype with real data, a live local renderer, and a documented design direction.
+---
 
-## Project Status
+## 🚀 Current Product State & Features
 
-Potter Pulse is currently a work in progress. The core local architecture is working, the SQLite data is populated, and the high-density dashboard direction is established, but the project still needs refinement before it should be treated as production-ready.
+1. **Matches Hub & Fixture Centre**:
+   - Displays a collapsible timeline of 47 EFL fixtures (collapsing to 5 rows or showing all).
+   - Completed matches display live scorelines. Clicking them queries the SQLite database and slides open a detailed Match Stats popover detailing goalscorers, shots, fouls, and visual possession bars.
+   - Upcoming matches show a tactical debrief detailing official refs, weather forecasts, and tactical briefs.
 
-Known WIP areas:
+2. **Supporter Player Ratings & POTM Crown**:
+   - For completed fixtures, fans can view aggregate player ratings averages and see who won the **Terrace POTM crown** (Player of the Match) highlighted with a golden crown (👑).
+   - Fans can vote on player performances (1–10 scale) using interactive sliders, instantly updating SQLite rating sums and live averages.
 
-- Add richer fixture detail screens and interaction states.
-- Improve responsive polish across more viewport sizes.
-- Decide whether to keep the current no-build Node renderer or migrate to a fuller frontend stack later.
+3. **Terrace Temperature Check & Donut Mood Chart**:
+   - A live fan confidence poll (Optimism, Regular, Pessimism) that visualizes terrace sentiment using a responsive, animated SVG Donut Chart showing total vote counters.
+   - Includes **Terrace Debates**, a real-time matchday message thread powered by SQLite.
 
-## Current Architecture
+4. **Interactive Starting XI Pitch Canvas**:
+   - Features an isometric 3D grass canvas displaying name badges and numbers.
+   - Includes a GK yellow-gold custom kit layout and outfield striped jerseys.
+   - Supports active formation switching (4-3-3 vs 5-3-2) with smooth coordinate transforms.
+   - Clicking any player card displays a popover with rating records, goals, assists, and form trend timelines.
 
-```text
-Potterpulse/
-|-- .github/
-|   |-- workflows/
-|       |-- ci-cd.yml                  # GitHub Actions test and container build pipeline
-|-- Dockerfile                         # Multi-stage Node runtime container
-|-- index.html                         # Single-page dashboard shell and CSS
-|-- package.json                       # CI test scripts and Playwright dependency
-|-- package-lock.json                  # Locked dependency graph for CI
-|-- potter_pulse.db                    # SQLite database used by the renderer
-|-- assets/
-|   |-- crests/                        # Local SVG crest assets
-|-- infra/
-|   |-- main.tf                        # ECS/Fargate infrastructure stub
-|-- scripts/
-|   |-- ci-mobile-layout-check.mjs     # Playwright mobile layout regression check
-|   |-- server.mjs                     # Local Node HTTP server, SQLite renderer, and vote guardrails
-|   |-- seed-potter-pulse.mjs          # Initial seed script for core players/fixtures
-|-- docs/
-|   |-- screenshots/
-|       |-- dashboard_latest.png       # Latest README hero screenshot
-|-- potterpulse-*.png                  # Local verification screenshots generated during QA
-```
+5. **Terrace Threads (Forum Wire)**:
+   - A live, categorized forum feed split into *Trending*, *Matchday*, *Transfers*, and *Away Days* channels.
+   - Supports filters to toggle views instantly.
+   - Slide-open "+ New Thread" form includes server-side content length validators (max 100 character titles, 500 character bodies) and a **15-second session rate-limiting cooldown** to protect against spam.
 
-## How It Works
+6. **Away Day Guides & Transit Planner**:
+   - Swaps matches (Swansea City vs West Brom) to display hotels, pub listings, and local briefings.
+   - Features an interactive **Away Day Journey Planner** route calculator. Select a departure station (Stoke, London, Birmingham) and transit method (Car, Train, Official Coach) to dynamically render driving routes, services, railway connections, and coach timings.
 
-The app is intentionally simple:
+---
 
-1. `potter_pulse.db` stores the squad and fixture data.
-2. `scripts/server.mjs` opens the SQLite database with Node's built-in `node:sqlite` module.
-3. The server reads `index.html` as a template.
-4. It injects live database values into placeholders such as `{{heroOpponentDisplay}}`, `{{homeDisplayName}}`, `{{matchdayBriefingHeadline}}`, `{{matchdayBriefingSummary}}`, `{{squadCards}}`, `{{fanPollOptions}}`, and `{{fixtureTimeline}}`.
-5. The page is served locally at `http://localhost:4173`.
-6. `POST /api/vote` persists fan performance votes into SQLite and returns updated aggregate poll percentages.
-7. The active culture profile maps canonical team names to supporter-facing display names without mutating fixture data.
+## 🛠️ Technology Stack Overview
 
-This means there is no framework build step or frontend bundler required for the current version. The app is a fast local prototype with real persisted data.
+- **Frontend**: Semantic HTML5, Vanilla CSS (using responsive grid/flexbox and custom style tokens), and Vanilla JavaScript for asynchronous API fetching, SVG rendering, and routing.
+- **Backend**: Node.js HTTP Server (`scripts/server.mjs`) implementing REST routes and serving templates.
+- **Database**: SQLite powered by Node’s native `node:sqlite` API.
+- **Testing & Verification**: Playwright (`scripts/ci-mobile-layout-check.mjs`) verifying viewport boundaries, layout flows, and mobile drawer toggles.
 
-GitHub Actions now performs the production guardrails that do require tooling: dependency install, Node syntax checks, Playwright mobile layout verification, and Docker image build validation.
+---
 
-## Database
+## 📸 Screenshots
 
-Database file:
+- **SVG Mood Donut Chart**: [Mood Chart Screenshot](file:///C:/Users/Wilshaw/.gemini/antigravity/brain/7e7e021c-2c47-45b6-8f99-345d8db273ea/visual-donut-chart.png)
+- **Terrace Player Ratings**: [Ratings Averages & POTM Crown](file:///C:/Users/Wilshaw/.gemini/antigravity/brain/7e7e021c-2c47-45b6-8f99-345d8db273ea/player-ratings-view.png)
+- **Interactive Range Sliders**: [Ratings Form Sliders](file:///C:/Users/Wilshaw/.gemini/antigravity/brain/7e7e021c-2c47-45b6-8f99-345d8db273ea/player-ratings-sliders.png)
+- **Away Day Journey Planner**: [Transit Planner Calculations](file:///C:/Users/Wilshaw/.gemini/antigravity/brain/7e7e021c-2c47-45b6-8f99-345d8db273ea/away-journey-planner.png)
+- **Terrace Threads (Forum Wire)**: [Categorized Forum Feed](file:///C:/Users/Wilshaw/.gemini/antigravity/brain/7e7e021c-2c47-45b6-8f99-345d8db273ea/dynamic-forum-board.png)
 
-```text
-potter_pulse.db
-```
+---
 
-Tables:
+## 💻 Local Installation & Run Instructions
 
-```sql
-stoke_squad
-```
+1. **Install Dependencies**:
+   ```bash
+   npm install
+   ```
 
-Purpose: stores tracked Stoke City players.
+2. **Start the local Node Server**:
+   ```bash
+   $env:PORT="4179"; node scripts/server.mjs
+   ```
 
-Important columns:
+3. **Browse the Dashboard**:
+   Open **[http://localhost:4179](http://localhost:4179)** in your web browser. You can navigate views directly via anchors:
+   - Matches: `#matches`
+   - Squad: `#squad`
+   - Away Days: `#away-days`
 
-```text
-id
-player_name
-position
-squad_number
-nationality
-date_of_birth
-created_at
-updated_at
-```
+---
 
-```sql
-efl_fixtures
-```
+## 🧪 Verification Commands
 
-Purpose: stores Stoke City fixtures.
+Maintain code quality and responsiveness checks using:
 
-Important columns:
+- **Check JavaScript Syntax**:
+  ```bash
+  npm run check
+  ```
+- **Run Playwright Layout Checks**:
+  ```bash
+  npm run test:layout
+  ```
 
-```text
-id
-competition
-match_date
-opponent
-venue
-status
-stoke_score
-opponent_score
-created_at
-updated_at
-```
-
-Dates are stored as clean `YYYY-MM-DD` text so the frontend can format them consistently.
-
-
-```sql
-fan_poll_votes
-```
-
-Purpose: persists aggregate fan performance poll votes across runtime restarts and page reloads.
-
-Important columns:
-
-```text
-option_key
-label
-note
-vote_count
-created_at
-updated_at
-```
-
-Venues are normalized as lowercase values:
-
-```text
-home
-away
-neutral
-```
-
-## Data Currently Seeded
-
-The squad table contains the initial core squad:
-
-```text
-Viktor Johansson #1, goalkeeper
-Bae Jun-ho #10, midfielder
-Junior Tchamadeu #22, defender
-Million Manhoef #42, forward
-```
-
-The fixture table contains the full 47-match layout supplied during the build, starting with:
-
-```text
-2026-08-08 | EFL Cup | Oldham Athletic | home
-2026-08-15 | Championship | Swansea City | home
-2026-08-22 | Championship | Southampton | away
-```
-
-and ending with:
-
-```text
-2027-05-01 | Championship | Millwall | away
-```
-
-## Running Locally
-
-Start the local server:
-
-```powershell
-node scripts\server.mjs
-```
-
-Open the app:
-
-```text
-http://localhost:4173
-```
-
-If another process is already using port `4173`, stop the old Node server or run with another port:
-
-```powershell
-$env:PORT = '4174'
-node scripts\server.mjs
-```
-
-
-## Current App Views
-
-The UI now has a streamlined three-tab client-side structure. The top pill navigation and bottom navigation both target the same view controller.
-
-Direct local routes:
-
-```text
-http://localhost:4173/#matches
-http://localhost:4173/#squad
-http://localhost:4173/#away-days
-```
-
-View responsibilities:
-
-- `Matches`: next-match hero card, Boothen Verdict fanzine block, fan performance poll, and fixture centre.
-- `Squad`: tactical pitch squad view with circular player markers.
-- `Away Days`: work-in-progress away guide showing ground, travel time, safe pub, pie-index, form, referee, and weather briefing details.
-
-## Design Direction
-
-The original interface looked closer to a traditional admin dashboard: large desktop panels, a broad hero card, and a flat information layout.
-
-The current direction is closer to a high-density match telemetry interface:
-
-- Compact top app bar
-- Horizontal pill navigation
-- JavaScript-controlled tab views for Matches, Squad, and Away Days
-- Premium match-centre card
-- Bold uppercase match typography
-- Black-and-red Stoke colour system
-- Soft crimson glow effects
-- Dense fixture rows
-- Tactical pitch squad view with circular player markers
-- Formation controls for switching between compact tactical layouts
-- Independent fanzine editorial card for fan voice inside the Matches flow
-- Fan performance voting poll inside the Matches flow
-- Away Day guide card for supporter travel notes
-- Pre-match briefing tiles for form, officials, and weather
-- Bottom navigation designed for fast mobile telemetry scanning
-
-The goal is to build a portfolio-safe interface language around compact hierarchy, live-match modules, pill tabs, dense rows, dark surfaces, high-contrast action areas, and real-time sports telemetry patterns.
+---
 
 ## Engineering Struggle Log
 
@@ -638,11 +507,11 @@ Verification notes:
 
 Problem: the Starting XI pitch still read as a flat tactical grid and the player nodes retained button semantics even though the current Squad view is meant to be a static fanzine graphic.
 
-Solution: converted the home pitch into a 3D isometric board with perspective, rotateX/rotateZ tilt, a thick turf edge, and drop shadow. Player nodes are rendered as static spans with pointer events disabled, counter-rotated upright above the pitch, and given dark high-contrast name badges.
+Solution: converted the home pitch into a 3D isometric board with perspective, rotateX/rotateZ tilt, a thick turf edge, and drop shadow. Player nodes are rendered as static spans with pointer events disabled, counter-rotated upright above the pitch, and given dark high-contrast name badges. *(Note: player cards were later made interactive again to support stats tooltips).*
 
 Verification notes:
 
-- Fresh rendered check shows 11 static span nodes, 0 player buttons, and `pointer-events: none` on the player nodes.
+- Fresh rendered check shows 11 static span nodes, 0 player buttons, and `pointer-events: none` on the player nodes. *(Note: player cards were later made interactive again to support stats tooltips).*
 - Viktor Johansson (#1) resolves to grid row 6 / column 4, keeping the goalkeeper firmly bottom center.
 - Pitch transform, 6px turf edge, drop shadow, dark badges, and mobile 390px no-overflow check passed.
 
@@ -654,7 +523,7 @@ Solution: rebuilt the `.home-pitch` styling around `transform: perspective(1400p
 
 Verification notes:
 
-- Fresh rendered check shows 11 static span nodes, 0 pitch buttons, and `pointer-events: none` on the player nodes.
+- Fresh rendered check shows 11 static span nodes, 0 pitch buttons, and `pointer-events: none` on the player nodes. *(Note: player cards were later made interactive again to support stats tooltips).*
 - Viktor Johansson remains grid row 6 / column 4 with a neon-green keeper kit.
 - Outfield kits render as red/white striped CSS figurines; label badges do not overlap.
 - Mobile check stays within 390px viewport with a 370px rendered pitch width.
@@ -668,7 +537,7 @@ Solution: reduced each player token to exactly one `.mini-kit` container with a 
 Verification notes:
 
 - Fresh rendered check shows 11 player nodes, 11 `.mini-kit` elements, 0 `.kit-body`, 0 `.kit-sleeve`, and 0 player number pills.
-- Player nodes remain non-clickable with `pointer-events: none`; transform style resolves to `flat`.
+- Player nodes remain non-clickable with `pointer-events: none`; transform style resolves to `flat`. *(Note: player cards were later made interactive again to support stats tooltips).*
 - Keeper kit renders solid green, outfield kits render red/white stripes, badges sit beneath kits, and labels do not overlap.
 - Mobile remains contained at 390px viewport with a 342px rendered pitch width.
 
