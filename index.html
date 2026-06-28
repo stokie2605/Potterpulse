@@ -1700,6 +1700,9 @@
         control.addEventListener('click', () => activateView(control.dataset.view));
       });
 
+      window.addEventListener('hashchange', () => activateView(location.hash.slice(1)));
+      activateView(location.hash.slice(1) || 'matches');
+
       const fixtureToggle = document.querySelector('[data-fixture-toggle]');
       const fixtureList = document.querySelector('[data-fixture-list]');
       if (fixtureToggle && fixtureList) {

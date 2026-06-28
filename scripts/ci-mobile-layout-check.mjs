@@ -46,7 +46,7 @@ try {
 
   const browser = await chromium.launch();
   const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
-  await page.goto(`${baseUrl}/#matches`, { waitUntil: 'domcontentloaded' });
+  await page.goto(`${baseUrl}/#stats`, { waitUntil: 'domcontentloaded' });
   await page.waitForSelector('.matchday-briefing-card');
 
   const initialState = await page.evaluate(() => {
