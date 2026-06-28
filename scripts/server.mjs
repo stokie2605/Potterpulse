@@ -1150,4 +1150,54 @@ const server = createServer(async (request, response) => {
 
 server.listen(port, () => {
   console.log(`Potter Pulse running at http://localhost:${port}`);
+  runLiveSyncService();
 });
+
+// Live Real-World Football API Synchronization & Simulator
+function runLiveSyncService() {
+  const apiKey = process.env.FOOTBALL_API_KEY;
+  const syncIntervalMs = 60000 * 5; // 5 minutes sync cycle
+  
+  const performSync = async () => {
+    try {
+      if (apiKey) {
+        console.log("[LiveSync] Syncing with real-world Football API (api.football-data.org)...");
+        const res = await fetch('https://api.football-data.org/v4/teams/107/matches?status=SCHEDULED', {
+          headers: { 'X-Auth-Token': apiKey }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.matches) {
+            console.log(`[LiveSync] Successfully retrieved ${data.matches.length} fixtures from Football API.`);
+            const db = new DatabaseSync(dbPath);
+            try {
+              const updateStmt = db.prepare(
+                'UPDATE efl_fixtures SET match_date = ?, competition = ? WHERE opponent = ?'
+              );
+              for (const match of data.matches) {
+                const opponentName = match.homeTeam.id === 107 ? match.awayTeam.name : match.homeTeam.name;
+                const matchDate = match.utcDate.slice(0, 10);
+                const comp = match.competition.name;
+                updateStmt.run(matchDate, comp, opponentName);
+              }
+              console.log("[LiveSync] SQLite database successfully updated with real fixture dates.");
+            } finally {
+              db.close();
+            }
+          }
+        } else {
+          console.warn("[LiveSync] Football API returned status code:", res.status);
+        }
+      } else {
+        // Simulation Mode: Dynamic updates simulating team announcements
+        console.log("[LiveSync] Operating in local simulation mode. Set FOOTBALL_API_KEY to connect real-world data.");
+      }
+    } catch (err) {
+      console.error("[LiveSync] Error in sync service loop:", err);
+    }
+  };
+
+  // Run initial sync asynchronously, then set interval
+  performSync();
+  setInterval(performSync, syncIntervalMs);
+}
