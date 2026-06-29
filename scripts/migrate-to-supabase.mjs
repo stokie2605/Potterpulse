@@ -1,27 +1,29 @@
 import { DatabaseSync } from 'node:sqlite';
 import { readFileSync, existsSync } from 'node:fs';
-import { dirname, join, resolve } from 'node:path';
+import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const rootDir = join(__dirname, '..', '..');
+const rootDir = join(__dirname, '..');
 const dbPath = join(rootDir, 'potter_pulse.db');
 
 let supabaseUrl = process.env.SUPABASE_URL;
-let supabaseKey = process.env.SUPABASE_ANON_KEY;
+let supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY;
 
 // Load .env variables
 const envPath = join(rootDir, '.env');
 if (existsSync(envPath)) {
   const dotenvContent = readFileSync(envPath, 'utf8');
   const urlMatch = dotenvContent.match(/SUPABASE_URL\s*=\s*["']?([^\s"'#]+)["']?/i);
-  const keyMatch = dotenvContent.match(/SUPABASE_ANON_KEY\s*=\s*["']?([^\s"'#]+)["']?/i);
+  const anonKeyMatch = dotenvContent.match(/SUPABASE_ANON_KEY\s*=\s*["']?([^\s"'#]+)["']?/i);
+  const serviceKeyMatch = dotenvContent.match(/SUPABASE_SERVICE_ROLE_KEY\s*=\s*["']?([^\s"'#]+)["']?/i);
   if (urlMatch) supabaseUrl = urlMatch[1];
-  if (keyMatch) supabaseKey = keyMatch[1];
+  if (serviceKeyMatch) supabaseKey = serviceKeyMatch[1];
+  else if (anonKeyMatch) supabaseKey = anonKeyMatch[1];
 }
 
 if (!supabaseUrl || !supabaseKey) {
-  console.error("Error: SUPABASE_URL and SUPABASE_ANON_KEY must be configured in .env file first!");
+  console.error("Error: SUPABASE_URL and SUPABASE_ANON_KEY or SUPABASE_SERVICE_ROLE_KEY must be configured in .env first!");
   process.exit(1);
 }
 

@@ -27,6 +27,7 @@ Fresh mobile captures from the current app build:
 - **Frontend:** semantic HTML, vanilla CSS, vanilla JavaScript
 - **Backend:** Node.js HTTP server in `scripts/server.mjs`
 - **Database:** SQLite through Node's native `node:sqlite` API
+- **Cloud mode:** optional Supabase PostgREST adapter for squad, fixtures, and transfers
 - **Testing:** Playwright layout checks in `scripts/ci-mobile-layout-check.mjs`
 - **DevOps:** Dockerfile, GitHub Actions workflow, and ECS/Fargate Terraform stub
 
@@ -50,6 +51,14 @@ Direct views:
 ```powershell
 npm run check
 npm run test:layout
+```
+
+## Optional Cloud Mode
+
+Supabase support is available for squad, fixture, and transfer reads once credentials are configured locally or in hosting secrets. Setup steps and table SQL live in [docs/SUPABASE_SETUP.md](docs/SUPABASE_SETUP.md).
+
+```powershell
+node scripts/migrate-to-supabase.mjs
 ```
 
 ## Project Notes
