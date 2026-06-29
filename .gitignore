@@ -6,3 +6,4 @@ npm-debug.log*
 .env.*
 !.env.example
 potterpulse-preview.log
+potter_pulse.db
