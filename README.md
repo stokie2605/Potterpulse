@@ -53,6 +53,15 @@ npm run check
 npm run test:layout
 ```
 
+## Database Reset
+
+Recreate the local SQLite demo database and reseed baseline squad/fixture rows:
+
+```powershell
+npm run reset-db
+npm run seed
+```
+
 ## Optional Cloud Mode
 
 Supabase support is available for squad, fixture, and transfer reads once credentials are configured locally or in hosting secrets. Setup steps and table SQL live in [docs/SUPABASE_SETUP.md](docs/SUPABASE_SETUP.md).
@@ -67,11 +76,10 @@ node scripts/migrate-to-supabase.mjs
 
 - Full engineering diary: [docs/BUILD_HISTORY.md](docs/BUILD_HISTORY.md)
 - Fresh screenshot paths: [matchday](assets/screenshots/matchday-mobile.png), [squad](assets/screenshots/squad-mobile.png), [away days](assets/screenshots/away-days-mobile.png)
-- SQLite database: `potter_pulse.db`
+- SQLite database: `potter_pulse.db` local demo runtime file; recreate with `npm run reset-db`
 
 ## Next Steps
 
 - Add a public demo URL.
-- Add a demo reset/seed command.
 - Move schema changes into explicit migrations.
 - Add an accessibility pass for keyboard flow, labels, contrast, and reduced motion.
