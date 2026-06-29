@@ -203,6 +203,7 @@ const ensureSchema = (db) => {
     seedFixture.run('Swansea City', '2026-08-15', 'Championship', 'home', 'scheduled', null, null);
     seedFixture.run('West Bromwich Albion', '2026-08-22', 'Championship', 'away', 'scheduled', null, null);
     seedFixture.run('Southampton', '2026-08-29', 'Championship', 'away', 'scheduled', null, null);
+    seedFixture.run('Sheffield United', '2026-09-05', 'Championship', 'home', 'scheduled', null, null);
   }
 
   // 1. Forum threads table
