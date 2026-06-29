@@ -1322,6 +1322,7 @@ function runLiveSyncService() {
             } else {
               const db = new DatabaseSync(dbPath);
               try {
+                ensureSchema(db);
                 const updateStmt = db.prepare(
                   'UPDATE efl_fixtures SET match_date = ?, competition = ? WHERE opponent = ?'
                 );
