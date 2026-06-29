@@ -63,6 +63,8 @@ node scripts/migrate-to-supabase.mjs
 
 ## Project Notes
 
+- Data source guide: [docs/DATA_SOURCES.md](docs/DATA_SOURCES.md)
+
 - Full engineering diary: [docs/BUILD_HISTORY.md](docs/BUILD_HISTORY.md)
 - Fresh screenshot paths: [matchday](assets/screenshots/matchday-mobile.png), [squad](assets/screenshots/squad-mobile.png), [away days](assets/screenshots/away-days-mobile.png)
 - SQLite database: `potter_pulse.db`
