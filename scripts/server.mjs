@@ -1,5 +1,4 @@
 import { createServer } from 'node:http';
-import { parse } from 'node:url';
 import { readFileSync } from 'node:fs';
 import { dirname, extname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -362,34 +361,37 @@ const ensureSchema = (db) => {
     seedTransfer.run('Luke Cundle', 'OUT', 'End of Loan');
   }
 
-  // 6. Current Squad list database creation
-  db.exec('DROP TABLE IF EXISTS stoke_squad');
+  // 6. Current Squad list database creation. Seed once, then preserve manual/API updates.
   db.exec(
-    'CREATE TABLE stoke_squad (' +
+    'CREATE TABLE IF NOT EXISTS stoke_squad (' +
       'id INTEGER PRIMARY KEY AUTOINCREMENT,' +
       'player_name TEXT NOT NULL,' +
       'position TEXT NOT NULL,' +
-      'squad_number INTEGER NOT NULL,' +
+      'squad_number INTEGER NOT NULL UNIQUE,' +
       'created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,' +
       'updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP' +
     ')'
   );
-  
-  const seedSquadPlayer = db.prepare('INSERT INTO stoke_squad (player_name, position, squad_number) VALUES (?, ?, ?)');
-  seedSquadPlayer.run('Viktor Johansson', 'goalkeeper', 1);
-  seedSquadPlayer.run('Junior Tchamadeu', 'defender', 2);
-  seedSquadPlayer.run('Ben Wilmot', 'defender', 16);
-  seedSquadPlayer.run('Ben Gibson', 'defender', 23);
-  seedSquadPlayer.run('Eric Bocat', 'defender', 3);
-  seedSquadPlayer.run('Wouter Burger', 'midfielder', 6);
-  seedSquadPlayer.run('Tatsuki Seko', 'midfielder', 15);
-  seedSquadPlayer.run('Andrew Moran', 'midfielder', 8);
-  seedSquadPlayer.run('Bae Jun-ho', 'midfielder', 10);
-  seedSquadPlayer.run('Million Manhoef', 'forward', 42);
-  seedSquadPlayer.run('Tom Cannon', 'forward', 9);
-  seedSquadPlayer.run('Lewis Koumas', 'forward', 11);
-  seedSquadPlayer.run('Jordan Thompson', 'midfielder', 7);
-  seedSquadPlayer.run('Niall Ennis', 'forward', 14);
+
+  const squadCount = db.prepare('SELECT count(*) as count FROM stoke_squad').get().count;
+  if (squadCount === 0) {
+    const seedSquadPlayer = db.prepare('INSERT OR IGNORE INTO stoke_squad (player_name, position, squad_number) VALUES (?, ?, ?)');
+    seedSquadPlayer.run('Viktor Johansson', 'goalkeeper', 1);
+    seedSquadPlayer.run('Junior Tchamadeu', 'defender', 2);
+    seedSquadPlayer.run('Ben Wilmot', 'defender', 16);
+    seedSquadPlayer.run('Ben Gibson', 'defender', 23);
+    seedSquadPlayer.run('Eric Bocat', 'defender', 3);
+    seedSquadPlayer.run('Wouter Burger', 'midfielder', 6);
+    seedSquadPlayer.run('Tatsuki Seko', 'midfielder', 15);
+    seedSquadPlayer.run('Andrew Moran', 'midfielder', 8);
+    seedSquadPlayer.run('Bae Jun-ho', 'midfielder', 10);
+    seedSquadPlayer.run('Million Manhoef', 'forward', 42);
+    seedSquadPlayer.run('Tom Cannon', 'forward', 9);
+    seedSquadPlayer.run('Lewis Koumas', 'forward', 11);
+    seedSquadPlayer.run('Jordan Thompson', 'midfielder', 7);
+    seedSquadPlayer.run('Niall Ennis', 'forward', 14);
+  }
+
 };
 
 const getPollResults = (db) => {
@@ -434,6 +436,10 @@ const renderPollOptions = (rows) =>
       ].join(''),
     )
     .join('');
+
+const getRequestUrl = (request) => new URL(request.url, 'http://' + (request.headers.host || 'localhost'));
+
+const getQueryObject = (request) => Object.fromEntries(getRequestUrl(request).searchParams.entries());
 
 const readJsonBody = (request) =>
   new Promise((resolve, reject) => {
@@ -974,7 +980,7 @@ const handleVote = async (request, response) => {
 const forumCooldowns = new Map();
 
 const handleGetForumThreads = (request, response) => {
-  const { query } = parse(request.url, true);
+  const query = getQueryObject(request);
   const category = query.category;
   const db = new DatabaseSync(dbPath);
   try {
@@ -1055,7 +1061,7 @@ const handlePostForumThread = async (request, response) => {
 };
 
 const handleGetPollComments = (request, response) => {
-  const { query } = parse(request.url, true);
+  const query = getQueryObject(request);
   const voteLockKey = query.voteLockKey ?? 'current_match';
   const db = new DatabaseSync(dbPath);
   try {
@@ -1097,7 +1103,7 @@ const handlePostPollComment = async (request, response) => {
 };
 
 const handleGetMatchStats = (request, response) => {
-  const { query } = parse(request.url, true);
+  const query = getQueryObject(request);
   const opponent = query.opponent;
   const matchDate = query.matchDate;
 
@@ -1141,7 +1147,7 @@ const handleGetMatchStats = (request, response) => {
 };
 
 const handleGetPlayerRatings = (request, response) => {
-  const { query } = parse(request.url, true);
+  const query = getQueryObject(request);
   const opponent = query.opponent;
   const matchDate = query.matchDate;
 
@@ -1238,11 +1244,50 @@ const handlePostPlayerRatings = async (request, response) => {
   }
 };
 
+const initializeLocalDatabase = () => {
+  const db = new DatabaseSync(dbPath);
+  try {
+    ensureSchema(db);
+  } finally {
+    db.close();
+  }
+};
+
+const handleGetDataSources = (response) => {
+  loadEnvConfig();
+  let hasFootballApiKey = Boolean(process.env.FOOTBALL_API_KEY);
+  if (!hasFootballApiKey) {
+    try {
+      const dotenvContent = readFileSync(resolve(rootDir, '.env'), 'utf8');
+      hasFootballApiKey = /FOOTBALL_API_KEY\s*=\s*["']?[^\s"'#]+["']?/i.test(dotenvContent);
+    } catch {
+      hasFootballApiKey = false;
+    }
+  }
+
+  response.writeHead(200, { 'content-type': 'application/json; charset=utf-8' });
+  response.end(JSON.stringify({
+    ok: true,
+    sources: {
+      fixtures: hasFootballApiKey ? 'football-data.org scheduled matches sync' : 'local SQLite seed data',
+      squad: supabaseUrl && supabaseKey ? 'Supabase stoke_squad table' : 'local SQLite stoke_squad table, seeded only when empty',
+      terraceThreads: 'PotterPulse first-party feed; The Oatcake is linked externally, not scraped or mirrored',
+      injuries: 'not live yet; recommended next step is a manual injury_updates editorial table',
+      firebase: 'client-side Firestore is active only when Firebase config is replaced from placeholders',
+    },
+  }));
+};
+
 const server = createServer(async (request, response) => {
-  const { pathname } = parse(request.url);
+  const { pathname } = getRequestUrl(request);
 
   if (request.method === 'GET' && pathname.startsWith('/assets/')) {
     sendAsset(pathname, response);
+    return;
+  }
+
+  if (request.method === 'GET' && pathname === '/api/data-sources') {
+    handleGetDataSources(response);
     return;
   }
 
@@ -1291,6 +1336,7 @@ const server = createServer(async (request, response) => {
 });
 
 server.listen(port, () => {
+  initializeLocalDatabase();
   console.log(`Potter Pulse running at http://localhost:${port}`);
   runLiveSyncService();
 });
