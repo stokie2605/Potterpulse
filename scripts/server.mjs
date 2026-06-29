@@ -183,6 +183,29 @@ const ensureSchema = (db) => {
     seedVote.run(candidate.key, candidate.label, candidate.note);
   }
 
+  // 0. EFL Fixtures table
+  db.exec(
+    'CREATE TABLE IF NOT EXISTS efl_fixtures (' +
+      'opponent TEXT NOT NULL,' +
+      'match_date TEXT NOT NULL,' +
+      'competition TEXT NOT NULL,' +
+      'venue TEXT NOT NULL,' +
+      'status TEXT NOT NULL DEFAULT "scheduled",' +
+      'stoke_score INTEGER,' +
+      'opponent_score INTEGER,' +
+      'PRIMARY KEY (opponent, match_date)' +
+    ')'
+  );
+
+  const fixtureCount = db.prepare('SELECT count(*) as count FROM efl_fixtures').get().count;
+  if (fixtureCount === 0) {
+    const seedFixture = db.prepare('INSERT OR IGNORE INTO efl_fixtures (opponent, match_date, competition, venue, status, stoke_score, opponent_score) VALUES (?, ?, ?, ?, ?, ?, ?)');
+    seedFixture.run('Oldham Athletic', '2026-08-08', 'EFL Cup', 'home', 'completed', 2, 1);
+    seedFixture.run('Swansea City', '2026-08-15', 'Championship', 'home', 'scheduled', null, null);
+    seedFixture.run('West Bromwich Albion', '2026-08-22', 'Championship', 'away', 'scheduled', null, null);
+    seedFixture.run('Southampton', '2026-08-29', 'Championship', 'away', 'scheduled', null, null);
+  }
+
   // 1. Forum threads table
   let needsThreadsMigration = false;
   try {
